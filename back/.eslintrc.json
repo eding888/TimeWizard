@@ -9,6 +9,6 @@
         "sourceType": "module"
     },
     "rules": {
-      "semi": [2, "always"]
+      "semi": ["error", "always"]
     }
 }
