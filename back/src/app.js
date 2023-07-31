@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import config from './utils/config.js';
+import userRouter from './routers/userRouter.js';
 
 const app = express();
 const { MONGO_URL } = config;
@@ -18,5 +19,7 @@ mongoose.connect(MONGO_URL)
 app.use(express.json());
 app.use(cors());
 app.use(express.static('build'));
+
+app.use('/api/users', userRouter);
 
 export default app;
