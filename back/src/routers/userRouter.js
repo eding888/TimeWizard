@@ -13,7 +13,7 @@ passwordSchema
   .is().max(100, 'Password is too long')
   .has().uppercase(1, 'Password must contain an uppercase character')
   .has().digits(1, 'Password must contain a digit')
-  .has().not().spaces('Password cannot contain spaces');
+  .has().not().spaces();
 
 userRouter.post('/', async (request, response) => {
   const { username, email, password } = request.body;
