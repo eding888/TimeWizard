@@ -24,11 +24,21 @@ passwordSchema
     .has().uppercase(1, 'Password must contain an uppercase character')
     .has().digits(1, 'Password must contain a digit')
     .has().not().spaces();
+userRouter.get('/all', cors(noCors), (request, response) => __awaiter(void 0, void 0, void 0, function* () {
+    const users = yield User.find({});
+    if (users !== null) {
+        response.json(users);
+    }
+    else {
+        response.status(400);
+    }
+}));
 userRouter.post('/', cors(noCors), (request, response) => __awaiter(void 0, void 0, void 0, function* () {
     const { username, email, password } = request.body;
     const passErrors = passwordSchema.validate(password, { details: true });
-    if (Array.isArray(passErrors)) {
-        response.status(400).json(passErrors);
+    console.log(passErrors);
+    if (Array.isArray(passErrors) && passErrors.length >= 1) {
+        return response.status(400).json(passErrors);
     }
     const saltRounds = 10;
     const passwordHash = yield bcrypt.hash(password, saltRounds);

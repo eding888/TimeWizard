@@ -8,8 +8,8 @@ const app = express();
 const { MONGO_URL } = config;
 mongoose.set('strictQuery', false);
 mongoose.connect(MONGO_URL)
-    .then((response) => {
-    console.log('Connected to MongoDB', response);
+    .then(() => {
+    console.log('Connected to MongoDB');
 })
     .catch((error) => {
     console.log('Error:', error);

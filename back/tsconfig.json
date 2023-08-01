@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "target": "es6",
-    "module": "es6",
+    "target": "esnext",
+    "module": "esnext",
     "outDir": "./dist",
     "rootDir": "./src",
     "strict": true,
@@ -11,7 +11,12 @@
     "allowJs": true,
     "skipLibCheck": true,
     "moduleResolution": "node",
+    "baseUrl": "./",
+    "paths": {
+      "*": ["src/*"]
+    },
+    "typeRoots": ["./global.d.ts", "./node_modules/@types"]
   },
-  "include": ["src/**/*.ts", "src/**/*.js", "index.ts"],
+  "include": ["src/**/*.ts", "src/**/*.js", "index.ts", "./src/global.d.ts"],
   "exclude": ["node_modules", "dist"]
 }
