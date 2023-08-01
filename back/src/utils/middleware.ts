@@ -1,6 +1,6 @@
-import express, { Request, Response } from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 
-const errorHandler = (error: Error, request: Request, response: Response, next: any) => {
+const errorHandler = (error: Error, request: Request, response: Response, next: NextFunction) => {
   console.log(error.message);
 
   if (error.name === 'CastError') {
