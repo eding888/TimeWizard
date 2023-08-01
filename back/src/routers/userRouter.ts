@@ -1,5 +1,5 @@
-import express, {Request, Response, Router} from 'express';
-import User from '../models/user';
+import express, { Request, Response, Router } from 'express';
+import User, { UserInterface } from '../models/user';
 import bcrypt from 'bcrypt';
 import cors from 'cors';
 import 'express-async-errors';
@@ -24,21 +24,19 @@ interface requestDetails {
   username: string,
   email: string,
   password: string
-};
-
-console.log('hi')
+}
 
 userRouter.post('/', cors(noCors), async (request: Request, response: Response) => {
-  const { username, email, password } = request.body;
-  const passErrors: boolean | any[] = passwordSchema.validate(password, { details: true });
+  const { username, email, password }: requestDetails = request.body;
+  const passErrors: boolean | object[] = passwordSchema.validate(password, { details: true });
   if (Array.isArray(passErrors)) {
     response.status(400).json(passErrors);
   }
 
   const saltRounds = 10;
-  const passwordHash = await bcrypt.hash(password, saltRounds);
+  const passwordHash: string = await bcrypt.hash(password, saltRounds);
 
-  const user = new User({
+  const user: UserInterface = new User({
     username,
     email,
     passwordHash

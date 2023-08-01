@@ -1,4 +1,4 @@
-import express, {Request, Response} from 'express';
+import express, { Request, Response } from 'express';
 
 const errorHandler = (error: Error, request: Request, response: Response, next: any) => {
   console.log(error.message);
@@ -13,3 +13,5 @@ const errorHandler = (error: Error, request: Request, response: Response, next: 
 
   next(error);
 };
+
+export default { errorHandler };
