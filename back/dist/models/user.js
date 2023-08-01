@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import uniqueValidator from 'mongoose-unique-validator';
-const UNCEmailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]*unc\.edu[a-zA-Z0-9.-]*$/;
+const UNCEmailRegex = /^[a-zA-Z0-9._%+-]+@([a-zA-Z0-9.-]*\.)?unc\.edu$/;
 const checkEmail = (email) => {
     return UNCEmailRegex.test(email);
 };
@@ -21,7 +21,8 @@ const userSchema = new mongoose.Schema({
         type: String,
         minLength: 3,
         required: true
-    }
+    },
+    refreshToken: String
 });
 userSchema.set('toJSON', {
     transform: (document, returnedObject) => {

@@ -10,7 +10,7 @@
     "forceConsistentCasingInFileNames": true,
     "allowJs": true,
     "skipLibCheck": true,
-    "moduleResolution": "node"
+    "moduleResolution": "node",
   },
   "include": ["src/**/*.ts", "src/**/*.js", "index.ts"],
   "exclude": ["node_modules", "dist"]

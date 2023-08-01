@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
-import config from './config';
-import User, { UserInterface } from '../models/user';
+import config from './config.js';
+import User, { UserInterface } from '../models/user.js';
 import { ObjectId } from 'mongodb';
 
 interface jwtSubject{

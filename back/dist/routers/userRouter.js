@@ -8,7 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import express from 'express';
-import User from '../models/user';
+import User from '../models/user.js';
 import bcrypt from 'bcrypt';
 import cors from 'cors';
 import 'express-async-errors';

@@ -1,5 +1,5 @@
 import express, { Request, Response, Router } from 'express';
-import User, { UserInterface } from '../models/user';
+import User, { UserInterface } from '../models/user.js';
 import bcrypt from 'bcrypt';
 import cors from 'cors';
 import 'express-async-errors';
@@ -25,12 +25,20 @@ interface requestDetails {
   email: string,
   password: string
 }
-
+userRouter.get('/all', cors(noCors), async (request: Request, response: Response) => {
+  const users: UserInterface[] | null = await User.find({})!;
+  if (users !== null) {
+    response.json(users);
+  } else {
+    response.status(400);
+  }
+});
 userRouter.post('/', cors(noCors), async (request: Request, response: Response) => {
   const { username, email, password }: requestDetails = request.body;
   const passErrors: boolean | object[] = passwordSchema.validate(password, { details: true });
-  if (Array.isArray(passErrors)) {
-    response.status(400).json(passErrors);
+  console.log(passErrors);
+  if (Array.isArray(passErrors) && passErrors.length >= 1) {
+    return response.status(400).json(passErrors);
   }
 
   const saltRounds = 10;
