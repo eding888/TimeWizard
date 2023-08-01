@@ -3,10 +3,15 @@ import uniqueValidator from 'mongoose-unique-validator';
 
 const UNCEmailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]*unc\.edu[a-zA-Z0-9.-]*$/;
 
-const checkEmail = email => {
+const checkEmail = (email: string) => {
   return UNCEmailRegex.test(email);
 };
 
+interface UserInterface extends mongoose.Document {
+  username: string,
+  email: string,
+  passwordHash: string
+}
 const userSchema = new mongoose.Schema({
   username: {
     type: String,
@@ -39,6 +44,6 @@ userSchema.set('toJSON', {
 
 userSchema.plugin(uniqueValidator);
 
-const User = mongoose.model('User', userSchema);
+const User = mongoose.model<UserInterface>('User', userSchema);
 
 export default User;

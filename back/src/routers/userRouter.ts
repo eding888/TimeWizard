@@ -1,5 +1,5 @@
 import express from 'express';
-import User from '../models/user.ts';
+import User from '../models/user';
 import bcrypt from 'bcrypt';
 import cors from 'cors';
 import 'express-async-errors';
@@ -22,8 +22,8 @@ passwordSchema
 
 userRouter.post('/', cors(noCors), async (request, response) => {
   const { username, email, password } = request.body;
-  const passErrors = passwordSchema.validate(password, { details: true });
-  if (passErrors.length >= 1) {
+  const passErrors: boolean | any[] = passwordSchema.validate(password, { details: true });
+  if (Array.isArray(passErrors)) {
     response.status(400).json(passErrors);
   }
 

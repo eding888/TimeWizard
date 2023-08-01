@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "es6",
-    "module": "commonjs",
+    "module": "es6",
     "outDir": "./dist",
     "rootDir": "./src",
     "strict": true,
@@ -9,8 +9,8 @@
     "resolveJsonModule": true,
     "forceConsistentCasingInFileNames": true,
     "allowJs": true,
-    "noEmit": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "moduleResolution": "node"
   },
   "include": ["src/**/*.ts", "src/**/*.js", "index.ts"],
   "exclude": ["node_modules", "dist"]
