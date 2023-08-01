@@ -1,17 +1,17 @@
 {
   "compilerOptions": {
-    "target": "es6",                       // Set the target ECMAScript version
-    "module": "commonjs",                  // Set the module system (e.g., "commonjs" for Node.js)
-    "outDir": "./dist",                    // Output directory for compiled TypeScript files
-    "rootDir": "./src",                    // Root directory of your source files (change accordingly)
-    "strict": true,                        // Enable strict type-checking
+    "target": "es6",
+    "module": "commonjs",
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "strict": true,
     "esModuleInterop": true,
-    "allowImportingTsExtensions": true,           // Enable ES module interop for CommonJS modules
-    "resolveJsonModule": true,             // Enable importing JSON files
-    "forceConsistentCasingInFileNames": true, // Ensure consistent casing for filenames (helps on case-insensitive file systems)
-    "allowJs": true,                       // Allow JavaScript files in the TypeScript project
-    "noEmit": true                         // Do not emit JavaScript files during migration, only type-check
+    "resolveJsonModule": true,
+    "forceConsistentCasingInFileNames": true,
+    "allowJs": true,
+    "noEmit": true,
+    "skipLibCheck": true
   },
-  "include": ["src/**/*.ts", "src/**/*.js", "index.ts"], // Include TypeScript and JavaScript files in the migration
-  "exclude": ["node_modules", "dist"]         // Exclude folders from the migration process
+  "include": ["src/**/*.ts", "src/**/*.js", "index.ts"],
+  "exclude": ["node_modules", "dist"]
 }
