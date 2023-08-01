@@ -1,18 +1,18 @@
-import express from 'express';
+import express, {Express} from 'express';
 import cors from 'cors';
-import mongoose from 'mongoose';
+import mongoose, { Connection } from 'mongoose';
 import config from './utils/config';
 import userRouter from './routers/userRouter';
 
-const app = express();
+const app: Express = express();
 const { MONGO_URL } = config;
 mongoose.set('strictQuery', false);
 
 mongoose.connect(MONGO_URL)
-  .then(response => {
+  .then((response: typeof import('mongoose')) => {
     console.log('Connected to MongoDB');
   })
-  .catch(error => {
+  .catch((error: any) => {
     console.log('Error:', error);
   });
 

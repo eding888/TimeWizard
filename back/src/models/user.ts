@@ -7,7 +7,7 @@ const checkEmail = (email: string) => {
   return UNCEmailRegex.test(email);
 };
 
-interface UserInterface extends mongoose.Document {
+export interface UserInterface extends mongoose.Document {
   username: string,
   email: string,
   passwordHash: string

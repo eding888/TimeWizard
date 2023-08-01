@@ -1,13 +1,13 @@
-import express from 'express';
+import express, {Request, Response, Router} from 'express';
 import User from '../models/user';
 import bcrypt from 'bcrypt';
 import cors from 'cors';
 import 'express-async-errors';
 import PasswordValidator from 'password-validator';
 
-const userRouter = express.Router();
+const userRouter: Router = express.Router();
 
-const passwordSchema = new PasswordValidator();
+const passwordSchema: PasswordValidator = new PasswordValidator();
 
 const noCors = {
   origin: true
@@ -20,7 +20,15 @@ passwordSchema
   .has().digits(1, 'Password must contain a digit')
   .has().not().spaces();
 
-userRouter.post('/', cors(noCors), async (request, response) => {
+interface requestDetails {
+  username: string,
+  email: string,
+  password: string
+};
+
+console.log('hi')
+
+userRouter.post('/', cors(noCors), async (request: Request, response: Response) => {
   const { username, email, password } = request.body;
   const passErrors: boolean | any[] = passwordSchema.validate(password, { details: true });
   if (Array.isArray(passErrors)) {
