@@ -9,9 +9,10 @@
     "test": "NODE_ENV=test jest --verbose --runInBand"
   },
   "author": "Eddy Ding",
-  "type": "module",
   "license": "ISC",
   "dependencies": {
+    "@types/bcrypt": "^5.0.0",
+    "@types/mongoose-unique-validator": "^1.0.7",
     "bcrypt": "^5.1.0",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
@@ -25,6 +26,9 @@
     "validator": "^13.9.0"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.13",
+    "@types/express": "^4.17.17",
+    "@types/node": "^20.4.5",
     "@typescript-eslint/eslint-plugin": "^5.62.0",
     "eslint": "^8.46.0",
     "eslint-config-standard": "^17.1.0",
@@ -34,6 +38,7 @@
     "eslint-plugin-promise": "^6.1.1",
     "jest": "^29.6.2",
     "nodemon": "^3.0.1",
-    "supertest": "^6.3.3"
+    "supertest": "^6.3.3",
+    "typescript": "^5.1.6"
   }
 }
