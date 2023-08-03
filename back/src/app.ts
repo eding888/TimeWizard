@@ -22,6 +22,9 @@ app.use(express.json());
 app.use(cors());
 app.use(express.static('build'));
 
+app.use(middleware.getTokenFrom);
+app.use(middleware.getUserFromToken);
+
 app.use('/api/users', userRouter);
 
 app.use(middleware.errorHandler);

@@ -1,17 +1,13 @@
-import express, { Request, Response, Router } from 'express';
+import express, { Response, Router } from 'express';
 import User, { UserInterface } from '../models/user.js';
 import bcrypt from 'bcrypt';
-import cors from 'cors';
 import 'express-async-errors';
 import PasswordValidator from 'password-validator';
+import { AuthenticatedRequest } from 'utils/middleware.js';
 
 const userRouter: Router = express.Router();
 
 const passwordSchema: PasswordValidator = new PasswordValidator();
-
-const noCors = {
-  origin: true
-};
 
 passwordSchema
   .is().min(6, 'Password must have minimum of 6 characters')
@@ -25,7 +21,7 @@ interface requestDetails {
   email: string,
   password: string
 }
-userRouter.get('/all', cors(noCors), async (request: Request, response: Response) => {
+userRouter.get('/all', async (request: AuthenticatedRequest, response: Response) => {
   const users: UserInterface[] | null = await User.find({})!;
   if (users !== null) {
     response.json(users);
@@ -33,7 +29,7 @@ userRouter.get('/all', cors(noCors), async (request: Request, response: Response
     response.status(400);
   }
 });
-userRouter.post('/', cors(noCors), async (request: Request, response: Response) => {
+userRouter.post('/', async (request: AuthenticatedRequest, response: Response) => {
   const { username, email, password }: requestDetails = request.body;
   const passErrors: boolean | object[] = passwordSchema.validate(password, { details: true });
   console.log(passErrors);
