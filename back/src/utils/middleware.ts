@@ -1,8 +1,8 @@
-import express, { NextFunction, Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import config from './config';
 import User, { UserInterface } from 'models/user';
-import { genAuthToken } from './genToken';
+import { verifyToken, genAuthToken } from './genToken';
 
 // Token is tacked onto the request, made possible with this interface
 export interface AuthenticatedRequest extends Request {
@@ -24,30 +24,37 @@ const errorHandler = (error: Error, request: Request, response: Response, next: 
   next(error);
 };
 
+// Will acquire the token from headers and checks if its valid. If it is, it updates request.token.
+// If not, it will decode that token, check the user it came from for a refresh token, and if refresh token
+// is valid, a new auth token will simply be provided.
 const getTokenFrom = async (request: AuthenticatedRequest, response: Response, next: NextFunction) => {
-  if (request.token) {
-    try {
-      const decodedToken = jwt.verify(request.token, config.SECRET);
-    } catch (error) {
-      if (error instanceof jwt.JsonWebTokenError && error.message === 'jwt expired') {
-        const expiredToken = jwt.decode(request.token) as UserInterface;
-        if (!expiredToken.id) {
-          return response.status(401).json({ error: 'token invalid' });
-        }
-        const user: UserInterface = await User.findById(expiredToken.id) as UserInterface;
-        if(user.refreshToken){
-          response.setHeader('Authorization', )
-        }
-      } else {
+  const authorization = request.get('authorization');
+  if (authorization && authorization.startsWith('bearer ')) {
+    const token = authorization.replace('bearer ', '');
+    if (verifyToken(token)) {
+      request.token = token;
+    } else {
+      let expiredToken;
+      try {
+        expiredToken = jwt.decode(token) as UserInterface;
+      } catch (error) {
+        return response.status(401).json({ error: 'token invalid' }); // token is nonsense
+      }
+      if (!expiredToken.id || !expiredToken.username) {
+        return response.status(401).json({ error: 'token invalid' }); // token may be user, but is formatted wrong
+      }
 
+      const user: UserInterface = await User.findById(expiredToken.id) as UserInterface;
+      if (verifyToken(user.refreshToken) && user.username) {
+        const newToken = await genAuthToken(user.username);
+        request.token = newToken;
+        // NEW AUTH TOKEN GENERATED, BE SURE TO CATCH THIS IN FRONTEND TO STORE IN COOKIE
+        response.setHeader('Authorization', newToken);
+      } else {
+        return response.status(400).json({ error: 'refresh token expired' });
       }
     }
   }
-  const authorization = request.get('authorization');
-  if (authorization && authorization.startsWith('bearer ')) {
-    request.token = authorization.replace('bearer ', '');
-  } else request.token = null;
-
   next();
 };
 
@@ -60,7 +67,7 @@ const getUserFromToken = async (request: AuthenticatedRequest, response: Respons
       }
       request.user = await User.findById(decodedToken.id) as UserInterface;
     } else {
-      return response.status(401).json({ error: 'missing token' });
+      return response.status(400).json({ error: 'missing token' });
     }
   } catch (error) {
     if (error instanceof jwt.JsonWebTokenError) {
@@ -74,20 +81,4 @@ const getUserFromToken = async (request: AuthenticatedRequest, response: Respons
   next();
 };
 
-/* if (request.token) {
-    try {
-      const decodedToken = jwt.verify(request.token, config.SECRET);
-    } catch (error) {
-      if (error instanceof jwt.JsonWebTokenError && error.message === 'jwt expired') {
-        const expiredToken = jwt.decode(request.token) as UserInterface;
-        if (!expiredToken.id) {
-          return response.status(401).json({ error: 'token invalid' });
-        }
-        const user: UserInterface = await User.findById(expiredToken.id) as UserInterface;
-        const userRefreshToken = user.refreshToken;
-      } else {
-
-      }
-    }
-  } */
 export default { errorHandler, getTokenFrom, getUserFromToken };
