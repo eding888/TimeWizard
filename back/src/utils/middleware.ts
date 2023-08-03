@@ -2,6 +2,7 @@ import express, { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import config from './config';
 import User, { UserInterface } from 'models/user';
+import { genAuthToken } from './genToken';
 
 // Token is tacked onto the request, made possible with this interface
 export interface AuthenticatedRequest extends Request {
@@ -23,7 +24,25 @@ const errorHandler = (error: Error, request: Request, response: Response, next: 
   next(error);
 };
 
-const getTokenFrom = (request: AuthenticatedRequest, response: Response, next: NextFunction) => {
+const getTokenFrom = async (request: AuthenticatedRequest, response: Response, next: NextFunction) => {
+  if (request.token) {
+    try {
+      const decodedToken = jwt.verify(request.token, config.SECRET);
+    } catch (error) {
+      if (error instanceof jwt.JsonWebTokenError && error.message === 'jwt expired') {
+        const expiredToken = jwt.decode(request.token) as UserInterface;
+        if (!expiredToken.id) {
+          return response.status(401).json({ error: 'token invalid' });
+        }
+        const user: UserInterface = await User.findById(expiredToken.id) as UserInterface;
+        if(user.refreshToken){
+          response.setHeader('Authorization', )
+        }
+      } else {
+
+      }
+    }
+  }
   const authorization = request.get('authorization');
   if (authorization && authorization.startsWith('bearer ')) {
     request.token = authorization.replace('bearer ', '');
