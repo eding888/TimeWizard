@@ -4,6 +4,7 @@ import bcrypt from 'bcrypt';
 import 'express-async-errors';
 import PasswordValidator from 'password-validator';
 import { AuthenticatedRequest } from 'utils/middleware.js';
+import { genAuthToken } from '../utils/genToken.js';
 
 const userRouter: Router = express.Router();
 
@@ -48,7 +49,9 @@ userRouter.post('/', async (request: AuthenticatedRequest, response: Response) =
 
   const savedUser = await user.save();
 
-  response.status(201).json(savedUser);
+  const starterAuthToken = genAuthToken(username);
+
+  response.status(201).json({ savedUser, starterAuthToken });
 });
 
 export default userRouter;

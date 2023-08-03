@@ -1,11 +1,31 @@
 import express, { Response, Router } from 'express';
 import User from 'models/user';
-import { AuthenticatedRequest } from 'utils/middleware';
+import { AuthenticatedRequest } from 'utils/middleware.js';
+import bcrypt from 'bcrypt';
+import { verifyToken, genRefreshToken, genAuthToken } from '../utils/genToken.js';
 
 const loginRouter: Router = express.Router();
 
 loginRouter.post('/', async (request: AuthenticatedRequest, response: Response) => {
   const { username, password } = request.body;
+  if (username && password) {
+    const user = await User.findOne({ username });
+    const passwordCorrect = user === null
+      ? false
+      : await bcrypt.compare(password, user.passwordHash);
 
-  const user = await User.findOne({ username });
+    if (!(user && passwordCorrect)) {
+      return response.status(401).json({
+        error: 'invalid username or password'
+      });
+    }
+
+    if (!user.refreshToken || !verifyToken(user.refreshToken)) {
+      user.refreshToken = genRefreshToken();
+    }
+
+    const authToken = genAuthToken(user.username);
+
+    response.status(200).json(authToken);
+  }
 });

@@ -27,7 +27,7 @@ export const genAuthToken = async (username : string) => {
   return '';
 };
 
-export const genRefreshToken = async () => {
+export const genRefreshToken = () => {
   const random = crypto.randomBytes(32).toString('hex');
   return jwt.sign(random, config.SECRET, { expiresIn: expiresInOneWeek });
 };

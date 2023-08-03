@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import config from './config';
-import User, { UserInterface } from 'models/user';
-import { verifyToken, genAuthToken } from './genToken';
+import config from './config.js';
+import User, { UserInterface } from '../models/user.js';
+import { verifyToken, genAuthToken } from './genToken.js';
 
 // Token is tacked onto the request, made possible with this interface
 export interface AuthenticatedRequest extends Request {
@@ -28,10 +28,10 @@ const errorHandler = (error: Error, request: Request, response: Response, next: 
 // If not, it will decode that token, check the user it came from for a refresh token, and if refresh token
 // is valid, a new auth token will simply be provided.
 const getTokenFrom = async (request: AuthenticatedRequest, response: Response, next: NextFunction) => {
-  const authorization = request.get('authorization');
+  const authorization = request.get('Authorization');
   if (authorization && authorization.startsWith('bearer ')) {
     const token = authorization.replace('bearer ', '');
-    if (verifyToken(token)) {
+    if (verifyToken(token) || token === config.SECRET) {
       request.token = token;
     } else {
       let expiredToken;
@@ -45,29 +45,31 @@ const getTokenFrom = async (request: AuthenticatedRequest, response: Response, n
       }
 
       const user: UserInterface = await User.findById(expiredToken.id) as UserInterface;
-      if (verifyToken(user.refreshToken) && user.username) {
-        const newToken = await genAuthToken(user.username);
-        request.token = newToken;
-        // NEW AUTH TOKEN GENERATED, BE SURE TO CATCH THIS IN FRONTEND TO STORE IN COOKIE
-        response.setHeader('Authorization', newToken);
-      } else {
+      if (!verifyToken(user.refreshToken) || !user.username) {
         return response.status(400).json({ error: 'refresh token expired' });
-      }
+      } 
+      const newToken = await genAuthToken(user.username);
+      request.token = newToken;
+      // NEW AUTH TOKEN GENERATED, BE SURE TO CATCH THIS IN FRONTEND TO STORE IN COOKIE
+      response.setHeader('Authorization', newToken);
     }
+  } else {
+    return response.status(400).json({ error: 'missing token' });
   }
   next();
 };
 
 const getUserFromToken = async (request: AuthenticatedRequest, response: Response, next: NextFunction) => {
   try {
-    if (request.token) {
+    if (!request.token) {
+      return response.status(400).json({ error: 'missing token' });
+    }
+    if (request.token !== config.SECRET) {
       const decodedToken: UserInterface = jwt.verify(request.token, config.SECRET) as UserInterface;
       if (!decodedToken.id) {
         return response.status(401).json({ error: 'token invalid' });
       }
       request.user = await User.findById(decodedToken.id) as UserInterface;
-    } else {
-      return response.status(400).json({ error: 'missing token' });
     }
   } catch (error) {
     if (error instanceof jwt.JsonWebTokenError) {
