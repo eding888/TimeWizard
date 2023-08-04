@@ -31,6 +31,10 @@ export const genRefreshToken = () => {
   return jwt.sign(random, config.SECRET, { expiresIn: expiresInOneWeek });
 };
 
+export const genEmailCode = (digits: string) => {
+  return jwt.sign(digits, config.SECRET, { expiresIn: expiresInOneWeek });
+};
+
 export const verifyToken = (refreshToken: string) => {
   try {
     const decoded = jwt.verify(refreshToken, config.SECRET); // eslint-disable-line
