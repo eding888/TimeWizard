@@ -29,3 +29,5 @@ loginRouter.post('/', async (request: AuthenticatedRequest, response: Response) 
     response.status(200).json(authToken);
   }
 });
+
+export default loginRouter;

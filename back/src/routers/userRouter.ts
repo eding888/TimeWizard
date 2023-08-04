@@ -5,7 +5,7 @@ import 'express-async-errors';
 import PasswordValidator from 'password-validator';
 import { AuthenticatedRequest } from 'utils/middleware.js';
 import { genAuthToken } from '../utils/genToken.js';
-import { checkAdmin } from 'utils/routerHelper.js';
+import { checkAdmin } from '../utils/routerHelper.js';
 
 const userRouter: Router = express.Router();
 
@@ -60,7 +60,7 @@ userRouter.post('/', async (request: AuthenticatedRequest, response: Response) =
 
   const starterAuthToken = await genAuthToken(username);
 
-  response.status(201).json({ savedUser, starterAuthToken });
+  response.status(201).json({ savedUser, token: starterAuthToken });
 });
 
 export default userRouter;
