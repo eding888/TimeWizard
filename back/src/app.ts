@@ -25,11 +25,10 @@ app.use(express.json());
 app.use(cors());
 app.use(express.static('build'));
 
-app.use('/api/login', loginRouter);
-
 app.use(middleware.getTokenFrom);
 app.use(middleware.getUserFromToken);
 
+app.use('/api/login', loginRouter);
 app.use('/api/newUser', newUserRouter);
 app.use('/api/users', userRouter);
 app.use('/api/test', sample);

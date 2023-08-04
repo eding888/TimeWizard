@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import config from './config.js';
 import User, { UserInterface } from '../models/user.js';
-import { verifyToken, genAuthToken } from './genToken.js';
+import { verifyToken, genAuthToken, jwtSubject } from './genToken.js';
 
 // Token is tacked onto the request, made possible with this interface
 export interface AuthenticatedRequest extends Request {
@@ -36,7 +36,7 @@ const getTokenFrom = async (request: AuthenticatedRequest, response: Response, n
     } else {
       let expiredToken;
       try {
-        expiredToken = jwt.decode(token) as UserInterface;
+        expiredToken = jwt.decode(token) as jwtSubject;
       } catch (error) {
         return response.status(401).json({ error: 'token invalid' }); // token is nonsense
       }
@@ -66,7 +66,7 @@ const getUserFromToken = async (request: AuthenticatedRequest, response: Respons
       return response.status(400).json({ error: 'missing token' });
     }
     if (request.token !== config.ADMIN_KEY) {
-      const decodedToken: UserInterface = jwt.verify(request.token, config.SECRET) as UserInterface;
+      const decodedToken: jwtSubject = jwt.verify(request.token, config.SECRET) as jwtSubject;
       const id = decodedToken._id;
       if (!id) {
         return response.status(401).json({ error: 'token invalid' });

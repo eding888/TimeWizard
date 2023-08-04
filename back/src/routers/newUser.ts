@@ -30,8 +30,12 @@ newUserRouter.post('/', async (request: AuthenticatedRequest, response: Response
   }
 
   const { username, email, password }: requestDetails = request.body;
+  if (!username || !email || !password) {
+    return response.status(400).json({
+      error: 'no username or password or email'
+    });
+  }
   const passErrors: boolean | object[] = passwordSchema.validate(password, { details: true });
-  console.log(passErrors);
   if (Array.isArray(passErrors) && passErrors.length >= 1) {
     return response.status(400).json(passErrors);
   }

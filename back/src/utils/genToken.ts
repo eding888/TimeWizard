@@ -3,10 +3,14 @@ import crypto from 'crypto';
 import config from './config.js';
 import User from '../models/user.js';
 
-interface jwtSubject{
+export interface jwtSubject{
   _id: string;
   username: string,
   jti: string
+}
+
+export interface code{
+  code: string;
 }
 
 const expiresInOneWeek = '7d';
@@ -42,7 +46,7 @@ export const genEmailCode = () => {
   const randomNumber = Math.floor(Math.random() * (max - min + 1)) + min;
   const digits = randomNumber.toString();
 
-  const payload = {
+  const payload: code = {
     code: digits
   };
 

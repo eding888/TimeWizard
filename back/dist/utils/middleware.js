@@ -38,7 +38,7 @@ const getTokenFrom = async (request, response, next) => {
                 return response.status(401).json({ error: 'token invalid' }); // token may be user, but is formatted wrong
             }
             const user = await User.findById(id);
-            if (!verifyToken(user.refreshToken) || !user.username) {
+            if (user.refreshToken !== null && (!verifyToken(user.refreshToken) || !user.username)) {
                 return response.status(400).json({ error: 'refresh token expired' });
             }
             const newToken = await genAuthToken(user.username);
