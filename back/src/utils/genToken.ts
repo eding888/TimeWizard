@@ -9,8 +9,8 @@ interface jwtSubject{
   jti: string
 }
 
-const expiresInOneWeek = 7 * 24 * 60 * 60;
-const expiresInOneHour = 60 * 60;
+const expiresInOneWeek = '7d';
+const expiresInOneHour = '1h';
 
 export const genAuthToken = async (username : string) => {
   const user = await User.findOne({ username });
@@ -28,11 +28,32 @@ export const genAuthToken = async (username : string) => {
 
 export const genRefreshToken = () => {
   const random = crypto.randomBytes(32).toString('hex');
-  return jwt.sign(random, config.SECRET, { expiresIn: expiresInOneWeek });
+
+  const payload = {
+    code: random
+  };
+
+  return jwt.sign(payload, config.SECRET, { expiresIn: expiresInOneWeek });
 };
 
-export const genEmailCode = (digits: string) => {
-  return jwt.sign(digits, config.SECRET, { expiresIn: expiresInOneWeek });
+export const genEmailCode = () => {
+  const min = 100000;
+  const max = 999999;
+  const randomNumber = Math.floor(Math.random() * (max - min + 1)) + min;
+  const digits = randomNumber.toString();
+
+  const payload = {
+    code: digits
+  };
+
+  const token = jwt.sign(payload, config.SECRET, { expiresIn: expiresInOneWeek });
+
+  return (
+    {
+      digits,
+      token
+    }
+  );
 };
 
 export const verifyToken = (refreshToken: string) => {

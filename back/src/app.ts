@@ -2,6 +2,7 @@ import express, { Express } from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import config from './utils/config.js';
+import newUserRouter from './routers/newUser.js';
 import userRouter from './routers/userRouter.js';
 import loginRouter from './routers/loginRouter.js';
 import sample from './routers/sample.js';
@@ -29,6 +30,7 @@ app.use('/api/login', loginRouter);
 app.use(middleware.getTokenFrom);
 app.use(middleware.getUserFromToken);
 
+app.use('/api/newUser', newUserRouter);
 app.use('/api/users', userRouter);
 app.use('/api/test', sample);
 

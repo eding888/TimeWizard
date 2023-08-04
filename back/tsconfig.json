@@ -12,9 +12,6 @@
     "skipLibCheck": true,
     "moduleResolution": "node",
     "baseUrl": "./src",
-    "paths": {
-      "*": ["*"]
-    },
     "typeRoots": ["./global.d.ts", "./node_modules/@types"]
   },
   "ts-node": {
