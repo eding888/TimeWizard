@@ -7,7 +7,8 @@
     "buildJS": "rm -rf dist && tsc",
     "start": "NODE_ENV=production node index.js",
     "dev": "NODE_ENV=development nodemon index.js",
-    "test": "NODE_ENV=test jest --verbose --runInBand"
+    "test": "NODE_ENV=test NODE_OPTIONS=--experimental-vm-modules jest --verbose --runInBand",
+    "buildAndTest": "npm run buildJS && npm run test"
   },
   "author": "Eddy Ding",
   "license": "ISC",

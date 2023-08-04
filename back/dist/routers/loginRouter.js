@@ -1,5 +1,5 @@
 import express from 'express';
-import User from 'models/user';
+import User from '../models/user.js';
 import bcrypt from 'bcrypt';
 import { verifyToken, genRefreshToken, genAuthToken } from '../utils/genToken.js';
 const loginRouter = express.Router();

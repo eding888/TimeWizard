@@ -1,6 +1,6 @@
 import express, { Response, Router } from 'express';
-import User from 'models/user';
-import { AuthenticatedRequest } from 'utils/middleware.js';
+import User from '../models/user.js';
+import { AuthenticatedRequest } from '../utils/middleware.js';
 import bcrypt from 'bcrypt';
 import { verifyToken, genRefreshToken, genAuthToken } from '../utils/genToken.js';
 

@@ -15,16 +15,13 @@ test('a user can be created and can make an authenticated request', async () => 
     email: "jlin@student.unc.edu",
     password: "Password123"
   };
-
   const response = await api
     .post('/api/users')
     .set({ Authorization: `bearer ${config.ADMIN_KEY}` })
     .send(newUser)
     .expect(201)
-    .expect('Content-Type', /application\/json/);
-
-  const token = response.token;
-
+    .expect('Content-Type', /application\/json/)
+  const token = response.body.token;
   await api
     .get('/api/test')
     .set({ Authorization: `bearer ${token}` })
