@@ -8,7 +8,7 @@ const checkEmail = (email: string) => {
 };
 
 export interface UserInterface extends mongoose.Document {
-  _id: mongoose.Types.ObjectId,
+  _id: string,
   username: string,
   email: string,
   passwordHash: string,

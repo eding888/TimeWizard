@@ -15,5 +15,6 @@ const MONGO_URL: string = (process.env.NODE_ENV === 'test'
   ? process.env.TEST_MONGO_URL!
   : process.env.MONGO_URL!);
 const SECRET: string = process.env.SECRET!;
+const ADMIN_KEY: string = process.env.ADMIN_KEY!;
 
-export default { PORT, MONGO_URL, SECRET };
+export default { PORT, MONGO_URL, SECRET, ADMIN_KEY };

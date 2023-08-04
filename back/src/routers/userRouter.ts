@@ -5,6 +5,7 @@ import 'express-async-errors';
 import PasswordValidator from 'password-validator';
 import { AuthenticatedRequest } from 'utils/middleware.js';
 import { genAuthToken } from '../utils/genToken.js';
+import { checkAdmin } from 'utils/routerHelper.js';
 
 const userRouter: Router = express.Router();
 
@@ -23,6 +24,10 @@ interface requestDetails {
   password: string
 }
 userRouter.get('/all', async (request: AuthenticatedRequest, response: Response) => {
+  if (!checkAdmin(request.token)) {
+    return response.status(401).json({ error: 'unauthorized access' });
+  }
+
   const users: UserInterface[] | null = await User.find({})!;
   if (users !== null) {
     response.json(users);
@@ -31,6 +36,10 @@ userRouter.get('/all', async (request: AuthenticatedRequest, response: Response)
   }
 });
 userRouter.post('/', async (request: AuthenticatedRequest, response: Response) => {
+  if (!checkAdmin(request.token)) {
+    return response.status(401).json({ error: 'unauthorized access' });
+  }
+
   const { username, email, password }: requestDetails = request.body;
   const passErrors: boolean | object[] = passwordSchema.validate(password, { details: true });
   console.log(passErrors);
@@ -49,7 +58,7 @@ userRouter.post('/', async (request: AuthenticatedRequest, response: Response) =
 
   const savedUser = await user.save();
 
-  const starterAuthToken = genAuthToken(username);
+  const starterAuthToken = await genAuthToken(username);
 
   response.status(201).json({ savedUser, starterAuthToken });
 });

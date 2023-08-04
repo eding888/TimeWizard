@@ -2,10 +2,9 @@ import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import config from './config.js';
 import User from '../models/user.js';
-import { ObjectId } from 'mongodb';
 
 interface jwtSubject{
-  _id: ObjectId;
+  _id: string;
   username: string,
   jti: string
 }
@@ -16,7 +15,7 @@ const expiresInOneHour = 60 * 60;
 export const genAuthToken = async (username : string) => {
   const user = await User.findOne({ username });
   if (user !== null) {
-    const id: ObjectId = user._id;
+    const id: string = user._id.toString();
     const jwtSubject:jwtSubject = {
       _id: id,
       username,

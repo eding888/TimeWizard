@@ -31,7 +31,7 @@ const getTokenFrom = async (request: AuthenticatedRequest, response: Response, n
   const authorization = request.get('Authorization');
   if (authorization && authorization.startsWith('bearer ')) {
     const token = authorization.replace('bearer ', '');
-    if (verifyToken(token) || token === config.SECRET) {
+    if (verifyToken(token) || token === config.ADMIN_KEY) {
       request.token = token;
     } else {
       let expiredToken;
@@ -40,14 +40,15 @@ const getTokenFrom = async (request: AuthenticatedRequest, response: Response, n
       } catch (error) {
         return response.status(401).json({ error: 'token invalid' }); // token is nonsense
       }
-      if (!expiredToken.id || !expiredToken.username) {
+      const id = expiredToken._id;
+      if (!id || !expiredToken.username) {
         return response.status(401).json({ error: 'token invalid' }); // token may be user, but is formatted wrong
       }
 
-      const user: UserInterface = await User.findById(expiredToken.id) as UserInterface;
+      const user: UserInterface = await User.findById(id) as UserInterface;
       if (!verifyToken(user.refreshToken) || !user.username) {
         return response.status(400).json({ error: 'refresh token expired' });
-      } 
+      }
       const newToken = await genAuthToken(user.username);
       request.token = newToken;
       // NEW AUTH TOKEN GENERATED, BE SURE TO CATCH THIS IN FRONTEND TO STORE IN COOKIE
@@ -64,12 +65,13 @@ const getUserFromToken = async (request: AuthenticatedRequest, response: Respons
     if (!request.token) {
       return response.status(400).json({ error: 'missing token' });
     }
-    if (request.token !== config.SECRET) {
+    if (request.token !== config.ADMIN_KEY) {
       const decodedToken: UserInterface = jwt.verify(request.token, config.SECRET) as UserInterface;
-      if (!decodedToken.id) {
+      const id = decodedToken._id;
+      if (!id) {
         return response.status(401).json({ error: 'token invalid' });
       }
-      request.user = await User.findById(decodedToken.id) as UserInterface;
+      request.user = await User.findById(id) as UserInterface;
     }
   } catch (error) {
     if (error instanceof jwt.JsonWebTokenError) {
