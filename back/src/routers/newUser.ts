@@ -18,18 +18,12 @@ passwordSchema
   .has().digits(1, 'Password must contain a digit')
   .has().not().spaces();
 
-interface requestDetails {
-  username: string,
-  email: string,
-  password: string
-}
-
 newUserRouter.post('/', async (request: AuthenticatedRequest, response: Response) => {
   if (!checkAdmin(request.token)) {
     return response.status(401).json({ error: 'unauthorized access' });
   }
 
-  let { username, email, password }: requestDetails = request.body;
+  let { username, email, password } = request.body;
 
   if (!username || !email || !password) {
     return response.status(400).json({

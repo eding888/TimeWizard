@@ -7,6 +7,15 @@ import userRouter from './routers/userRouter.js';
 import loginRouter from './routers/loginRouter.js';
 import sample from './routers/sample.js';
 import middleware from './utils/middleware.js';
+import rateLimit from 'express-rate-limit';
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 1500,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: 'Too many requests, please try again later.'
+});
 
 const app: Express = express();
 
@@ -20,6 +29,8 @@ mongoose.connect(MONGO_URI)
   .catch((error: Error) => {
     console.log('Error:', error);
   });
+
+app.use(limiter);
 
 app.use(express.json());
 app.use(cors());

@@ -24,7 +24,6 @@ loginRouter.post('/', async (request: AuthenticatedRequest, response: Response) 
         error: 'invalid username or password'
       });
     }
-
     if (!user.isVerified) {
       const code = genEmailCode();
       sendConfirmationEmail(code.digits, user.email)
