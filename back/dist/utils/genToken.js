@@ -5,8 +5,8 @@ import User from '../models/user.js';
 let expiresInOneWeek = '7d';
 let expiresInOneHour = '1h';
 if (config.TEST) {
-    expiresInOneWeek = '10s';
-    expiresInOneHour = '5s';
+    expiresInOneWeek = '9s';
+    expiresInOneHour = '4s';
 }
 export const genAuthToken = async (username) => {
     const user = await User.findOne({ username });

@@ -22,7 +22,7 @@ const getTokenFrom = async (request, response, next) => {
     const authorization = request.get('Authorization');
     if (authorization && authorization.startsWith('bearer ')) {
         const token = authorization.replace('bearer ', '');
-        if (token !== 'undefined') {
+        if (token !== 'undefined' && token) {
             if (verifyToken(token)) {
                 request.token = token;
             }
@@ -39,10 +39,6 @@ const getTokenFrom = async (request, response, next) => {
                     return response.status(401).json({ error: 'token invalid' }); // token may be user, but is formatted wrong
                 }
                 const user = await User.findById(id);
-                if (!user.isVerified) {
-                    user.deleteOne();
-                    return response.status(400).json({ error: 'starter auth token expired' }); // gets rid of users who create accounts but never verifies them
-                }
                 if (user.refreshToken !== null && (!verifyToken(user.refreshToken) || !user.username)) {
                     return response.status(400).json({ error: 'refresh token expired' });
                 }
@@ -57,7 +53,7 @@ const getTokenFrom = async (request, response, next) => {
 };
 const getUserFromToken = async (request, response, next) => {
     try {
-        if (request.token) {
+        if (request.token !== 'undefined' && request.token) {
             const decodedToken = jwt.verify(request.token, config.SECRET);
             const id = decodedToken._id;
             if (!id) {

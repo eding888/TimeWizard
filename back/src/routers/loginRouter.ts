@@ -1,22 +1,24 @@
 import express, { Response, Router } from 'express';
 import { AuthenticatedRequest } from '../utils/middleware.js';
 import bcrypt from 'bcrypt';
-import { genRefreshToken, genAuthToken, genEmailCode, code } from '../utils/genToken.js';
+import { genRefreshToken, genAuthToken, genEmailCode, code, verifyToken } from '../utils/genToken.js';
 import { sendConfirmationEmail, sanitizeInput } from '../utils/routerHelper.js';
 import jwt from 'jsonwebtoken';
 import config from '../utils/config.js';
+import User, { UserInterface } from '../models/user.js';
 
 const loginRouter: Router = express.Router();
 
 loginRouter.post('/', async (request: AuthenticatedRequest, response: Response) => {
-  let { password } = request.body;
-  if (password) {
+  let { username, password } = request.body;
+  if (username && password) {
+    username = sanitizeInput(username, 'none');
     password = sanitizeInput(password, 'allow');
-    const user = request.user;
+    const user: UserInterface = await User.findOne({ username }) as UserInterface;
 
     if (!user) {
       return response.status(401).json({
-        error: 'invalid token'
+        error: 'invalid username'
       });
     }
     const passwordCorrect = user === null
@@ -40,6 +42,7 @@ loginRouter.post('/', async (request: AuthenticatedRequest, response: Response) 
             error: 'invalid email'
           });
         });
+
       user.emailCode = code.token;
       await user.save();
       return response.status(401).json({
@@ -47,16 +50,16 @@ loginRouter.post('/', async (request: AuthenticatedRequest, response: Response) 
       });
     }
 
-    if (!user.refreshToken) {
+    if (!user.refreshToken || !verifyToken(user.refreshToken)) {
       user.refreshToken = genRefreshToken();
     }
 
-    const authToken = genAuthToken(user.username);
+    const authToken = await genAuthToken(user.username);
 
-    response.status(200).json(authToken);
+    response.status(200).json({ token: authToken });
   } else {
     return response.status(400).json({
-      error: 'no password provided'
+      error: 'no username/password provided'
     });
   }
 });

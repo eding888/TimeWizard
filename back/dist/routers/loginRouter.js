@@ -1,18 +1,20 @@
 import express from 'express';
 import bcrypt from 'bcrypt';
-import { genRefreshToken, genAuthToken, genEmailCode } from '../utils/genToken.js';
+import { genRefreshToken, genAuthToken, genEmailCode, verifyToken } from '../utils/genToken.js';
 import { sendConfirmationEmail, sanitizeInput } from '../utils/routerHelper.js';
 import jwt from 'jsonwebtoken';
 import config from '../utils/config.js';
+import User from '../models/user.js';
 const loginRouter = express.Router();
 loginRouter.post('/', async (request, response) => {
-    let { password } = request.body;
-    if (password) {
+    let { username, password } = request.body;
+    if (username && password) {
+        username = sanitizeInput(username, 'none');
         password = sanitizeInput(password, 'allow');
-        const user = request.user;
+        const user = await User.findOne({ username });
         if (!user) {
             return response.status(401).json({
-                error: 'invalid token'
+                error: 'invalid username'
             });
         }
         const passwordCorrect = user === null
@@ -41,15 +43,15 @@ loginRouter.post('/', async (request, response) => {
                 error: 'user is not verified'
             });
         }
-        if (!user.refreshToken) {
+        if (!user.refreshToken || !verifyToken(user.refreshToken)) {
             user.refreshToken = genRefreshToken();
         }
-        const authToken = genAuthToken(user.username);
-        response.status(200).json(authToken);
+        const authToken = await genAuthToken(user.username);
+        response.status(200).json({ token: authToken });
     }
     else {
         return response.status(400).json({
-            error: 'no password provided'
+            error: 'no username/password provided'
         });
     }
 });
