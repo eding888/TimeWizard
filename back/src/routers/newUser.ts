@@ -5,7 +5,7 @@ import 'express-async-errors';
 import PasswordValidator from 'password-validator';
 import { AuthenticatedRequest } from 'utils/middleware.js';
 import { genAuthToken } from '../utils/genToken.js';
-import { checkAdmin, sanitizeInput } from '../utils/routerHelper.js';
+import { sanitizeInput } from '../utils/routerHelper.js';
 
 const newUserRouter: Router = express.Router();
 
@@ -19,10 +19,6 @@ passwordSchema
   .has().not().spaces();
 
 newUserRouter.post('/', async (request: AuthenticatedRequest, response: Response) => {
-  if (!checkAdmin(request.token)) {
-    return response.status(401).json({ error: 'unauthorized access' });
-  }
-
   let { username, email, password } = request.body;
 
   if (!username || !email || !password) {

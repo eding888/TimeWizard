@@ -19,6 +19,10 @@ const limiter = rateLimit({
 
 const app: Express = express();
 
+app.use(cors({
+  origin: `localhost:/${config.PORT}`
+}));
+
 const { MONGO_URI } = config;
 mongoose.set('strictQuery', false);
 

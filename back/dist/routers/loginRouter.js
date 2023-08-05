@@ -1,6 +1,6 @@
 import express from 'express';
 import bcrypt from 'bcrypt';
-import { verifyToken, genRefreshToken, genAuthToken, genEmailCode } from '../utils/genToken.js';
+import { genRefreshToken, genAuthToken, genEmailCode } from '../utils/genToken.js';
 import { sendConfirmationEmail, sanitizeInput } from '../utils/routerHelper.js';
 import jwt from 'jsonwebtoken';
 import config from '../utils/config.js';
@@ -20,7 +20,7 @@ loginRouter.post('/', async (request, response) => {
             : await bcrypt.compare(password, user.passwordHash);
         if (!passwordCorrect) {
             return response.status(401).json({
-                error: 'invalid username or password'
+                error: 'invalid password'
             });
         }
         if (!user.isVerified) {
@@ -41,7 +41,7 @@ loginRouter.post('/', async (request, response) => {
                 error: 'user is not verified'
             });
         }
-        if (!user.refreshToken || !verifyToken(user.refreshToken)) {
+        if (!user.refreshToken) {
             user.refreshToken = genRefreshToken();
         }
         const authToken = genAuthToken(user.username);

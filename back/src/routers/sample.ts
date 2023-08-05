@@ -6,9 +6,15 @@ import { AuthenticatedRequest } from 'utils/middleware';
 const testRouter: Router = express.Router();
 
 testRouter.get('/', async (request: AuthenticatedRequest, response: Response) => {
-  if (!request.user?.isVerified) {
+  if (!request.user) {
     return response.status(401).json({
-      error: 'user is not verified'
+      error: 'invalid token'
+    });
+  }
+
+  if (!request.user.isVerified) {
+    return response.status(401).json({
+      error: 'user not verified'
     });
   }
   const message = 'hej';

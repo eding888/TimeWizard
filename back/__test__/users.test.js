@@ -25,15 +25,14 @@ let token;
 test('a user can be created', async() => {
   const res = await api
     .post('/api/newUser')
-    .set({ Authorization: `bearer ${config.ADMIN_KEY}` })
     .send(newUser)
     .expect(201)
     .expect('Content-Type', /application\/json/)
   token = res.body.token;
+  console.log(token);
 });
 
 test('the user can be verified', async() => {
-  
   await api
     .get('/api/sample')
     .set({ Authorization: `bearer ${token}` })

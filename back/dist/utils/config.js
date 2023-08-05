@@ -12,8 +12,7 @@ const MONGO_URI = (TEST
     ? process.env.TEST_MONGO_URI
     : process.env.MONGO_URI);
 const SECRET = process.env.SECRET;
-const ADMIN_KEY = process.env.ADMIN_KEY;
 const EMAIL = process.env.EMAIL;
 const EMAIL_PASS = process.env.EMAIL_PASS;
 const MAILSAC_KEY = process.env.MAILSAC_KEY;
-export default { PORT, MONGO_URI, SECRET, ADMIN_KEY, EMAIL, EMAIL_PASS, TEST, MAILSAC_KEY };
+export default { PORT, MONGO_URI, SECRET, EMAIL, EMAIL_PASS, TEST, MAILSAC_KEY };

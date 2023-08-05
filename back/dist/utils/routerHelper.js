@@ -1,11 +1,5 @@
 import config from './config.js';
 import nodemailer from 'nodemailer';
-export const checkAdmin = (token) => {
-    if (token === config.ADMIN_KEY) {
-        return true;
-    }
-    return false;
-};
 export const sendConfirmationEmail = (digits, recipientEmail) => {
     return new Promise((resolve, reject) => {
         const transporter = nodemailer.createTransport({

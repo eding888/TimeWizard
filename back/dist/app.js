@@ -16,6 +16,9 @@ const limiter = rateLimit({
     message: 'Too many requests, please try again later.'
 });
 const app = express();
+app.use(cors({
+    origin: `localhost:/${config.PORT}`
+}));
 const { MONGO_URI } = config;
 mongoose.set('strictQuery', false);
 mongoose.connect(MONGO_URI)

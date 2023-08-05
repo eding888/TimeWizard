@@ -31,45 +31,41 @@ const getTokenFrom = async (request: AuthenticatedRequest, response: Response, n
   const authorization = request.get('Authorization');
   if (authorization && authorization.startsWith('bearer ')) {
     const token = authorization.replace('bearer ', '');
-    if (verifyToken(token) || token === config.ADMIN_KEY) {
-      request.token = token;
-    } else {
-      let expiredToken;
-      try {
-        expiredToken = jwt.decode(token) as jwtSubject;
-      } catch (error) {
-        return response.status(401).json({ error: 'token invalid' }); // token is nonsense
+    if (token !== 'undefined') {
+      if (verifyToken(token)) {
+        request.token = token;
+      } else {
+        let expiredToken;
+        try {
+          expiredToken = jwt.decode(token) as jwtSubject;
+        } catch (error) {
+          return response.status(401).json({ error: 'token invalid' }); // token is nonsense
+        }
+        const id = expiredToken._id;
+        if (!id || !expiredToken.username) {
+          return response.status(401).json({ error: 'token invalid' }); // token may be user, but is formatted wrong
+        }
+        const user: UserInterface = await User.findById(id) as UserInterface;
+        if (!user.isVerified) {
+          user.deleteOne();
+          return response.status(400).json({ error: 'starter auth token expired' }); // gets rid of users who create accounts but never verifies them
+        }
+        if (user.refreshToken !== null && (!verifyToken(user.refreshToken) || !user.username)) {
+          return response.status(400).json({ error: 'refresh token expired' });
+        }
+        const newToken = await genAuthToken(user.username);
+        request.token = newToken;
+        // NEW AUTH TOKEN GENERATED, BE SURE TO CATCH THIS IN FRONTEND TO STORE IN COOKIE
+        response.setHeader('Authorization', newToken);
       }
-      const id = expiredToken._id;
-      if (!id || !expiredToken.username) {
-        return response.status(401).json({ error: 'token invalid' }); // token may be user, but is formatted wrong
-      }
-
-      const user: UserInterface = await User.findById(id) as UserInterface;
-      if (!user.isVerified) {
-        user.deleteOne();
-        return response.status(400).json({ error: 'starter auth token expired' });
-      }
-      if (user.refreshToken !== null && (!verifyToken(user.refreshToken) || !user.username)) {
-        return response.status(400).json({ error: 'refresh token expired' });
-      }
-      const newToken = await genAuthToken(user.username);
-      request.token = newToken;
-      // NEW AUTH TOKEN GENERATED, BE SURE TO CATCH THIS IN FRONTEND TO STORE IN COOKIE
-      response.setHeader('Authorization', newToken);
     }
-  } else {
-    return response.status(400).json({ error: 'missing token' });
   }
   next();
 };
 
 const getUserFromToken = async (request: AuthenticatedRequest, response: Response, next: NextFunction) => {
   try {
-    if (!request.token) {
-      return response.status(400).json({ error: 'missing token' });
-    }
-    if (request.token !== config.ADMIN_KEY) {
+    if (request.token) {
       const decodedToken: jwtSubject = jwt.verify(request.token, config.SECRET) as jwtSubject;
       const id = decodedToken._id;
       if (!id) {
