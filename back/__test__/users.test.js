@@ -4,6 +4,7 @@ import supertest from 'supertest';
 import mongoose from 'mongoose';
 import config from '../dist/utils/config.js';
 import axios from 'axios';
+import { resolve } from 'node:path/posix';
 const api = supertest(app);
 
 const email = 'eding888_1632w@mailsac.com';
@@ -14,28 +15,25 @@ const conf = {
   }
 };
 //
-beforeEach(async () => {
-  await User.deleteMany({})
-});
-
-
-const testMsg = 'a user can be created, can try to make a request that fails due to not being verified, can log in and confirm their email, make the same request and have it go through due to being verified and have the auth and refresh tokens expire properly.'
-
-test(testMsg, async () => {
-  const newUser = {
-    username: "Jeremy",
-    email,
-    password: "Password123"
-  };
-  const response = await api
+await User.deleteMany({})
+const newUser = {
+  username: "Jeremy",
+  email,
+  password: "Password123"
+};
+let token;
+test('a user can be created', async() => {
+  const res = await api
     .post('/api/newUser')
     .set({ Authorization: `bearer ${config.ADMIN_KEY}` })
     .send(newUser)
     .expect(201)
     .expect('Content-Type', /application\/json/)
+  token = res.body.token;
+});
 
-  const token = response.body.token;
-
+test('the user can be verified', async() => {
+  
   await api
     .get('/api/sample')
     .set({ Authorization: `bearer ${token}` })
@@ -77,21 +75,25 @@ test(testMsg, async () => {
     .set({ Authorization: `bearer ${token}` })
     .send({ code: sixDigitNumber })
     .expect(200);
+}, 10000);
 
+test('the user can make a request', async() => {
   await api
-    .get('/api/sample')
-    .set({ Authorization: `bearer ${token}` })
-    .expect(200)
-    .expect('Content-Type', /application\/json/);
-  await new Promise((r) => setTimeout(r, 11000));
+  .get('/api/sample')
+  .set({ Authorization: `bearer ${token}` })
+  .expect(200)
+  .expect('Content-Type', /application\/json/);
+})
+let newToken;
+test('the users auth token will expire and be refreshed', async() => {
+  await new Promise((r) => setTimeout(r, 5500));
   const newTokenResponse = await api
     .get('/api/sample')
     .set({ Authorization: `bearer ${token}` })
     .expect(200)
     .expect('Content-Type', /application\/json/);
 
-  const newToken = newTokenResponse.headers.authorization;
-  console.log(newToken);
+  newToken = newTokenResponse.headers.authorization;
   expect(token).not.toEqual(newToken);
 
   await api
@@ -99,7 +101,50 @@ test(testMsg, async () => {
     .set({ Authorization: `bearer ${newToken}` })
     .expect(200)
     .expect('Content-Type', /application\/json/);
-}, 40000);
+
+}, 10000)
+
+test('the users refresh token will expire', async() => {
+  await new Promise((r) => setTimeout(r, 5000));
+  const response = await api
+    .get('/api/sample')
+    .set({ Authorization: `bearer ${newToken}` })
+    .expect(400)
+  expect(response.body.error).toEqual('refresh token expired');
+}, 10000)
+
+test('the users refresh token can regenerate after login', async() => {
+  const response = await api
+    .post('/api/login')
+    .set({ Authorization: `bearer ${newToken}` })
+    .send(newUser)
+    .expect(200);
+  const refreshedToken = response.body.token;
+
+  await api
+    .get('/api/sample')
+    .set({ Authorization: `bearer ${refreshedToken}` })
+    .expect(200)
+    .expect('Content-Type', /application\/json/);
+
+  await new Promise((r) => setTimeout(r, 5500));
+  const newTokenResponse = await api
+    .get('/api/sample')
+    .set({ Authorization: `bearer ${token}` })
+    .expect(200)
+    .expect('Content-Type', /application\/json/);
+
+  newToken = newTokenResponse.headers.authorization;
+  expect(token).not.toEqual(newToken);
+
+  await api
+    .get('/api/sample')
+    .set({ Authorization: `bearer ${newToken}` })
+    .expect(200)
+    .expect('Content-Type', /application\/json/);
+
+})
+
 
 afterAll(async () => {
   await mongoose.connection.close();

@@ -1,5 +1,4 @@
 import express from 'express';
-import User from '../models/user.js';
 import bcrypt from 'bcrypt';
 import { verifyToken, genRefreshToken, genAuthToken, genEmailCode } from '../utils/genToken.js';
 import { sendConfirmationEmail, sanitizeInput } from '../utils/routerHelper.js';
@@ -7,15 +6,19 @@ import jwt from 'jsonwebtoken';
 import config from '../utils/config.js';
 const loginRouter = express.Router();
 loginRouter.post('/', async (request, response) => {
-    let { username, password } = request.body;
-    if (username && password) {
-        username = sanitizeInput(username, 'none');
+    let { password } = request.body;
+    if (password) {
         password = sanitizeInput(password, 'allow');
-        const user = await User.findOne({ username });
+        const user = request.user;
+        if (!user) {
+            return response.status(401).json({
+                error: 'invalid token'
+            });
+        }
         const passwordCorrect = user === null
             ? false
             : await bcrypt.compare(password, user.passwordHash);
-        if (!(user && passwordCorrect)) {
+        if (!passwordCorrect) {
             return response.status(401).json({
                 error: 'invalid username or password'
             });
@@ -46,7 +49,7 @@ loginRouter.post('/', async (request, response) => {
     }
     else {
         return response.status(400).json({
-            error: 'no username or password'
+            error: 'no password provided'
         });
     }
 });

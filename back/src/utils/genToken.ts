@@ -17,8 +17,8 @@ let expiresInOneWeek = '7d';
 let expiresInOneHour = '1h';
 
 if (config.TEST) {
-  expiresInOneWeek = '30s';
-  expiresInOneHour = '10s';
+  expiresInOneWeek = '10s';
+  expiresInOneHour = '5s';
 }
 
 export const genAuthToken = async (username : string) => {

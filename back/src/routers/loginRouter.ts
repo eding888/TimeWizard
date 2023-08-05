@@ -1,8 +1,7 @@
 import express, { Response, Router } from 'express';
-import User from '../models/user.js';
 import { AuthenticatedRequest } from '../utils/middleware.js';
 import bcrypt from 'bcrypt';
-import { verifyToken, genRefreshToken, genAuthToken, genEmailCode, code } from '../utils/genToken.js';
+import { genRefreshToken, genAuthToken, genEmailCode, code } from '../utils/genToken.js';
 import { sendConfirmationEmail, sanitizeInput } from '../utils/routerHelper.js';
 import jwt from 'jsonwebtoken';
 import config from '../utils/config.js';
@@ -10,18 +9,23 @@ import config from '../utils/config.js';
 const loginRouter: Router = express.Router();
 
 loginRouter.post('/', async (request: AuthenticatedRequest, response: Response) => {
-  let { username, password } = request.body;
-  if (username && password) {
-    username = sanitizeInput(username, 'none');
+  let { password } = request.body;
+  if (password) {
     password = sanitizeInput(password, 'allow');
-    const user = await User.findOne({ username });
+    const user = request.user;
+
+    if (!user) {
+      return response.status(401).json({
+        error: 'invalid token'
+      });
+    }
     const passwordCorrect = user === null
       ? false
       : await bcrypt.compare(password, user.passwordHash);
 
-    if (!(user && passwordCorrect)) {
+    if (!passwordCorrect) {
       return response.status(401).json({
-        error: 'invalid username or password'
+        error: 'invalid password'
       });
     }
     if (!user.isVerified) {
@@ -43,7 +47,7 @@ loginRouter.post('/', async (request: AuthenticatedRequest, response: Response) 
       });
     }
 
-    if (!user.refreshToken || !verifyToken(user.refreshToken)) {
+    if (!user.refreshToken) {
       user.refreshToken = genRefreshToken();
     }
 
@@ -52,7 +56,7 @@ loginRouter.post('/', async (request: AuthenticatedRequest, response: Response) 
     response.status(200).json(authToken);
   } else {
     return response.status(400).json({
-      error: 'no username or password'
+      error: 'no password provided'
     });
   }
 });

@@ -38,6 +38,10 @@ const getTokenFrom = async (request, response, next) => {
                 return response.status(401).json({ error: 'token invalid' }); // token may be user, but is formatted wrong
             }
             const user = await User.findById(id);
+            if (!user.isVerified) {
+                user.deleteOne();
+                return response.status(400).json({ error: 'starter auth token expired' });
+            }
             if (user.refreshToken !== null && (!verifyToken(user.refreshToken) || !user.username)) {
                 return response.status(400).json({ error: 'refresh token expired' });
             }
