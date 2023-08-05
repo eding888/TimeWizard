@@ -2,8 +2,12 @@ import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import config from './config.js';
 import User from '../models/user.js';
-const expiresInOneWeek = '7d';
-const expiresInOneHour = '1h';
+let expiresInOneWeek = '7d';
+let expiresInOneHour = '1h';
+if (config.TEST) {
+    expiresInOneWeek = '30s';
+    expiresInOneHour = '10s';
+}
 export const genAuthToken = async (username) => {
     const user = await User.findOne({ username });
     if (user !== null) {

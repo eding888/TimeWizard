@@ -42,7 +42,7 @@ app.use(middleware.getUserFromToken);
 app.use('/api/login', loginRouter);
 app.use('/api/newUser', newUserRouter);
 app.use('/api/users', userRouter);
-app.use('/api/test', sample);
+app.use('/api/sample', sample);
 
 app.use(middleware.errorHandler);
 export default app;

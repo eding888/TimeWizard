@@ -1,2 +1,2 @@
-tests/
-jest.config.js
+__test__/
+jest.config.cjs

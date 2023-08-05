@@ -13,8 +13,13 @@ export interface code{
   code: string;
 }
 
-const expiresInOneWeek = '7d';
-const expiresInOneHour = '1h';
+let expiresInOneWeek = '7d';
+let expiresInOneHour = '1h';
+
+if (config.TEST) {
+  expiresInOneWeek = '30s';
+  expiresInOneHour = '10s';
+}
 
 export const genAuthToken = async (username : string) => {
   const user = await User.findOne({ username });

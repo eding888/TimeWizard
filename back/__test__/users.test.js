@@ -1,10 +1,9 @@
 import User from '../dist/models/user.js'
-import app from '../dist/app';
+import app from '../dist/app.js';
 import supertest from 'supertest';
 import mongoose from 'mongoose';
-import config from '../dist/utils/config';
+import config from '../dist/utils/config.js';
 import axios from 'axios';
-
 const api = supertest(app);
 
 const email = 'eding888_1632w@mailsac.com';
@@ -15,10 +14,14 @@ const conf = {
   }
 };
 //
-beforeEach(async () =>
-  await User.deleteMany({}));
+beforeEach(async () => {
+  await User.deleteMany({})
+});
 
-test('a user can be created, can log in and confirm their email', async () => {
+
+const testMsg = 'a user can be created, can try to make a request that fails due to not being verified, can log in and confirm their email, make the same request and have it go through due to being verified and have the auth and refresh tokens expire properly.'
+
+test(testMsg, async () => {
   const newUser = {
     username: "Jeremy",
     email,
@@ -34,6 +37,11 @@ test('a user can be created, can log in and confirm their email', async () => {
   const token = response.body.token;
 
   await api
+    .get('/api/sample')
+    .set({ Authorization: `bearer ${token}` })
+    .expect(401);
+
+  await api
     .post('/api/login')
     .set({ Authorization: `bearer ${token}` })
     .send(newUser)
@@ -41,7 +49,6 @@ test('a user can be created, can log in and confirm their email', async () => {
 
   let msgId;
   let msg;
-
   try {
     const axiosResponse = await axios.delete(`https://mailsac.com/api/addresses/${email}/messages`, conf);
   } catch (error) {
@@ -71,8 +78,29 @@ test('a user can be created, can log in and confirm their email', async () => {
     .send({ code: sixDigitNumber })
     .expect(200);
 
-});
+  await api
+    .get('/api/sample')
+    .set({ Authorization: `bearer ${token}` })
+    .expect(200)
+    .expect('Content-Type', /application\/json/);
+  await new Promise((r) => setTimeout(r, 11000));
+  const newTokenResponse = await api
+    .get('/api/sample')
+    .set({ Authorization: `bearer ${token}` })
+    .expect(200)
+    .expect('Content-Type', /application\/json/);
+
+  const newToken = newTokenResponse.headers.authorization;
+  console.log(newToken);
+  expect(token).not.toEqual(newToken);
+
+  await api
+    .get('/api/sample')
+    .set({ Authorization: `bearer ${newToken}` })
+    .expect(200)
+    .expect('Content-Type', /application\/json/);
+}, 40000);
 
 afterAll(async () => {
   await mongoose.connection.close();
-}, 15000);
+});
