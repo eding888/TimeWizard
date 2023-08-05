@@ -8,7 +8,8 @@
     "start": "NODE_ENV=production node index.js",
     "dev": "NODE_ENV=development nodemon index.js",
     "test": "NODE_ENV=test NODE_OPTIONS=--experimental-vm-modules jest --verbose --runInBand",
-    "buildAndTest": "npm run buildJS && npm run test"
+    "buildAndTest": "npm run buildJS && npm run test",
+    "manualTest": "NODE_ENV=test ts-node-esm index.ts"
   },
   "author": "Eddy Ding",
   "license": "ISC",

@@ -31,3 +31,17 @@ export const sendConfirmationEmail = (digits, recipientEmail) => {
         });
     });
 };
+// This must be used for basically any user input especially when it used
+// as a search parameter to shut down any xss or injection attacks.
+// Special characters are simply removed as a last ditch resort. Special character
+// checks should most definitely be checked in the frontend as it would be much more
+// reponsive and resource efficient to do so
+export const sanitizeInput = (input, specialCharactersAllowed = 'none') => {
+    switch (specialCharactersAllowed) {
+        case 'none':
+            return input.replace(/[^a-zA-Z0-9]/g, '');
+        case 'email':
+            return input.replace(/[^a-zA-Z0-9@.-_]/g, '');
+    }
+    return input;
+};

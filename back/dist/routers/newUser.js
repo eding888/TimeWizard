@@ -4,7 +4,7 @@ import bcrypt from 'bcrypt';
 import 'express-async-errors';
 import PasswordValidator from 'password-validator';
 import { genAuthToken } from '../utils/genToken.js';
-import { checkAdmin } from '../utils/routerHelper.js';
+import { checkAdmin, sanitizeInput } from '../utils/routerHelper.js';
 const newUserRouter = express.Router();
 const passwordSchema = new PasswordValidator();
 passwordSchema
@@ -17,12 +17,15 @@ newUserRouter.post('/', async (request, response) => {
     if (!checkAdmin(request.token)) {
         return response.status(401).json({ error: 'unauthorized access' });
     }
-    const { username, email, password } = request.body;
+    let { username, email, password } = request.body;
     if (!username || !email || !password) {
         return response.status(400).json({
             error: 'no username or password or email'
         });
     }
+    username = sanitizeInput(username, 'none');
+    email = sanitizeInput(email, 'email');
+    password = sanitizeInput(password, 'allow');
     const passErrors = passwordSchema.validate(password, { details: true });
     if (Array.isArray(passErrors) && passErrors.length >= 1) {
         return response.status(400).json(passErrors);

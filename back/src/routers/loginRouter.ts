@@ -3,15 +3,17 @@ import User from '../models/user.js';
 import { AuthenticatedRequest } from '../utils/middleware.js';
 import bcrypt from 'bcrypt';
 import { verifyToken, genRefreshToken, genAuthToken, genEmailCode, code } from '../utils/genToken.js';
-import { sendConfirmationEmail } from '../utils/routerHelper.js';
+import { sendConfirmationEmail, sanitizeInput } from '../utils/routerHelper.js';
 import jwt from 'jsonwebtoken';
 import config from '../utils/config.js';
 
 const loginRouter: Router = express.Router();
 
 loginRouter.post('/', async (request: AuthenticatedRequest, response: Response) => {
-  const { username, password } = request.body;
+  let { username, password } = request.body;
   if (username && password) {
+    username = sanitizeInput(username, 'none');
+    password = sanitizeInput(password, 'allow');
     const user = await User.findOne({ username });
     const passwordCorrect = user === null
       ? false
