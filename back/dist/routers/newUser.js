@@ -1,40 +1,33 @@
 import express from 'express';
 import User from '../models/user.js';
-import bcrypt from 'bcrypt';
 import 'express-async-errors';
-import PasswordValidator from 'password-validator';
 import { genAuthToken } from '../utils/genToken.js';
-import { sanitizeInput } from '../utils/routerHelper.js';
+import { checkSanitizedInput, passwordToHash } from '../utils/routerHelper.js';
 const newUserRouter = express.Router();
-const passwordSchema = new PasswordValidator();
-passwordSchema
-    .is().min(6, 'Password must have minimum of 6 characters')
-    .is().max(100, 'Password is too long')
-    .has().uppercase(1, 'Password must contain an uppercase character')
-    .has().digits(1, 'Password must contain a digit')
-    .has().not().spaces();
 newUserRouter.post('/', async (request, response) => {
-    let { username, email, password } = request.body;
+    const { username, email, password } = request.body;
     if (!username || !email || !password) {
         return response.status(400).json({
             error: 'no username or password or email'
         });
     }
-    username = sanitizeInput(username, 'none');
-    email = sanitizeInput(email, 'email');
-    password = sanitizeInput(password, 'allow');
-    if (!username || !email) {
-        console.log('hi', email);
+    if (!checkSanitizedInput(username, 'none') || !checkSanitizedInput(email, 'email')) {
         return response.status(400).json({
             error: 'improper formatting of username or email'
         });
     }
-    const passErrors = passwordSchema.validate(password, { details: true });
-    if (Array.isArray(passErrors) && passErrors.length >= 1) {
-        return response.status(400).json(passErrors);
+    const passwordHashDetails = await passwordToHash(password);
+    if (passwordHashDetails.errors) {
+        return response.status(400).json({
+            errors: passwordHashDetails.errors
+        });
     }
-    const saltRounds = 10;
-    const passwordHash = await bcrypt.hash(password, saltRounds);
+    const passwordHash = passwordHashDetails.password;
+    if (!passwordHash) {
+        return response.status(500).json({
+            error: 'error in generating hash'
+        });
+    }
     const user = new User({
         username,
         email,

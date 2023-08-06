@@ -2,11 +2,12 @@ import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import config from './config.js';
 import User from '../models/user.js';
-let expiresInOneWeek = '7d';
-let expiresInOneHour = '1h';
+let expireLong = '7d';
+let expireShort = '1h';
+const expireVeryShort = '10m';
 if (config.TEST) {
-    expiresInOneWeek = '9s';
-    expiresInOneHour = '4s';
+    expireLong = '9s';
+    expireShort = '4s';
 }
 export const genAuthToken = async (username, passwordHash) => {
     const user = await User.findOne({ username });
@@ -18,7 +19,7 @@ export const genAuthToken = async (username, passwordHash) => {
             passwordHash,
             jti: crypto.randomBytes(32).toString('hex')
         };
-        return jwt.sign(jwtSubject, config.SECRET, { expiresIn: expiresInOneHour });
+        return jwt.sign(jwtSubject, config.SECRET, { expiresIn: expireShort });
     }
     return '';
 };
@@ -27,7 +28,7 @@ export const genRefreshToken = () => {
     const payload = {
         code: random
     };
-    return jwt.sign(payload, config.SECRET, { expiresIn: expiresInOneWeek });
+    return jwt.sign(payload, config.SECRET, { expiresIn: expireLong });
 };
 export const genEmailCode = () => {
     const min = 100000;
@@ -37,7 +38,7 @@ export const genEmailCode = () => {
     const payload = {
         code: digits
     };
-    const token = jwt.sign(payload, config.SECRET, { expiresIn: expiresInOneWeek });
+    const token = jwt.sign(payload, config.SECRET, { expiresIn: expireVeryShort });
     return ({
         digits,
         token

@@ -2,7 +2,7 @@ import express, { Response, Router } from 'express';
 import { AuthenticatedRequest } from '../utils/middleware.js';
 import bcrypt from 'bcrypt';
 import { genRefreshToken, genAuthToken, genEmailCode, code, verifyToken } from '../utils/genToken.js';
-import { sendConfirmationEmail, checkSanitizedInput } from '../utils/routerHelper.js';
+import { sendConfirmationEmail, checkSanitizedInput, passDetails, passwordToHash } from '../utils/routerHelper.js';
 import jwt from 'jsonwebtoken';
 import config from '../utils/config.js';
 import User, { UserInterface } from '../models/user.js';
@@ -111,7 +111,68 @@ loginRouter.post('/resetPassword', async (request: AuthenticatedRequest, respons
       error: 'email not properly formatted'
     });
   }
-  const resetCodeToken = sendEmailWithCode(email, 'Confirm your heelsmart account.', 'Confirm your heelsmart account with this code:');
+  const user: UserInterface = await User.findOne({ email }) as UserInterface;
+  if (!user) {
+    return response.status(400).json({
+      error: 'email not found in system'
+    });
+  }
+  const resetCodeToken = sendEmailWithCode(email, 'Reset your heelsmart password.', 'Confirm your heelsmart account password change with this code:');
+  if (resetCodeToken === null) {
+    return response.status(500).json({
+      error: 'error with sending email'
+    });
+  }
+  user.passResetCode = resetCodeToken;
+  await user.save();
+  response.status(200).end();
+});
+
+loginRouter.post('/resetPassword/confirm', async (request: AuthenticatedRequest, response: Response) => {
+  const { email, code, newPassword } = request.body;
+  if (!email || !code || !newPassword) {
+    return response.status(400).json({
+      error: 'email not provided'
+    });
+  }
+  if (!checkSanitizedInput(email, 'email')) {
+    return response.status(400).json({
+      error: 'email not properly formatted'
+    });
+  }
+  const user: UserInterface = await User.findOne({ email }) as UserInterface;
+  if (!user) {
+    return response.status(400).json({
+      error: 'email not found in system'
+    });
+  }
+  if (!user.passResetCode) {
+    return response.status(400).json({
+      error: 'user has no password reset code'
+    });
+  }
+  const userCode: string = (jwt.verify(user.passResetCode, config.SECRET) as code).code;
+  if (userCode !== code) {
+    return response.status(401).json({
+      error: 'code does not match'
+    });
+  }
+  const passwordHashDetails: passDetails = await passwordToHash(newPassword);
+  if (passwordHashDetails.errors) {
+    return response.status(400).json({
+      errors: passwordHashDetails.errors
+    });
+  }
+  const passwordHash = passwordHashDetails.password;
+  if (!passwordHash) {
+    return response.status(500).json({
+      error: 'error in generating hash'
+    });
+  }
+  user.passwordHash = passwordHash;
+  await user.save();
+
+  response.status(200).end();
 });
 
 export default loginRouter;

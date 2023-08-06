@@ -10,7 +10,7 @@ import middleware from './utils/middleware.js';
 import rateLimit from 'express-rate-limit';
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 1500,
+    max: 750,
     standardHeaders: true,
     legacyHeaders: false,
     message: 'Too many requests, please try again later.'

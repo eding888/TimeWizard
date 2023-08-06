@@ -14,12 +14,13 @@ export interface code{
   code: string;
 }
 
-let expiresInOneWeek = '7d';
-let expiresInOneHour = '1h';
+let expireLong = '7d';
+let expireShort = '1h';
+const expireVeryShort = '10m';
 
 if (config.TEST) {
-  expiresInOneWeek = '9s';
-  expiresInOneHour = '4s';
+  expireLong = '9s';
+  expireShort = '4s';
 }
 
 export const genAuthToken = async (username : string, passwordHash: string) => {
@@ -32,7 +33,7 @@ export const genAuthToken = async (username : string, passwordHash: string) => {
       passwordHash,
       jti: crypto.randomBytes(32).toString('hex')
     };
-    return jwt.sign(jwtSubject, config.SECRET, { expiresIn: expiresInOneHour });
+    return jwt.sign(jwtSubject, config.SECRET, { expiresIn: expireShort });
   }
   return '';
 };
@@ -43,7 +44,7 @@ export const genRefreshToken = () => {
   const payload = {
     code: random
   };
-  return jwt.sign(payload, config.SECRET, { expiresIn: expiresInOneWeek });
+  return jwt.sign(payload, config.SECRET, { expiresIn: expireLong });
 };
 
 export const genEmailCode = () => {
@@ -56,7 +57,7 @@ export const genEmailCode = () => {
     code: digits
   };
 
-  const token = jwt.sign(payload, config.SECRET, { expiresIn: expiresInOneWeek });
+  const token = jwt.sign(payload, config.SECRET, { expiresIn: expireVeryShort });
 
   return (
     {

@@ -1,5 +1,7 @@
 import config from './config.js';
 import nodemailer from 'nodemailer';
+import PasswordValidator from 'password-validator';
+import bcrypt from 'bcrypt';
 
 export const sendConfirmationEmail = (digits: string, recipientEmail: string, subject: string, message: string) => {
   return new Promise((resolve, reject) => {
@@ -47,4 +49,34 @@ export const checkSanitizedInput = (input: string, specialCharactersAllowed: str
       }
   }
   return null;
+};
+
+export interface passDetails {
+  password: string | null,
+  errors: object[] | null
+}
+export const passwordToHash = async (password: string) => {
+  const passwordSchema: PasswordValidator = new PasswordValidator();
+  passwordSchema
+    .is().min(6, 'Password must have minimum of 6 characters')
+    .is().max(100, 'Password is too long')
+    .has().uppercase(1, 'Password must contain an uppercase character')
+    .has().digits(1, 'Password must contain a digit')
+    .has().not().spaces();
+
+  const passDetails: passDetails = {
+    password: null,
+    errors: null
+  };
+
+  const passErrors: boolean | object[] = passwordSchema.validate(password, { details: true });
+  if (Array.isArray(passErrors) && passErrors.length >= 1) {
+    passDetails.errors = passErrors;
+    return passDetails;
+  }
+
+  const saltRounds = 10;
+  const passwordHash: string = await bcrypt.hash(password, saltRounds);
+  passDetails.password = passwordHash;
+  return passDetails;
 };

@@ -7,6 +7,36 @@ import axios from 'axios';
 import { resolve } from 'node:path/posix';
 const api = supertest(app);
 
+const retrieveCodeFromEmail = async () => {
+  let msgId;
+  let msg;
+  console.log('hay');
+  try {
+    const axiosResponse = await axios.delete(`https://mailsac.com/api/addresses/${email}/messages`, conf);
+  } catch (error) {
+    console.error('Error fetching messages:', error);
+  }; 
+  console.log('hoy');
+
+  await new Promise((r) => setTimeout(r, 3000));
+  try {
+    const axiosResponse = await axios.get(`https://mailsac.com/api/addresses/${email}/messages/`, conf);
+    msgId = axiosResponse.data[0]._id;
+  } catch (error) {
+    console.error('Error fetching messages:', error);
+  };
+  console.log('hey');
+
+  try {
+    const axiosResponse = await axios.get(`https://mailsac.com/api/text/${email}/${msgId}`, conf);
+    msg = axiosResponse.data;
+  } catch (error) {
+    console.error('Error fetching messages:', error);
+  };
+  const sixDigitNumber = msg.match(/\b\d{6}\b/)[0];
+  return sixDigitNumber;
+}
+
 const email = 'eding888_1632w@mailsac.com';
 
 const conf = {
@@ -48,7 +78,7 @@ test('improperly formatted inputs are not allowed', async() => {
     .expect(400)
 
   const uncleanEmail = {
-    username: "Joe!",
+    username: "Joe",
     email: "joe1!!<>@@joemail.com",
     password: "Password123"
   };
@@ -56,6 +86,17 @@ test('improperly formatted inputs are not allowed', async() => {
   await api
     .post('/api/newUser')
     .send(uncleanEmail)
+    .expect(400)
+
+  const uncleanPassword = {
+    username: "Joe",
+    email: "joe@joemail.com",
+    password: "password"
+  };
+
+  await api
+    .post('/api/newUser')
+    .send(uncleanPassword)
     .expect(400)
 });
 
@@ -83,30 +124,7 @@ test('the user can be verified', async() => {
     .send(newUser)
     .expect(401);
 
-  let msgId;
-  let msg;
-  try {
-    const axiosResponse = await axios.delete(`https://mailsac.com/api/addresses/${email}/messages`, conf);
-  } catch (error) {
-    console.error('Error fetching messages:', error);
-  };
-
-  await new Promise((r) => setTimeout(r, 3000));
-  try {
-    const axiosResponse = await axios.get(`https://mailsac.com/api/addresses/${email}/messages/`, conf);
-    msgId = axiosResponse.data[0]._id;
-  } catch (error) {
-    console.error('Error fetching messages:', error);
-  };
-
-
-  try {
-    const axiosResponse = await axios.get(`https://mailsac.com/api/text/${email}/${msgId}`, conf);
-    msg = axiosResponse.data;
-  } catch (error) {
-    console.error('Error fetching messages:', error);
-  };
-  const sixDigitNumber = msg.match(/\b\d{6}\b/)[0];
+  const sixDigitNumber = await retrieveCodeFromEmail();
 
   await api
     .post('/api/login/confirm')
@@ -204,6 +222,52 @@ test('the users refresh token can regenerate after login', async() => {
     .set({ Authorization: `bearer ${newToken}` })
     .expect(200)
     .expect('Content-Type', /application\/json/);
+
+}, 10000)
+
+test('the user can reset their password', async() => {
+  const res = await api
+    .post('/api/login')
+    .send(newUser)
+    .expect(200);
+  const oldToken = res.body.token;
+  const randomEmail = {
+    username: "Joe",
+    email: "hank@hankmail.com",
+    password: "Password123"
+  };
+  await api
+    .post('/api/login/resetPassword')
+    .send(randomEmail)
+    .expect(400);
+
+  await api
+    .post('/api/login/resetPassword')
+    .send(newUser)
+    .expect(200);
+  console.log('made it');
+
+  const code = await retrieveCodeFromEmail();
+  console.log(code);
+  newUser.password = "NewPassword123";
+  const payload = {
+    email,
+    code,
+    newPassword: newUser.password
+  }
+  await api
+    .post('/api/login/resetPassword/confirm')
+    .send(payload)
+    .expect(200);
+  await api
+    .get('/api/sample')
+    .set({ Authorization: `bearer ${oldToken}` })
+    .expect(401)
+
+  await api
+    .post('/api/login')
+    .send(newUser)
+    .expect(200);
 
 }, 10000)
 
