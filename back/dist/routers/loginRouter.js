@@ -45,6 +45,7 @@ loginRouter.post('/', async (request, response) => {
         }
         if (!user.refreshToken || !verifyToken(user.refreshToken)) {
             user.refreshToken = genRefreshToken();
+            await user.save();
         }
         const authToken = await genAuthToken(user.username);
         response.status(200).json({ token: authToken });

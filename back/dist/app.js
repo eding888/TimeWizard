@@ -17,7 +17,7 @@ const limiter = rateLimit({
 });
 const app = express();
 app.use(cors({
-    origin: `localhost:/${config.PORT}`
+    origin: `http://localhost:${config.PORT}`
 }));
 const { MONGO_URI } = config;
 mongoose.set('strictQuery', false);
@@ -30,7 +30,6 @@ mongoose.connect(MONGO_URI)
 });
 app.use(limiter);
 app.use(express.json());
-app.use(cors());
 app.use(express.static('build'));
 app.use(middleware.getTokenFrom);
 app.use(middleware.getUserFromToken);

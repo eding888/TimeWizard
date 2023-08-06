@@ -40,6 +40,7 @@ const getTokenFrom = async (request, response, next) => {
                 }
                 const user = await User.findById(id);
                 if (user.refreshToken !== null && (!verifyToken(user.refreshToken) || !user.username)) {
+                    console.log('expired!!', verifyToken(user.refreshToken));
                     return response.status(400).json({ error: 'refresh token expired' });
                 }
                 const newToken = await genAuthToken(user.username);

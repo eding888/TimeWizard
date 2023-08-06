@@ -41,7 +41,6 @@ export const genRefreshToken = () => {
   const payload = {
     code: random
   };
-
   return jwt.sign(payload, config.SECRET, { expiresIn: expiresInOneWeek });
 };
 

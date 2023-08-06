@@ -20,7 +20,7 @@ const limiter = rateLimit({
 const app: Express = express();
 
 app.use(cors({
-  origin: `localhost:/${config.PORT}`
+  origin: `http://localhost:${config.PORT}`
 }));
 
 const { MONGO_URI } = config;
@@ -37,7 +37,6 @@ mongoose.connect(MONGO_URI)
 app.use(limiter);
 
 app.use(express.json());
-app.use(cors());
 app.use(express.static('build'));
 
 app.use(middleware.getTokenFrom);

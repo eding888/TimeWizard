@@ -76,88 +76,82 @@ test('the user can be verified', async() => {
 }, 10000);
 
 test('the user can make a request', async() => {
-  try {
-    await api
-    .get('/api/sample')
-    .set({ Authorization: `bearer ${token}` })
-    .expect(200)
-    .expect('Content-Type', /application\/json/);
-  } catch (error) {
-    console.log('error', error);
-  }
   await api
   .get('/api/sample')
   .set({ Authorization: `bearer ${token}` })
   .expect(200)
   .expect('Content-Type', /application\/json/);
 })
+
+test('cross-origin requests are not allowed', async () => {
+  const response = await api.get('/api/sample')
+    .set({ Authorization: `bearer ${token}` })
+    .set('Origin', 'http://example.com')
+    .expect(403);
+  console.log(response.headers, 'headers');
+  expect(response.headers['access-control-allow-origin']).toBeUndefined();
+});
 let newToken;
 test('the users auth token will expire and be refreshed', async() => {
-  try {
-    await new Promise((r) => setTimeout(r, 5500));
-    const newTokenResponse = await api
-      .get('/api/sample')
-      .set({ Authorization: `bearer ${token}` })
-      .expect(200)
-      .expect('Content-Type', /application\/json/);
-    newToken = newTokenResponse.headers.authorization;
-    expect(token).not.toEqual(newToken);
 
-    await api
-      .get('/api/sample')
-      .set({ Authorization: `bearer ${newToken}` })
-      .expect(200)
-      .expect('Content-Type', /application\/json/);
-  } catch (error) {
-    console.log('error', error);
-  }
+  await new Promise((r) => setTimeout(r, 5500));
+  const newTokenResponse = await api
+    .get('/api/sample')
+    .set({ Authorization: `bearer ${token}` })
+    .expect(200)
+    .expect('Content-Type', /application\/json/);
+  newToken = newTokenResponse.headers.authorization;
+  expect(token).not.toEqual(newToken);
+
+  await api
+    .get('/api/sample')
+    .set({ Authorization: `bearer ${newToken}` })
+    .expect(200)
+    .expect('Content-Type', /application\/json/);
+
 
 }, 10000)
 
 test('the users refresh token will expire', async() => {
-  try {
-    await new Promise((r) => setTimeout(r, 5000));
-    const response = await api
-      .get('/api/sample')
-      .set({ Authorization: `bearer ${newToken}` })
-      .expect(400)
-    expect(response.body.error).toEqual('refresh token expired');
-  } catch (error) {
-    console.log('error', error);
-  }
+
+  await new Promise((r) => setTimeout(r, 5000));
+  const response = await api
+    .get('/api/sample')
+    .set({ Authorization: `bearer ${newToken}` })
+    .expect(400)
+  expect(response.body.error).toEqual('refresh token expired');
+
 }, 10000)
 
 test('the users refresh token can regenerate after login', async() => {
-  try {
-    const res = await api
-    .post('/api/login')
-    .send(newUser)
-    .expect(200);
-    const refreshedToken = res.body.token;
-    await api
-      .get('/api/sample')
-      .set({ Authorization: `bearer ${refreshedToken}` })
-      .expect(200)
-      .expect('Content-Type', /application\/json/);
 
-    await new Promise((r) => setTimeout(r, 5500));
-    const newTokenResponse = await api
-      .get('/api/sample')
-      .set({ Authorization: `bearer ${refreshedToken}` })
-      .expect(200)
-      .expect('Content-Type', /application\/json/);
+  const res = await api
+  .post('/api/login')
+  .send(newUser)
+  .expect(200);
+  const refreshedToken = res.body.token;
+  await api
+    .get('/api/sample')
+    .set({ Authorization: `bearer ${refreshedToken}` })
+    .expect(200)
+    .expect('Content-Type', /application\/json/);
 
-    const newToken = newTokenResponse.headers.authorization;
-    expect(token).not.toEqual(newToken);
+  await new Promise((r) => setTimeout(r, 5500));
+  const newTokenResponse = await api
+    .get('/api/sample')
+    .set({ Authorization: `bearer ${refreshedToken}` })
+    .expect(200)
+    .expect('Content-Type', /application\/json/);
 
-    await api
-      .get('/api/sample')
-      .set({ Authorization: `bearer ${newToken}` })
-      .expect(200)
-      .expect('Content-Type', /application\/json/);
-  } catch (error) {
-    console.log('error', error);
-  }
+  const newToken = newTokenResponse.headers.authorization;
+  expect(token).not.toEqual(newToken);
+
+  await api
+    .get('/api/sample')
+    .set({ Authorization: `bearer ${newToken}` })
+    .expect(200)
+    .expect('Content-Type', /application\/json/);
+
 }, 10000)
 
 
