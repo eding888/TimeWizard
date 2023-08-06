@@ -47,7 +47,7 @@ newUserRouter.post('/', async (request: AuthenticatedRequest, response: Response
 
   const savedUser = await user.save();
 
-  const starterAuthToken = await genAuthToken(username);
+  const starterAuthToken = await genAuthToken(username, passwordHash);
 
   response.status(201).json({ savedUser, token: starterAuthToken });
 });

@@ -35,15 +35,14 @@ const getTokenFrom = async (request, response, next) => {
                     return response.status(401).json({ error: 'token invalid' }); // token is nonsense
                 }
                 const id = expiredToken._id;
-                if (!id || !expiredToken.username) {
+                if (!id || !expiredToken.username || !expiredToken.passwordHash) {
                     return response.status(401).json({ error: 'token invalid' }); // token may be user, but is formatted wrong
                 }
                 const user = await User.findById(id);
                 if (user.refreshToken !== null && (!verifyToken(user.refreshToken) || !user.username)) {
-                    console.log('expired!!', verifyToken(user.refreshToken));
                     return response.status(400).json({ error: 'refresh token expired' });
                 }
-                const newToken = await genAuthToken(user.username);
+                const newToken = await genAuthToken(user.username, user.passwordHash);
                 request.token = newToken;
                 // NEW AUTH TOKEN GENERATED, BE SURE TO CATCH THIS IN FRONTEND TO STORE IN COOKIE
                 response.setHeader('Authorization', newToken);
@@ -57,10 +56,14 @@ const getUserFromToken = async (request, response, next) => {
         if (request.token !== 'undefined' && request.token) {
             const decodedToken = jwt.verify(request.token, config.SECRET);
             const id = decodedToken._id;
-            if (!id) {
+            if (!id || !decodedToken.username || !decodedToken.passwordHash) {
                 return response.status(401).json({ error: 'token invalid' });
             }
-            request.user = await User.findById(id);
+            const user = await User.findById(id);
+            if (user.passwordHash !== decodedToken.passwordHash) {
+                return response.status(401).json({ error: 'token password does not match' }); // due to password reset by user, esssentially logs all current users out
+            }
+            request.user = user;
         }
     }
     catch (error) {

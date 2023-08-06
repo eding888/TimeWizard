@@ -8,13 +8,14 @@ if (config.TEST) {
     expiresInOneWeek = '9s';
     expiresInOneHour = '4s';
 }
-export const genAuthToken = async (username) => {
+export const genAuthToken = async (username, passwordHash) => {
     const user = await User.findOne({ username });
     if (user !== null) {
         const id = user._id.toString();
         const jwtSubject = {
             _id: id,
             username,
+            passwordHash,
             jti: crypto.randomBytes(32).toString('hex')
         };
         return jwt.sign(jwtSubject, config.SECRET, { expiresIn: expiresInOneHour });

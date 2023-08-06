@@ -6,6 +6,7 @@ import User from '../models/user.js';
 export interface jwtSubject{
   _id: string;
   username: string,
+  passwordHash: string,
   jti: string
 }
 
@@ -21,13 +22,14 @@ if (config.TEST) {
   expiresInOneHour = '4s';
 }
 
-export const genAuthToken = async (username : string) => {
+export const genAuthToken = async (username : string, passwordHash: string) => {
   const user = await User.findOne({ username });
   if (user !== null) {
     const id: string = user._id.toString();
     const jwtSubject:jwtSubject = {
       _id: id,
       username,
+      passwordHash,
       jti: crypto.randomBytes(32).toString('hex')
     };
     return jwt.sign(jwtSubject, config.SECRET, { expiresIn: expiresInOneHour });

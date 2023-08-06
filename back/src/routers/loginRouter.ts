@@ -55,7 +55,7 @@ loginRouter.post('/', async (request: AuthenticatedRequest, response: Response) 
       await user.save();
     }
 
-    const authToken = await genAuthToken(user.username);
+    const authToken = await genAuthToken(user.username, user.passwordHash);
 
     response.status(200).json({ token: authToken });
   } else {
