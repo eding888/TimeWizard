@@ -18,6 +18,7 @@ export interface UserInterface extends mongoose.Document {
   passwordHash: string,
   isVerified: boolean,
   emailCode: string | null,
+  passResetCode: string | null,
   refreshToken: string | null,
 }
 const userSchema = new mongoose.Schema({
@@ -46,6 +47,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: null
   },
+  passResetCode: {
+    type: String,
+    default: null
+  },
   refreshToken: {
     type: String,
     default: null
@@ -59,6 +64,7 @@ userSchema.set('toJSON', {
     delete returnedObject.__v;
     delete returnedObject.refreshToken;
     delete returnedObject.emailCode;
+    delete returnedObject.passResetCode;
     // the passwordHash should not be revealed
     delete returnedObject.passwordHash;
   }

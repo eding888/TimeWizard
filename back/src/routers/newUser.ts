@@ -5,7 +5,7 @@ import 'express-async-errors';
 import PasswordValidator from 'password-validator';
 import { AuthenticatedRequest } from 'utils/middleware.js';
 import { genAuthToken } from '../utils/genToken.js';
-import { sanitizeInput } from '../utils/routerHelper.js';
+import { checkSanitizedInput } from '../utils/routerHelper.js';
 
 const newUserRouter: Router = express.Router();
 
@@ -19,7 +19,7 @@ passwordSchema
   .has().not().spaces();
 
 newUserRouter.post('/', async (request: AuthenticatedRequest, response: Response) => {
-  let { username, email, password } = request.body;
+  const { username, email, password } = request.body;
 
   if (!username || !email || !password) {
     return response.status(400).json({
@@ -27,11 +27,7 @@ newUserRouter.post('/', async (request: AuthenticatedRequest, response: Response
     });
   }
 
-  username = sanitizeInput(username, 'none');
-  email = sanitizeInput(email, 'email');
-  password = sanitizeInput(password, 'allow');
-
-  if (!username || !email) {
+  if (!checkSanitizedInput(username, 'none') || !checkSanitizedInput(email, 'email')) {
     return response.status(400).json({
       error: 'improper formatting of username or email'
     });

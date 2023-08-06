@@ -2,7 +2,7 @@ import express, { Response, Router } from 'express';
 import { AuthenticatedRequest } from '../utils/middleware.js';
 import bcrypt from 'bcrypt';
 import { genRefreshToken, genAuthToken, genEmailCode, code, verifyToken } from '../utils/genToken.js';
-import { sendConfirmationEmail, sanitizeInput } from '../utils/routerHelper.js';
+import { sendConfirmationEmail, checkSanitizedInput } from '../utils/routerHelper.js';
 import jwt from 'jsonwebtoken';
 import config from '../utils/config.js';
 import User, { UserInterface } from '../models/user.js';
@@ -23,11 +23,9 @@ const sendEmailWithCode = (email: string, subject: string, message: string) => {
 };
 
 loginRouter.post('/', async (request: AuthenticatedRequest, response: Response) => {
-  let { username, password } = request.body;
+  const { username, password } = request.body;
   if (username && password) {
-    username = sanitizeInput(username, 'none');
-    password = sanitizeInput(password, 'allow');
-    if (!username) {
+    if (!checkSanitizedInput(username, 'none')) {
       return response.status(400).json({
         error: 'improper formatting of username'
       });
@@ -100,7 +98,7 @@ loginRouter.post('/confirm', async (request: AuthenticatedRequest, response: Res
   const savedUser = await request.user.save();
   response.status(200).json(savedUser);
 });
-/*
+
 loginRouter.post('/resetPassword', async (request: AuthenticatedRequest, response: Response) => {
   const { email } = request.body;
   if (!email) {
@@ -108,8 +106,12 @@ loginRouter.post('/resetPassword', async (request: AuthenticatedRequest, respons
       error: 'email not provided'
     });
   }
-  email = 
+  if (!checkSanitizedInput(email, 'email')) {
+    return response.status(400).json({
+      error: 'email not properly formatted'
+    });
+  }
+  const resetCodeToken = sendEmailWithCode(email, 'Confirm your heelsmart account.', 'Confirm your heelsmart account with this code:');
 });
-*/
 
 export default loginRouter;

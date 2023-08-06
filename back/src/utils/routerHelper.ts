@@ -31,20 +31,20 @@ export const sendConfirmationEmail = (digits: string, recipientEmail: string, su
 // This must be used for basically any user input especially when it used
 // as a search parameter to shut down any xss or injection attacks.
 const emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; // eslint-disable-line
-export const sanitizeInput = (input: string, specialCharactersAllowed: string = 'none') => {
+export const checkSanitizedInput = (input: string, specialCharactersAllowed: string = 'none') => {
   switch (specialCharactersAllowed) {
     case 'none':
       if (input.match(/[^a-zA-Z0-9]/)) {
-        return null;
+        return false;
       } else {
-        return input;
+        return true;
       }
     case 'email':
       if (input.match(emailRegex)) {
-        return input;
+        return true;
       } else {
-        return null;
+        return false;
       }
   }
-  return input;
+  return null;
 };

@@ -73,6 +73,12 @@ test('the user can be verified', async() => {
     .expect(401);
 
   await api
+    .post('/api/login/confirm')
+    .set({ Authorization: `bearer ${token}` })
+    .send({ code: '000000' })
+    .expect(400);
+
+  await api
     .post('/api/login')
     .send(newUser)
     .expect(401);
@@ -101,6 +107,12 @@ test('the user can be verified', async() => {
     console.error('Error fetching messages:', error);
   };
   const sixDigitNumber = msg.match(/\b\d{6}\b/)[0];
+
+  await api
+    .post('/api/login/confirm')
+    .set({ Authorization: `bearer ${token}` })
+    .send({ code: '000000' })
+    .expect(401);
 
   await api
     .post('/api/login/confirm')
