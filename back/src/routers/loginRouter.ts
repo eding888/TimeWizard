@@ -9,11 +9,29 @@ import User, { UserInterface } from '../models/user.js';
 
 const loginRouter: Router = express.Router();
 
+const sendEmailWithCode = (email: string, subject: string, message: string) => {
+  const code = genEmailCode();
+  sendConfirmationEmail(code.digits, email, subject, message)
+    .then(result => {
+      console.log(result);
+    })
+    .catch(error => {
+      console.log(error);
+      return null;
+    });
+  return code.token;
+};
+
 loginRouter.post('/', async (request: AuthenticatedRequest, response: Response) => {
   let { username, password } = request.body;
   if (username && password) {
     username = sanitizeInput(username, 'none');
     password = sanitizeInput(password, 'allow');
+    if (!username) {
+      return response.status(400).json({
+        error: 'improper formatting of username'
+      });
+    }
     const user: UserInterface = await User.findOne({ username }) as UserInterface;
 
     if (!user) {
@@ -31,19 +49,13 @@ loginRouter.post('/', async (request: AuthenticatedRequest, response: Response) 
       });
     }
     if (!user.isVerified) {
-      const code = genEmailCode();
-      sendConfirmationEmail(code.digits, user.email)
-        .then(result => {
-          console.log(result);
-        })
-        .catch(error => {
-          console.log(error);
-          return response.status(400).json({
-            error: 'invalid email'
-          });
+      const codeToken: string = sendEmailWithCode(user.email, 'Confirm your heelsmart account.', 'Confirm your heelsmart account with this code:');
+      if (codeToken === null) {
+        return response.status(500).json({
+          error: 'error with sending email'
         });
-
-      user.emailCode = code.token;
+      }
+      user.emailCode = codeToken;
       await user.save();
       return response.status(401).json({
         error: 'user is not verified'
@@ -88,5 +100,16 @@ loginRouter.post('/confirm', async (request: AuthenticatedRequest, response: Res
   const savedUser = await request.user.save();
   response.status(200).json(savedUser);
 });
+/*
+loginRouter.post('/resetPassword', async (request: AuthenticatedRequest, response: Response) => {
+  const { email } = request.body;
+  if (!email) {
+    return response.status(400).json({
+      error: 'email not provided'
+    });
+  }
+  email = 
+});
+*/
 
 export default loginRouter;

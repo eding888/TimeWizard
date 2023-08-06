@@ -46,6 +46,9 @@ const getTokenFrom = async (request: AuthenticatedRequest, response: Response, n
           return response.status(401).json({ error: 'token invalid' }); // token may be user, but is formatted wrong
         }
         const user: UserInterface = await User.findById(id) as UserInterface;
+        if (user.passwordHash !== expiredToken.passwordHash) {
+          return response.status(401).json({ error: 'token password does not match' }); // due to password reset by user, esssentially logs all current users out
+        }
         if (user.refreshToken !== null && (!verifyToken(user.refreshToken) || !user.username)) {
           return response.status(400).json({ error: 'refresh token expired' });
         }

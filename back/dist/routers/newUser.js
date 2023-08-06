@@ -23,6 +23,12 @@ newUserRouter.post('/', async (request, response) => {
     username = sanitizeInput(username, 'none');
     email = sanitizeInput(email, 'email');
     password = sanitizeInput(password, 'allow');
+    if (!username || !email) {
+        console.log('hi', email);
+        return response.status(400).json({
+            error: 'improper formatting of username or email'
+        });
+    }
     const passErrors = passwordSchema.validate(password, { details: true });
     if (Array.isArray(passErrors) && passErrors.length >= 1) {
         return response.status(400).json(passErrors);

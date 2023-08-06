@@ -21,6 +21,10 @@ const newUser = {
   email,
   password: "Password123"
 };
+const wrongUser = {
+  name: "Jeremy",
+  pass: "Password123"
+};
 let token;
 test('a user can be created', async() => {
   const res = await api
@@ -30,6 +34,36 @@ test('a user can be created', async() => {
     .expect('Content-Type', /application\/json/)
   token = res.body.token;
   console.log(token);
+});
+
+test('improperly formatted inputs are not allowed', async() => {
+  const uncleanUsername = {
+    username: "Joe!!<>",
+    email: "joe@joemail.com",
+    password: "Password123"
+  };
+  await api
+    .post('/api/newUser')
+    .send(uncleanUsername)
+    .expect(400)
+
+  const uncleanEmail = {
+    username: "Joe!",
+    email: "joe1!!<>@@joemail.com",
+    password: "Password123"
+  };
+
+  await api
+    .post('/api/newUser')
+    .send(uncleanEmail)
+    .expect(400)
+});
+
+test('improperly formatted new user is rejected', async() => {
+  await api
+    .post('/api/newUser')
+    .send(wrongUser)
+    .expect(400)
 });
 
 test('the user can be verified', async() => {
@@ -92,6 +126,13 @@ test('cross-origin requests are not allowed', async () => {
   expect(response.headers['access-control-allow-origin']).toBeUndefined();
 });
 let newToken;
+
+test('improperly formatted logins are not allowed', async () => {
+  await api
+    .post('/api/login')
+    .send(wrongUser)
+    .expect(400);
+});
 test('the users auth token will expire and be refreshed', async() => {
 
   await new Promise((r) => setTimeout(r, 5500));
@@ -153,7 +194,6 @@ test('the users refresh token can regenerate after login', async() => {
     .expect('Content-Type', /application\/json/);
 
 }, 10000)
-
 
 afterAll(async () => {
   await mongoose.connection.close();
