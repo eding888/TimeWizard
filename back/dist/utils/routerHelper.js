@@ -9,13 +9,18 @@ import { dirname, join } from 'path';
 const readFile = util.promisify(fs.readFile);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const readTemplate = async () => {
-    const templatePath = join(__dirname, '..', '..', 'templ', 'email.html');
+export var MailType;
+(function (MailType) {
+    MailType["verifyUser"] = "verify-user";
+    MailType["resetPassword"] = "reset-password";
+})(MailType || (MailType = {}));
+const readTemplate = async (templateName) => {
+    const templatePath = join(__dirname, '..', '..', 'templ', `${templateName}.html`);
     const template = await readFile(templatePath, 'utf-8');
     return template;
 };
-export const sendConfirmationEmail = async (digits, recipientEmail, subject, message) => {
-    const template = await readTemplate();
+export const sendConfirmationEmail = async (recipientEmail, emailType, subject, digits) => {
+    const template = await readTemplate(emailType);
     const transporter = nodemailer.createTransport({
         service: 'Gmail',
         auth: {
@@ -27,7 +32,7 @@ export const sendConfirmationEmail = async (digits, recipientEmail, subject, mes
         from: config.EMAIL,
         to: recipientEmail,
         subject,
-        html: template.replace('{{message}}', message).replace('{{code}}', digits)
+        html: template.replace('{{code}}', digits)
     };
     let response = true;
     transporter.sendMail(mailOptions, (error) => {

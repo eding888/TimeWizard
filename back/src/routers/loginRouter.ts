@@ -2,16 +2,16 @@ import express, { Response, Router } from 'express';
 import { AuthenticatedRequest } from '../utils/middleware.js';
 import bcrypt from 'bcrypt';
 import { genRefreshToken, genAuthToken, genEmailCode, code, verifyToken } from '../utils/genToken.js';
-import { sendConfirmationEmail, checkSanitizedInput, passDetails, passwordToHash } from '../utils/routerHelper.js';
+import { sendConfirmationEmail, checkSanitizedInput, passDetails, passwordToHash, MailType } from '../utils/routerHelper.js';
 import jwt from 'jsonwebtoken';
 import config from '../utils/config.js';
 import User, { UserInterface } from '../models/user.js';
 
 const loginRouter: Router = express.Router();
 
-const sendEmailWithCode = async (email: string, subject: string, message: string) => {
+const sendEmailWithCode = async (email: string, mailType: MailType, subject: string) => {
   const code = genEmailCode();
-  const response = await sendConfirmationEmail(code.digits, email, subject, message);
+  const response = await sendConfirmationEmail(email, mailType, subject, code.digits);
   if (response === null) {
     return null;
   } else {
@@ -44,7 +44,7 @@ loginRouter.post('/', async (request: AuthenticatedRequest, response: Response) 
       });
     }
     if (!user.isVerified) {
-      const codeToken: string | null = await sendEmailWithCode(user.email, 'Confirm your heelsmart account.', 'Confirm your heelsmart account with this code:');
+      const codeToken: string | null = await sendEmailWithCode(user.email, MailType.verifyUser, 'Confirm your HeelsMart account.');
       if (codeToken === null) {
         return response.status(500).json({
           error: 'error with sending email'
@@ -121,7 +121,7 @@ loginRouter.post('/resetPassword', async (request: AuthenticatedRequest, respons
       error: 'user still on password reset cooldown'
     });
   }
-  const resetCodeToken: string | null = await sendEmailWithCode(email, 'Reset your heelsmart password.', 'Confirm your heelsmart account password change with this code:');
+  const resetCodeToken: string | null = await sendEmailWithCode(email, MailType.resetPassword, 'Confirm your HeelsMart password change.');
   if (resetCodeToken === null) {
     return response.status(500).json({
       error: 'error with sending email'
