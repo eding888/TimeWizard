@@ -2,30 +2,43 @@ import config from './config.js';
 import nodemailer from 'nodemailer';
 import PasswordValidator from 'password-validator';
 import bcrypt from 'bcrypt';
-export const sendConfirmationEmail = (digits, recipientEmail, subject, message) => {
-    return new Promise((resolve, reject) => {
-        const transporter = nodemailer.createTransport({
-            service: 'Gmail',
-            auth: {
-                user: config.EMAIL,
-                pass: config.EMAIL_PASS
-            }
-        });
-        const mailOptions = {
-            from: config.EMAIL,
-            to: recipientEmail,
-            subject,
-            text: `${message} ${digits}`
-        };
-        transporter.sendMail(mailOptions, (error, info) => {
-            if (error) {
-                reject(error);
-            }
-            else {
-                resolve(info.response);
-            }
-        });
+import fs from 'fs';
+import util from 'util';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+const readFile = util.promisify(fs.readFile);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const readTemplate = async () => {
+    const templatePath = join(__dirname, '..', '..', 'templ', 'email.html');
+    const template = await readFile(templatePath, 'utf-8');
+    return template;
+};
+export const sendConfirmationEmail = async (digits, recipientEmail, subject, message) => {
+    const template = await readTemplate();
+    const transporter = nodemailer.createTransport({
+        service: 'Gmail',
+        auth: {
+            user: config.EMAIL,
+            pass: config.EMAIL_PASS
+        }
     });
+    const mailOptions = {
+        from: config.EMAIL,
+        to: recipientEmail,
+        subject,
+        html: template.replace('{{message}}', message).replace('{{code}}', digits)
+    };
+    let response = true;
+    transporter.sendMail(mailOptions, (error) => {
+        if (error) {
+            response = false;
+        }
+        else {
+            response = true;
+        }
+    });
+    return response;
 };
 // This must be used for basically any user input especially when it used
 // as a search parameter to shut down any xss or injection attacks.

@@ -2,32 +2,47 @@ import config from './config.js';
 import nodemailer from 'nodemailer';
 import PasswordValidator from 'password-validator';
 import bcrypt from 'bcrypt';
+import fs from 'fs';
+import util from 'util';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+const readFile = util.promisify(fs.readFile);
 
-export const sendConfirmationEmail = (digits: string, recipientEmail: string, subject: string, message: string) => {
-  return new Promise((resolve, reject) => {
-    const transporter = nodemailer.createTransport({
-      service: 'Gmail',
-      auth: {
-        user: config.EMAIL,
-        pass: config.EMAIL_PASS
-      }
-    });
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
-    const mailOptions = {
-      from: config.EMAIL,
-      to: recipientEmail,
-      subject,
-      text: `${message} ${digits}`
-    };
+const readTemplate = async () => {
+  const templatePath = join(__dirname, '..', '..', 'templ', 'email.html');
+  const template = await readFile(templatePath, 'utf-8');
+  return template;
+};
 
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        reject(error);
-      } else {
-        resolve(info.response);
-      }
-    });
+export const sendConfirmationEmail = async (digits: string, recipientEmail: string, subject: string, message: string) => {
+  const template = await readTemplate();
+
+  const transporter = nodemailer.createTransport({
+    service: 'Gmail',
+    auth: {
+      user: config.EMAIL,
+      pass: config.EMAIL_PASS
+    }
   });
+
+  const mailOptions = {
+    from: config.EMAIL,
+    to: recipientEmail,
+    subject,
+    html: template.replace('{{message}}', message).replace('{{code}}', digits)
+  };
+  let response: boolean = true;
+  transporter.sendMail(mailOptions, (error) => {
+    if (error) {
+      response = false;
+    } else {
+      response = true;
+    }
+  });
+  return response;
 };
 
 // This must be used for basically any user input especially when it used

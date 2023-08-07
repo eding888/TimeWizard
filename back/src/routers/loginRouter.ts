@@ -9,17 +9,14 @@ import User, { UserInterface } from '../models/user.js';
 
 const loginRouter: Router = express.Router();
 
-const sendEmailWithCode = (email: string, subject: string, message: string) => {
+const sendEmailWithCode = async (email: string, subject: string, message: string) => {
   const code = genEmailCode();
-  sendConfirmationEmail(code.digits, email, subject, message)
-    .then(result => {
-      console.log(result);
-    })
-    .catch(error => {
-      console.log(error);
-      return null;
-    });
-  return code.token;
+  const response = await sendConfirmationEmail(code.digits, email, subject, message);
+  if (response === null) {
+    return null;
+  } else {
+    return code.token;
+  }
 };
 
 loginRouter.post('/', async (request: AuthenticatedRequest, response: Response) => {
@@ -37,7 +34,7 @@ loginRouter.post('/', async (request: AuthenticatedRequest, response: Response) 
         error: 'invalid username'
       });
     }
-    const passwordCorrect = user === null
+    const passwordCorrect: boolean = user === null
       ? false
       : await bcrypt.compare(password, user.passwordHash);
 
@@ -47,7 +44,7 @@ loginRouter.post('/', async (request: AuthenticatedRequest, response: Response) 
       });
     }
     if (!user.isVerified) {
-      const codeToken: string = sendEmailWithCode(user.email, 'Confirm your heelsmart account.', 'Confirm your heelsmart account with this code:');
+      const codeToken: string | null = await sendEmailWithCode(user.email, 'Confirm your heelsmart account.', 'Confirm your heelsmart account with this code:');
       if (codeToken === null) {
         return response.status(500).json({
           error: 'error with sending email'
@@ -65,7 +62,7 @@ loginRouter.post('/', async (request: AuthenticatedRequest, response: Response) 
       await user.save();
     }
 
-    const authToken = await genAuthToken(user.username, user.passwordHash);
+    const authToken: string = await genAuthToken(user.username, user.passwordHash);
 
     response.status(200).json({ token: authToken });
   } else {
@@ -95,7 +92,7 @@ loginRouter.post('/confirm', async (request: AuthenticatedRequest, response: Res
   }
   request.user.isVerified = true;
   request.user.refreshToken = genRefreshToken();
-  const savedUser = await request.user.save();
+  const savedUser: UserInterface = await request.user.save();
   response.status(200).json(savedUser);
 });
 
@@ -117,7 +114,7 @@ loginRouter.post('/resetPassword', async (request: AuthenticatedRequest, respons
       error: 'email not found in system'
     });
   }
-  const resetCodeToken = sendEmailWithCode(email, 'Reset your heelsmart password.', 'Confirm your heelsmart account password change with this code:');
+  const resetCodeToken: string | null = await sendEmailWithCode(email, 'Reset your heelsmart password.', 'Confirm your heelsmart account password change with this code:');
   if (resetCodeToken === null) {
     return response.status(500).json({
       error: 'error with sending email'
@@ -163,7 +160,7 @@ loginRouter.post('/resetPassword/confirm', async (request: AuthenticatedRequest,
       errors: passwordHashDetails.errors
     });
   }
-  const passwordHash = passwordHashDetails.password;
+  const passwordHash: string | null = passwordHashDetails.password;
   if (!passwordHash) {
     return response.status(500).json({
       error: 'error in generating hash'

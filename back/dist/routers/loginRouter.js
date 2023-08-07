@@ -6,17 +6,15 @@ import jwt from 'jsonwebtoken';
 import config from '../utils/config.js';
 import User from '../models/user.js';
 const loginRouter = express.Router();
-const sendEmailWithCode = (email, subject, message) => {
+const sendEmailWithCode = async (email, subject, message) => {
     const code = genEmailCode();
-    sendConfirmationEmail(code.digits, email, subject, message)
-        .then(result => {
-        console.log(result);
-    })
-        .catch(error => {
-        console.log(error);
+    const response = await sendConfirmationEmail(code.digits, email, subject, message);
+    if (response === null) {
         return null;
-    });
-    return code.token;
+    }
+    else {
+        return code.token;
+    }
 };
 loginRouter.post('/', async (request, response) => {
     const { username, password } = request.body;
@@ -41,7 +39,7 @@ loginRouter.post('/', async (request, response) => {
             });
         }
         if (!user.isVerified) {
-            const codeToken = sendEmailWithCode(user.email, 'Confirm your heelsmart account.', 'Confirm your heelsmart account with this code:');
+            const codeToken = await sendEmailWithCode(user.email, 'Confirm your heelsmart account.', 'Confirm your heelsmart account with this code:');
             if (codeToken === null) {
                 return response.status(500).json({
                     error: 'error with sending email'
@@ -107,7 +105,7 @@ loginRouter.post('/resetPassword', async (request, response) => {
             error: 'email not found in system'
         });
     }
-    const resetCodeToken = sendEmailWithCode(email, 'Reset your heelsmart password.', 'Confirm your heelsmart account password change with this code:');
+    const resetCodeToken = await sendEmailWithCode(email, 'Reset your heelsmart password.', 'Confirm your heelsmart account password change with this code:');
     if (resetCodeToken === null) {
         return response.status(500).json({
             error: 'error with sending email'
