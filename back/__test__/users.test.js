@@ -225,7 +225,7 @@ test('the users refresh token can regenerate after login', async() => {
 
 }, 10000)
 
-test('the user can reset their password', async() => {
+test('the user can reset their password when properly done and have a limited amount of attempts', async() => {
   const res = await api
     .post('/api/login')
     .send(newUser)
@@ -245,7 +245,6 @@ test('the user can reset their password', async() => {
     .post('/api/login/resetPassword')
     .send(newUser)
     .expect(200);
-  console.log('made it');
 
   const code = await retrieveCodeFromEmail();
   console.log(code);
@@ -268,6 +267,32 @@ test('the user can reset their password', async() => {
     .post('/api/login')
     .send(newUser)
     .expect(200);
+
+  await api
+    .post('/api/login/resetPassword')
+    .send(newUser)
+    .expect(200);
+
+  const crappyPayload = {
+    email,
+    code: '0000000',
+    newPassword: newUser.password
+  }
+  for(let i = 0; i < 6; i++){
+    await api
+    .post('/api/login/resetPassword/confirm')
+    .send(crappyPayload)
+  }
+
+  await api
+    .post('/api/login/resetPassword/confirm')
+    .send(payload)
+    .expect(400);
+
+  await api
+    .post('/api/login/resetPassword/')
+    .send(payload)
+    .expect(400);
 
 }, 10000)
 

@@ -19,6 +19,8 @@ export interface UserInterface extends mongoose.Document {
   isVerified: boolean,
   emailCode: string | null,
   passResetCode: string | null,
+  passResetAttempts: number | null,
+  passResetCooldown: number | null,
   refreshToken: string | null,
 }
 const userSchema = new mongoose.Schema({
@@ -49,6 +51,14 @@ const userSchema = new mongoose.Schema({
   },
   passResetCode: {
     type: String,
+    default: null
+  },
+  passResetAttempts: {
+    type: String,
+    default: null
+  },
+  passResetCooldown: {
+    type: Number,
     default: null
   },
   refreshToken: {

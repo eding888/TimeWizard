@@ -38,6 +38,14 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: null
     },
+    passResetAttempts: {
+        type: String,
+        default: null
+    },
+    passResetCooldown: {
+        type: Number,
+        default: null
+    },
     refreshToken: {
         type: String,
         default: null
