@@ -1,13 +1,5 @@
 import mongoose from 'mongoose';
 import uniqueValidator from 'mongoose-unique-validator';
-import config from '../utils/config.js';
-let UNCEmailRegex = /^[a-zA-Z0-9._%+-]+@([a-zA-Z0-9.-]*\.)?unc\.edu$/;
-if (config.TEST) {
-    UNCEmailRegex = /.*/;
-}
-const checkEmail = (email) => {
-    return UNCEmailRegex.test(email);
-};
 const userSchema = new mongoose.Schema({
     username: {
         type: String,
@@ -18,7 +10,6 @@ const userSchema = new mongoose.Schema({
     email: {
         type: String,
         required: [true, 'Email is required'],
-        validate: [checkEmail, 'Invalid email. Ensure you are using a valid UNC email.'],
         unique: [true, 'Email is already registered']
     },
     passwordHash: {

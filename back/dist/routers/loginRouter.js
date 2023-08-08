@@ -39,7 +39,7 @@ loginRouter.post('/', async (request, response) => {
             });
         }
         if (!user.isVerified) {
-            const codeToken = await sendEmailWithCode(user.email, MailType.verifyUser, 'Confirm your HeelsMart account.');
+            const codeToken = await sendEmailWithCode(user.email, MailType.verifyUser, 'Confirm your TimeWizard account.');
             if (codeToken === null) {
                 return response.status(500).json({
                     error: 'error with sending email'
@@ -112,7 +112,7 @@ loginRouter.post('/resetPassword', async (request, response) => {
             error: 'user still on password reset cooldown'
         });
     }
-    const resetCodeToken = await sendEmailWithCode(email, MailType.resetPassword, 'Confirm your HeelsMart password change.');
+    const resetCodeToken = await sendEmailWithCode(email, MailType.resetPassword, 'Confirm your TimeWizard password change.');
     if (resetCodeToken === null) {
         return response.status(500).json({
             error: 'error with sending email'

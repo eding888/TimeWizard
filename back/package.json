@@ -1,7 +1,7 @@
 {
-  "name": "heelsmart-back",
+  "name": "timewizard-back",
   "version": "1.0.0",
-  "description": "Backend for heelsmart",
+  "description": "Backend for timewizard",
   "main": "index.js",
   "scripts": {
     "buildJS": "rm -rf dist && tsc",
