@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './index.css';
+import LoginButton from './components/LoginButton';
 import { Box, Image, Flex, Button, IconButton, useMediaQuery, useColorMode, useColorModeValue, Heading, Center, Spacer } from '@chakra-ui/react';
 import { SunIcon, MoonIcon } from '@chakra-ui/icons';
 
@@ -26,7 +27,7 @@ function App () {
   }, [screenCutoff, variant]);
   return (
     <>
-      <Box w='100%' p={4} boxShadow='sm' bg={darkAndLightModeColor} color= 'white' borderBottom='1px' borderBottomColor= {darkAndLightModeBorderColor}>
+      <Box w='100%' p={4} mb={5} boxShadow='sm' bg={darkAndLightModeColor} color= 'white' borderBottom='1px' borderBottomColor= {darkAndLightModeBorderColor}>
         <Flex align="center" justifyContent="space-around">
           <Image
           src= {variant}
@@ -34,9 +35,7 @@ function App () {
           height="50px"
           />
           <Flex gap="20px">
-            <Button colorScheme='purple' size='md'>
-              Login
-            </Button>
+            <LoginButton color = "purple"/>
             <Button colorScheme='purple' size='md'>
               Sign Up
             </Button>
@@ -49,20 +48,25 @@ function App () {
           </Flex>
         </Flex>
       </Box>
-      <Flex flexDirection='column' alignItems='center' justifyContent='center' gap='25px' height = '80vh'>
+      <Flex flexDirection='column' alignItems='center' justifyContent='center' gap='25px' height = 'calc(90vh - 83px)'>
         <Image
         src= 'https://cdn-icons-png.flaticon.com/512/477/477103.png'
         objectFit='cover'
-        height="300px"
+        height= "30vh"
         animation="fadeInDelay2 2s ease-in-out forwards, wiggle 2s ease-in-out infinite"
         />
-        <Flex flexDirection='column' alignItems='center' justifyContent='center' gap='10px'>
+        <Flex ml={3} mr={3} flexDirection='column' alignItems='center' justifyContent='center' gap='10px'>
           <Heading textAlign='center' fontWeight='300' animation="fadeIn 1s ease-in-out forwards">Task management done simply yet effectively.</Heading>
           <Heading textAlign='center' animation="fadeInDelay1 2s ease-in-out forwards">Try TaskWizard for free!</Heading>
         </Flex>
-        <Button colorScheme='teal' size='lg' animation="fadeInDelay2 2s ease-in-out forwards">
-              Sign Up
-            </Button>
+        <Flex gap="20px">
+          <Button colorScheme='purple' size='lg' animation="fadeInDelay2 2s ease-in-out forwards">
+            Learn More
+          </Button>
+          <Button colorScheme='teal' size='lg' animation="fadeInDelay2 2s ease-in-out forwards">
+            Sign Up
+          </Button>
+        </Flex>
       </Flex>
     </>
   );
