@@ -1,7 +1,7 @@
 {
-  "name": "timewizard-back",
+  "name": "taskwizard-back",
   "version": "1.0.0",
-  "description": "Backend for timewizard",
+  "description": "Backend for taskwizard",
   "main": "index.js",
   "scripts": {
     "buildJS": "rm -rf dist && tsc",
