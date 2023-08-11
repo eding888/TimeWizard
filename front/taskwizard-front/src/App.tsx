@@ -1,11 +1,10 @@
 import React from 'react';
+import './index.css';
 
-import './App.css';
-
-function App() {
+function App () {
   return (
-    <div>
-
+    <div className="text-5xl font-bold underline">
+      helo
     </div>
   );
 }
