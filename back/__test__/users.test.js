@@ -58,16 +58,9 @@ const wrongUser = {
 let cookieHeader;
 let csrf;
 describe('Backend tests', () => {
-  test('csrf can be acquired', async() => {
-    const res = await api
-        .get('/getcsrf')
-        .expect(200);
-    csrf = res.body.csrf;
-  });
   test('a user can be created', async() => {
     const res = await api
       .post('/api/newUser')
-      .set('x-csrf-token', csrf)
       .send(newUser)
       .expect(201)
       .expect('Content-Type', /application\/json/)

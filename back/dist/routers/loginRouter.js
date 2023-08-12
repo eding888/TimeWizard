@@ -5,6 +5,8 @@ import { sendConfirmationEmail, checkSanitizedInput, passwordToHash, MailType } 
 import jwt from 'jsonwebtoken';
 import config from '../utils/config.js';
 import User from '../models/user.js';
+import Tokens from 'csrf';
+const tokens = new Tokens();
 const loginRouter = express.Router();
 const sendEmailWithCode = async (email, mailType, subject) => {
     const code = genEmailCode();
@@ -62,7 +64,8 @@ loginRouter.post('/', async (request, response) => {
         httpOnly: true,
         secure: true
     });
-    response.status(200).end();
+    const token = tokens.create(config.SECRET);
+    response.status(200).json({ csrf: token });
 });
 loginRouter.post('/confirm', async (request, response) => {
     const { code, username } = request.body;

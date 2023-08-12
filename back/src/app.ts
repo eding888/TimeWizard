@@ -12,10 +12,18 @@ import cookieParser from 'cookie-parser';
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 750,
+  max: 200,
   standardHeaders: true,
   legacyHeaders: false,
   message: 'Too many requests, please try again later.'
+});
+const maxAccounts = config.TEST ? 1000 : 3;
+const accountLimiter = rateLimit({
+  windowMs: 120 * 60 * 1000,
+  max: maxAccounts,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: 'Too many accounts created, please try again later.'
 });
 
 const app: Express = express();
@@ -35,20 +43,19 @@ mongoose.connect(MONGO_URI)
     console.log('Error:', error);
   });
 
-app.use(limiter);
 app.use(cookieParser());
 
 app.use(express.json());
 app.use(express.static('build'));
 
-app.use('/api/login', loginRouter);
-app.use('/api/newUser', newUserRouter);
+app.use('/api/login', limiter, loginRouter);
+app.use('/api/newUser', accountLimiter, newUserRouter);
 
 app.use(middleware.parseToken);
 app.use(middleware.checkCsrf);
 
-app.use('/api/users', userRouter);
-app.use('/api/sample', sample);
+app.use('/api/users', limiter, userRouter);
+app.use('/api/sample', limiter, sample);
 
 app.use(middleware.errorHandler);
 export default app;
