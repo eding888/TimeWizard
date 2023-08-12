@@ -6,6 +6,8 @@ import { sendConfirmationEmail, checkSanitizedInput, passDetails, passwordToHash
 import jwt from 'jsonwebtoken';
 import config from '../utils/config.js';
 import User, { UserInterface } from '../models/user.js';
+import Tokens from 'csrf';
+const tokens = new Tokens();
 
 const loginRouter: Router = express.Router();
 
@@ -70,8 +72,9 @@ loginRouter.post('/', async (request: AuthenticatedRequest, response: Response) 
     httpOnly: true,
     secure: true
   });
+  const token = tokens.create(config.SECRET);
 
-  response.status(200).end();
+  response.status(200).json({ csrf: token });
 });
 
 loginRouter.post('/confirm', async (request: AuthenticatedRequest, response: Response) => {
