@@ -19,8 +19,8 @@ let expireShort = '1h';
 const expireVeryShort = '10m';
 
 if (config.TEST) {
-  expireLong = '9s';
-  expireShort = '4s';
+  expireLong = '11s';
+  expireShort = '6s';
 }
 
 export const genAuthToken = async (username : string, passwordHash: string) => {

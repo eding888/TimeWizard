@@ -52,7 +52,7 @@ function App () {
         <Image
         src= 'https://cdn-icons-png.flaticon.com/512/477/477103.png'
         objectFit='cover'
-        height= "30vh"
+        height= "40%"
         animation="fadeInDelay2 2s ease-in-out forwards, wiggle 2s ease-in-out infinite"
         />
         <Flex ml={3} mr={3} flexDirection='column' alignItems='center' justifyContent='center' gap='10px'>

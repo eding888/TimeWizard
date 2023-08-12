@@ -55,246 +55,268 @@ const wrongUser = {
   name: "Jeremy",
   pass: "Password123"
 };
-let token;
-test('a user can be created', async() => {
-  const res = await api
-    .post('/api/newUser')
-    .send(newUser)
-    .expect(201)
-    .expect('Content-Type', /application\/json/)
-  token = res.body.token;
-  console.log(token);
-});
+let cookieHeader;
+describe('Backend tests', () => {
+  test('a user can be created', async() => {
+    const res = await api
+      .post('/api/newUser')
+      .send(newUser)
+      .expect(201)
+      .expect('Content-Type', /application\/json/)
+    console.log(res.headers);
+    cookieHeader = res.headers['set-cookie'][0];
+    console.log(cookieHeader)
+  });
 
-test('improperly formatted inputs are not allowed', async() => {
-  const uncleanUsername = {
-    username: "Joe!!<>",
-    email: "joe@joemail.com",
-    password: "Password123"
-  };
-  await api
-    .post('/api/newUser')
-    .send(uncleanUsername)
-    .expect(400)
-
-  const uncleanEmail = {
-    username: "Joe",
-    email: "joe1!!<>@@joemail.com",
-    password: "Password123"
-  };
-
-  await api
-    .post('/api/newUser')
-    .send(uncleanEmail)
-    .expect(400)
-
-  const uncleanPassword = {
-    username: "Joe",
-    email: "joe@joemail.com",
-    password: "password"
-  };
-
-  await api
-    .post('/api/newUser')
-    .send(uncleanPassword)
-    .expect(400)
-});
-
-test('improperly formatted new user is rejected', async() => {
-  await api
-    .post('/api/newUser')
-    .send(wrongUser)
-    .expect(400)
-});
-
-test('the user can be verified', async() => {
-  await api
-    .get('/api/sample')
-    .set({ Authorization: `bearer ${token}` })
-    .expect(401);
-
-  await api
-    .post('/api/login/confirm')
-    .set({ Authorization: `bearer ${token}` })
-    .send({ code: '000000' })
-    .expect(400);
-
-  await api
-    .post('/api/login')
-    .send(newUser)
-    .expect(401);
-
-  const sixDigitNumber = await retrieveCodeFromEmail();
-
-  await api
-    .post('/api/login/confirm')
-    .set({ Authorization: `bearer ${token}` })
-    .send({ code: '000000' })
-    .expect(401);
-
-  await api
-    .post('/api/login/confirm')
-    .set({ Authorization: `bearer ${token}` })
-    .send({ code: sixDigitNumber })
-    .expect(200);
-}, 10000);
-
-test('the user can make a request', async() => {
-  await api
-  .get('/api/sample')
-  .set({ Authorization: `bearer ${token}` })
-  .expect(200)
-  .expect('Content-Type', /application\/json/);
-})
-
-test('cross-origin requests are not allowed', async () => {
-  const response = await api.get('/api/sample')
-    .set({ Authorization: `bearer ${token}` })
-    .set('Origin', 'http://example.com')
-    .expect(403);
-  console.log(response.headers, 'headers');
-  expect(response.headers['access-control-allow-origin']).toBeUndefined();
-});
-let newToken;
-
-test('improperly formatted logins are not allowed', async () => {
-  await api
-    .post('/api/login')
-    .send(wrongUser)
-    .expect(400);
-});
-test('the users auth token will expire and be refreshed', async() => {
-
-  await new Promise((r) => setTimeout(r, 5500));
-  const newTokenResponse = await api
-    .get('/api/sample')
-    .set({ Authorization: `bearer ${token}` })
-    .expect(200)
-    .expect('Content-Type', /application\/json/);
-  newToken = newTokenResponse.headers.authorization;
-  expect(token).not.toEqual(newToken);
-
-  await api
-    .get('/api/sample')
-    .set({ Authorization: `bearer ${newToken}` })
-    .expect(200)
-    .expect('Content-Type', /application\/json/);
-
-
-}, 10000)
-
-test('the users refresh token will expire', async() => {
-
-  await new Promise((r) => setTimeout(r, 5000));
-  const response = await api
-    .get('/api/sample')
-    .set({ Authorization: `bearer ${newToken}` })
-    .expect(400)
-  expect(response.body.error).toEqual('refresh token expired');
-
-}, 10000)
-
-test('the users refresh token can regenerate after login', async() => {
-
-  const res = await api
-  .post('/api/login')
-  .send(newUser)
-  .expect(200);
-  const refreshedToken = res.body.token;
-  await api
-    .get('/api/sample')
-    .set({ Authorization: `bearer ${refreshedToken}` })
-    .expect(200)
-    .expect('Content-Type', /application\/json/);
-
-  await new Promise((r) => setTimeout(r, 5500));
-  const newTokenResponse = await api
-    .get('/api/sample')
-    .set({ Authorization: `bearer ${refreshedToken}` })
-    .expect(200)
-    .expect('Content-Type', /application\/json/);
-
-  const newToken = newTokenResponse.headers.authorization;
-  expect(token).not.toEqual(newToken);
-
-  await api
-    .get('/api/sample')
-    .set({ Authorization: `bearer ${newToken}` })
-    .expect(200)
-    .expect('Content-Type', /application\/json/);
-
-}, 10000)
-
-test('the user can reset their password when properly done and have a limited amount of attempts', async() => {
-  const res = await api
-    .post('/api/login')
-    .send(newUser)
-    .expect(200);
-  const oldToken = res.body.token;
-  const randomEmail = {
-    username: "Joe",
-    email: "hank@hankmail.com",
-    password: "Password123"
-  };
-  await api
-    .post('/api/login/resetPassword')
-    .send(randomEmail)
-    .expect(400);
-
-  await api
-    .post('/api/login/resetPassword')
-    .send(newUser)
-    .expect(200);
-
-  const code = await retrieveCodeFromEmail();
-  console.log(code);
-  newUser.password = "NewPassword123";
-  const payload = {
-    email,
-    code,
-    newPassword: newUser.password
-  }
-  await api
-    .post('/api/login/resetPassword/confirm')
-    .send(payload)
-    .expect(200);
-  await api
-    .get('/api/sample')
-    .set({ Authorization: `bearer ${oldToken}` })
-    .expect(401)
-
-  await api
-    .post('/api/login')
-    .send(newUser)
-    .expect(200);
-
-  await api
-    .post('/api/login/resetPassword')
-    .send(newUser)
-    .expect(200);
-
-  const crappyPayload = {
-    email,
-    code: '0000000',
-    newPassword: newUser.password
-  }
-  for(let i = 0; i < 6; i++){
+  test('improperly formatted inputs are not allowed', async() => {
+    const uncleanUsername = {
+      username: "Joe!!<>",
+      email: "joe@joemail.com",
+      password: "Password123"
+    };
     await api
-    .post('/api/login/resetPassword/confirm')
-    .send(crappyPayload)
-  }
+      .post('/api/newUser')
+      .set('Cookie', cookieHeader)
+      .send(uncleanUsername)
+      .expect(400)
 
-  await api
-    .post('/api/login/resetPassword/confirm')
-    .send(payload)
-    .expect(400);
+    const uncleanEmail = {
+      username: "Joe",
+      email: "joe1!!<>@@joemail.com",
+      password: "Password123"
+    };
 
-  await api
-    .post('/api/login/resetPassword/')
-    .send(payload)
-    .expect(400);
+    await api
+      .post('/api/newUser')
+      .set('Cookie', cookieHeader)
+      .send(uncleanEmail)
+      .expect(400)
 
-}, 10000)
+    const uncleanPassword = {
+      username: "Joe",
+      email: "joe@joemail.com",
+      password: "password"
+    };
+
+    await api
+      .post('/api/newUser')
+      .set('Cookie', cookieHeader)
+      .send(uncleanPassword)
+      .expect(400)
+  });
+
+  test('improperly formatted new user is rejected', async() => {
+    await api
+      .post('/api/newUser')
+      .set('Cookie', cookieHeader)
+      .send(wrongUser)
+      .expect(400)
+  });
+
+  test('the user can be verified', async() => {
+    await api
+      .get('/api/sample')
+      .set('Cookie', cookieHeader)
+      .expect(401);
+
+    await api
+      .post('/api/login/confirm')
+      .set('Cookie', cookieHeader)
+      .send({ code: '000000', username: 'Jeremy' })
+      .expect(400);
+
+    await api
+      .post('/api/login')
+      .set('Cookie', cookieHeader)
+      .send(newUser)
+      .expect(401);
+
+    const sixDigitNumber = await retrieveCodeFromEmail();
+
+    const response = await api
+      .post('/api/login/confirm')
+      .set('Cookie', cookieHeader)
+      .send({ code: '000000', username: 'Jeremy' })
+      .expect(401);
+
+    await api
+      .post('/api/login/confirm')
+      .set('Cookie', cookieHeader)
+      .send({ code: sixDigitNumber, username: 'Jeremy' })
+      .expect(200);
+  }, 10000);
+
+  test('the user can make a request', async() => {
+    await api
+    .get('/api/sample')
+    .set('Cookie', cookieHeader)
+    .expect(200)
+    .expect('Content-Type', /application\/json/);
+  })
+
+  test('cross-origin requests are not allowed', async () => {
+    const response = await api.get('/api/sample')
+      .set({ Authorization: `bearer ${token}` })
+      .set('Origin', 'http://example.com')
+      .expect(403);
+    expect(response.headers['access-control-allow-origin']).toBeUndefined();
+  });
+  let newToken;
+
+  test('improperly formatted logins are not allowed', async () => {
+    await api
+      .post('/api/login')
+      .set('Cookie', cookieHeader)
+      .send(wrongUser)
+      .expect(400);
+  });
+  test('the users auth token will expire and be refreshed', async() => {
+    const res = await api
+    .post('/api/login')
+    .set('Cookie', cookieHeader)
+    .send(newUser)
+    .expect(200);
+    console.log(res.headers);
+    cookieHeader = res.headers['set-cookie'][0];
+    await new Promise((r) => setTimeout(r, 6500));
+    const newTokenResponse = await api
+      .get('/api/sample')
+      .set('Cookie', cookieHeader)
+      .expect(200)
+      .expect('Content-Type', /application\/json/);
+    console.log(newTokenResponse.body);
+    cookieHeader = newTokenResponse.headers['set-cookie'][0];
+
+    await api
+      .get('/api/sample')
+      .set('Cookie', cookieHeader)
+      .expect(200)
+      .expect('Content-Type', /application\/json/);
+
+
+  }, 10000)
+
+  test('the users refresh token will expire', async() => {
+    await new Promise((r) => setTimeout(r, 6500));
+    const response = await api
+      .get('/api/sample')
+      .set('Cookie', cookieHeader)
+      .expect(400)
+    expect(response.body.error).toEqual('refresh token expired');
+
+  }, 10000)
+
+  test('the users refresh token can regenerate after login', async() => {
+    const res = await api
+    .post('/api/login')
+    .set('Cookie', cookieHeader)
+    .send(newUser)
+    .expect(200);
+    console.log(res.headers);
+    cookieHeader = res.headers['set-cookie'][0];
+    await api
+      .get('/api/sample')
+      .set('Cookie', cookieHeader)
+      .expect(200)
+      .expect('Content-Type', /application\/json/);
+
+    await new Promise((r) => setTimeout(r, 5500));
+    const newTokenResponse = await api
+      .get('/api/sample')
+      .set('Cookie', cookieHeader)
+      .expect(200)
+      .expect('Content-Type', /application\/json/);
+
+    cookieHeader = newTokenResponse.headers['set-cookie'][0];
+
+    await api
+      .get('/api/sample')
+      .set('Cookie', cookieHeader)
+      .expect(200)
+      .expect('Content-Type', /application\/json/);
+
+  }, 10000)
+
+  test('the user can reset their password when properly done and have a limited amount of attempts', async() => {
+    const res = await api
+      .post('/api/login')
+      .set('Cookie', cookieHeader)
+      .send(newUser)
+      .expect(200);
+    cookieHeader = res.headers['set-cookie'][0];
+    const randomEmail = {
+      username: "Joe",
+      email: "hank@hankmail.com",
+      password: "Password123"
+    };
+    await api
+      .post('/api/login/resetPassword')
+      .set('Cookie', cookieHeader)
+      .send(randomEmail)
+      .expect(404);
+
+    await api
+      .post('/api/login/resetPassword')
+      .set('Cookie', cookieHeader)
+      .send(newUser)
+      .expect(200);
+
+    const code = await retrieveCodeFromEmail();
+    console.log(code);
+    newUser.password = "NewPassword123";
+    const payload = {
+      email,
+      code,
+      newPassword: newUser.password
+    }
+    await api
+      .post('/api/login/resetPassword/confirm')
+      .set('Cookie', cookieHeader)
+      .send(payload)
+      .expect(200);
+    await api
+      .get('/api/sample')
+      .set('Cookie', cookieHeader)
+      .expect(401)
+
+    await api
+      .post('/api/login')
+      .set('Cookie', cookieHeader)
+      .send(newUser)
+      .expect(200);
+
+    await api
+      .post('/api/login/resetPassword')
+      .set('Cookie', cookieHeader)
+      .send(newUser)
+      .expect(200);
+
+    const crappyPayload = {
+      email,
+      code: '0000000',
+      newPassword: newUser.password
+    }
+    for(let i = 0; i < 6; i++){
+      await api
+      .post('/api/login/resetPassword/confirm')
+      .set('Cookie', cookieHeader)
+      .send(crappyPayload)
+    }
+
+    await api
+      .post('/api/login/resetPassword/confirm')
+      .set('Cookie', cookieHeader)
+      .send(payload)
+      .expect(400);
+
+    await api
+      .post('/api/login/resetPassword/')
+      .set('Cookie', cookieHeader)
+      .send(payload)
+      .expect(400);
+
+  }, 10000)
+})
 
 afterAll(async () => {
   await mongoose.connection.close();

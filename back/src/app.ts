@@ -8,6 +8,7 @@ import loginRouter from './routers/loginRouter.js';
 import sample from './routers/sample.js';
 import middleware from './utils/middleware.js';
 import rateLimit from 'express-rate-limit';
+import cookieParser from 'cookie-parser';
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -35,14 +36,15 @@ mongoose.connect(MONGO_URI)
   });
 
 app.use(limiter);
+app.use(cookieParser());
 
 app.use(express.json());
 app.use(express.static('build'));
 
-app.use(middleware.getTokenFrom);
-app.use(middleware.getUserFromToken);
-
 app.use('/api/login', loginRouter);
+
+app.use(middleware.parseToken);
+
 app.use('/api/newUser', newUserRouter);
 app.use('/api/users', userRouter);
 app.use('/api/sample', sample);

@@ -43,7 +43,12 @@ newUserRouter.post('/', async (request: AuthenticatedRequest, response: Response
 
   const starterAuthToken = await genAuthToken(username, passwordHash);
 
-  response.status(201).json({ savedUser, token: starterAuthToken });
+  response.cookie('token', starterAuthToken, {
+    httpOnly: true,
+    secure: true
+  });
+
+  response.status(201).json({ savedUser });
 });
 
 export default newUserRouter;

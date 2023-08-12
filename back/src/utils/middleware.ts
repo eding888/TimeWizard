@@ -24,48 +24,36 @@ const errorHandler = (error: Error, request: Request, response: Response, next: 
   next(error);
 };
 
-// Will acquire the token from headers and checks if its valid. If it is, it updates request.token.
-// If not, it will decode that token, check the user it came from for a refresh token, and if refresh token
-// is valid, a new auth token will simply be provided.
-const getTokenFrom = async (request: AuthenticatedRequest, response: Response, next: NextFunction) => {
-  const authorization = request.get('Authorization');
-  if (authorization && authorization.startsWith('bearer ')) {
-    const token = authorization.replace('bearer ', '');
-    if (token !== 'undefined' && token) {
-      if (verifyToken(token)) {
-        request.token = token;
-      } else {
-        let expiredToken;
-        try {
-          expiredToken = jwt.decode(token) as jwtSubject;
-        } catch (error) {
-          return response.status(401).json({ error: 'token invalid' }); // token is nonsense
-        }
-        const id = expiredToken._id;
-        if (!id || !expiredToken.username || !expiredToken.passwordHash) {
-          return response.status(401).json({ error: 'token invalid' }); // token may be user, but is formatted wrong
-        }
-        const user: UserInterface = await User.findById(id) as UserInterface;
-        if (user.passwordHash !== expiredToken.passwordHash) {
-          return response.status(401).json({ error: 'token password does not match' }); // due to password reset by user, esssentially logs all current users out
-        }
-        if (user.refreshToken !== null && (!verifyToken(user.refreshToken) || !user.username)) {
-          return response.status(400).json({ error: 'refresh token expired' });
-        }
-        const newToken = await genAuthToken(user.username, user.passwordHash);
-        request.token = newToken;
-        // NEW AUTH TOKEN GENERATED, BE SURE TO CATCH THIS IN FRONTEND TO STORE IN COOKIE
-        response.setHeader('Authorization', newToken);
+const parseToken = async (request: AuthenticatedRequest, response: Response, next: NextFunction) => {
+  let token = request.cookies.token;
+  if (token !== 'undefined' && token) {
+    if (!verifyToken(token)) {
+      let expiredToken;
+      try {
+        expiredToken = jwt.decode(token) as jwtSubject;
+      } catch (error) {
+        return response.status(401).json({ error: 'token invalid' }); // token is nonsense
       }
+      const id = expiredToken._id;
+      if (!id || !expiredToken.username || !expiredToken.passwordHash) {
+        return response.status(401).json({ error: 'token invalid' }); // token may be user, but is formatted wrong
+      }
+      const user: UserInterface = await User.findById(id) as UserInterface;
+      if (user.passwordHash !== expiredToken.passwordHash) {
+        return response.status(401).json({ error: 'token password does not match' }); // due to password reset by user, esssentially logs all current users out
+      }
+      if (user.refreshToken !== null && (!verifyToken(user.refreshToken) || !user.username)) {
+        return response.status(400).json({ error: 'refresh token expired' });
+      }
+      console.log('expirar');
+      token = await genAuthToken(user.username, user.passwordHash);
+      response.cookie('token', token, {
+        httpOnly: true,
+        secure: true
+      });
     }
-  }
-  next();
-};
-
-const getUserFromToken = async (request: AuthenticatedRequest, response: Response, next: NextFunction) => {
-  try {
-    if (request.token !== 'undefined' && request.token) {
-      const decodedToken: jwtSubject = jwt.verify(request.token, config.SECRET) as jwtSubject;
+    try {
+      const decodedToken: jwtSubject = jwt.verify(token, config.SECRET) as jwtSubject;
       const id = decodedToken._id;
       if (!id || !decodedToken.username || !decodedToken.passwordHash) {
         return response.status(401).json({ error: 'token invalid' });
@@ -75,17 +63,17 @@ const getUserFromToken = async (request: AuthenticatedRequest, response: Respons
         return response.status(401).json({ error: 'token password does not match' }); // due to password reset by user, esssentially logs all current users out
       }
       request.user = user;
-    }
-  } catch (error) {
-    if (error instanceof jwt.JsonWebTokenError) {
-      return response.status(400).json({ error: 'invalid token' });
-    } else if (error instanceof jwt.TokenExpiredError) {
-      return response.status(401).json({ error: 'token expired' });
-    } else {
-      return response.status(500).json({ error: 'internal server error' });
+    } catch (error) {
+      if (error instanceof jwt.JsonWebTokenError) {
+        return response.status(400).json({ error: 'invalid token' });
+      } else if (error instanceof jwt.TokenExpiredError) {
+        return response.status(401).json({ error: 'token expired' });
+      } else {
+        return response.status(500).json({ error: 'internal server error' });
+      }
     }
   }
   next();
 };
 
-export default { errorHandler, getTokenFrom, getUserFromToken };
+export default { errorHandler, parseToken };
