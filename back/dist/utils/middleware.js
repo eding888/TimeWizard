@@ -2,6 +2,8 @@ import jwt from 'jsonwebtoken';
 import config from './config.js';
 import User from '../models/user.js';
 import { verifyToken, genAuthToken } from './genToken.js';
+import Tokens from 'csrf';
+const tokens = new Tokens();
 const errorHandler = (error, request, response, next) => {
     console.log(error.message);
     if (error.name === 'CastError') {
@@ -70,4 +72,14 @@ const parseToken = async (request, response, next) => {
     }
     next();
 };
-export default { errorHandler, parseToken };
+const checkCsrf = (request, response, next) => {
+    const csrf = request.headers['x-csrf-token'];
+    if (!csrf || Array.isArray(csrf)) {
+        return response.status(400).json({ error: 'no csrf provided' });
+    }
+    if (!tokens.verify(config.SECRET, csrf)) {
+        return response.status(401).json({ error: 'invalid csrf' });
+    }
+    next();
+};
+export default { errorHandler, parseToken, checkCsrf };

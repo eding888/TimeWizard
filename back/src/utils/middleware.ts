@@ -3,6 +3,8 @@ import jwt from 'jsonwebtoken';
 import config from './config.js';
 import User, { UserInterface } from '../models/user.js';
 import { verifyToken, genAuthToken, jwtSubject } from './genToken.js';
+import Tokens from 'csrf';
+const tokens = new Tokens();
 
 // Token is tacked onto the request, made possible with this interface
 export interface AuthenticatedRequest extends Request {
@@ -76,4 +78,15 @@ const parseToken = async (request: AuthenticatedRequest, response: Response, nex
   next();
 };
 
-export default { errorHandler, parseToken };
+const checkCsrf = (request: AuthenticatedRequest, response: Response, next: NextFunction) => {
+  const csrf = request.headers['x-csrf-token'];
+  if (!csrf || Array.isArray(csrf)) {
+    return response.status(400).json({ error: 'no csrf provided' });
+  }
+  if (!tokens.verify(config.SECRET, csrf)) {
+    return response.status(401).json({ error: 'invalid csrf' });
+  }
+  next();
+};
+
+export default { errorHandler, parseToken, checkCsrf };

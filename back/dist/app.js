@@ -9,6 +9,8 @@ import sample from './routers/sample.js';
 import middleware from './utils/middleware.js';
 import rateLimit from 'express-rate-limit';
 import cookieParser from 'cookie-parser';
+import Tokens from 'csrf';
+const tokens = new Tokens();
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 750,
@@ -35,6 +37,11 @@ app.use(express.json());
 app.use(express.static('build'));
 app.use('/api/login', loginRouter);
 app.use(middleware.parseToken);
+app.get('/getcsrf', (req, res) => {
+    const token = tokens.create(config.SECRET);
+    res.status(200).json({ csrf: token });
+});
+app.use(middleware.checkCsrf);
 app.use('/api/newUser', newUserRouter);
 app.use('/api/users', userRouter);
 app.use('/api/sample', sample);
