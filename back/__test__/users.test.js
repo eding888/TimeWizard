@@ -10,13 +10,12 @@ const api = supertest(app);
 const retrieveCodeFromEmail = async () => {
   let msgId;
   let msg;
-  console.log('hay');
+  console.log('mailin');
   try {
     const axiosResponse = await axios.delete(`https://mailsac.com/api/addresses/${email}/messages`, conf);
   } catch (error) {
     console.error('Error fetching messages:', error);
   }; 
-  console.log('hoy');
 
   await new Promise((r) => setTimeout(r, 3000));
   try {
@@ -25,7 +24,6 @@ const retrieveCodeFromEmail = async () => {
   } catch (error) {
     console.error('Error fetching messages:', error);
   };
-  console.log('hey');
 
   try {
     const axiosResponse = await axios.get(`https://mailsac.com/api/text/${email}/${msgId}`, conf);
@@ -64,9 +62,7 @@ describe('Backend tests', () => {
       .send(newUser)
       .expect(201)
       .expect('Content-Type', /application\/json/)
-    console.log(res.headers);
     cookieHeader = res.headers['set-cookie'][0];
-    console.log(cookieHeader)
   });
 
   test('improperly formatted inputs are not allowed', async() => {
@@ -118,7 +114,7 @@ describe('Backend tests', () => {
     await api
       .get('/api/sample')
       .set('Cookie', cookieHeader)
-      .expect(401);
+      .expect(403);
 
     await api
       .post('/api/login/confirm')
@@ -134,23 +130,26 @@ describe('Backend tests', () => {
 
     const sixDigitNumber = await retrieveCodeFromEmail();
 
-    const response = await api
+    await api
       .post('/api/login/confirm')
       .set('Cookie', cookieHeader)
       .send({ code: '000000', username: 'Jeremy' })
       .expect(401);
 
-    await api
+    const res = await api
       .post('/api/login/confirm')
       .set('Cookie', cookieHeader)
       .send({ code: sixDigitNumber, username: 'Jeremy' })
       .expect(200);
+    
+    csrf = res.body.csrf;
   }, 10000);
 
   test('the user can make a request', async() => {
     await api
     .get('/api/sample')
     .set('Cookie', cookieHeader)
+    .set('x-csrf-token', csrf)
     .expect(200)
     .expect('Content-Type', /application\/json/);
   })
@@ -168,6 +167,7 @@ describe('Backend tests', () => {
     await api
       .post('/api/login')
       .set('Cookie', cookieHeader)
+      .set('x-csrf-token', csrf)
       .send(wrongUser)
       .expect(400);
   });
@@ -175,22 +175,23 @@ describe('Backend tests', () => {
     const res = await api
     .post('/api/login')
     .set('Cookie', cookieHeader)
+    .set('x-csrf-token', csrf)
     .send(newUser)
     .expect(200);
-    console.log(res.headers);
     cookieHeader = res.headers['set-cookie'][0];
     await new Promise((r) => setTimeout(r, 6500));
     const newTokenResponse = await api
       .get('/api/sample')
       .set('Cookie', cookieHeader)
+      .set('x-csrf-token', csrf)
       .expect(200)
       .expect('Content-Type', /application\/json/);
-    console.log(newTokenResponse.body);
     cookieHeader = newTokenResponse.headers['set-cookie'][0];
 
     await api
       .get('/api/sample')
       .set('Cookie', cookieHeader)
+      .set('x-csrf-token', csrf)
       .expect(200)
       .expect('Content-Type', /application\/json/);
 
@@ -202,37 +203,43 @@ describe('Backend tests', () => {
     const response = await api
       .get('/api/sample')
       .set('Cookie', cookieHeader)
+      .set('x-csrf-token', csrf)
       .expect(400)
     expect(response.body.error).toEqual('refresh token expired');
 
   }, 10000)
 
   test('the users refresh token can regenerate after login', async() => {
-    const res = await api
-    .post('/api/login')
-    .set('Cookie', cookieHeader)
-    .send(newUser)
-    .expect(200);
-    console.log(res.headers);
-    cookieHeader = res.headers['set-cookie'][0];
+    await new Promise((r) => setTimeout(r, 5500));
     await api
       .get('/api/sample')
       .set('Cookie', cookieHeader)
-      .expect(200)
+      .set('x-csrf-token', csrf)
+      .expect(400)
       .expect('Content-Type', /application\/json/);
 
-    await new Promise((r) => setTimeout(r, 5500));
+    await api
+      .post('/api/login')
+      .set('Cookie', cookieHeader)
+      .set('x-csrf-token', csrf)
+      .send(newUser)
+      .expect(200);
+ 
     const newTokenResponse = await api
       .get('/api/sample')
       .set('Cookie', cookieHeader)
+      .set('x-csrf-token', csrf)
       .expect(200)
       .expect('Content-Type', /application\/json/);
+
+    console.log(newTokenResponse.headers)
 
     cookieHeader = newTokenResponse.headers['set-cookie'][0];
 
     await api
       .get('/api/sample')
       .set('Cookie', cookieHeader)
+      .set('x-csrf-token', csrf)
       .expect(200)
       .expect('Content-Type', /application\/json/);
 
@@ -242,6 +249,7 @@ describe('Backend tests', () => {
     const res = await api
       .post('/api/login')
       .set('Cookie', cookieHeader)
+      .set('x-csrf-token', csrf)
       .send(newUser)
       .expect(200);
     cookieHeader = res.headers['set-cookie'][0];
@@ -253,17 +261,18 @@ describe('Backend tests', () => {
     await api
       .post('/api/login/resetPassword')
       .set('Cookie', cookieHeader)
+      .set('x-csrf-token', csrf)
       .send(randomEmail)
       .expect(404);
 
     await api
       .post('/api/login/resetPassword')
       .set('Cookie', cookieHeader)
+      .set('x-csrf-token', csrf)
       .send(newUser)
       .expect(200);
 
     const code = await retrieveCodeFromEmail();
-    console.log(code);
     newUser.password = "NewPassword123";
     const payload = {
       email,
@@ -273,22 +282,26 @@ describe('Backend tests', () => {
     await api
       .post('/api/login/resetPassword/confirm')
       .set('Cookie', cookieHeader)
+      .set('x-csrf-token', csrf)
       .send(payload)
       .expect(200);
     await api
       .get('/api/sample')
       .set('Cookie', cookieHeader)
+      .set('x-csrf-token', csrf)
       .expect(401)
 
     await api
       .post('/api/login')
       .set('Cookie', cookieHeader)
+      .set('x-csrf-token', csrf)
       .send(newUser)
       .expect(200);
 
     await api
       .post('/api/login/resetPassword')
       .set('Cookie', cookieHeader)
+      .set('x-csrf-token', csrf)
       .send(newUser)
       .expect(200);
 
@@ -301,18 +314,21 @@ describe('Backend tests', () => {
       await api
       .post('/api/login/resetPassword/confirm')
       .set('Cookie', cookieHeader)
+      .set('x-csrf-token', csrf)
       .send(crappyPayload)
     }
 
     await api
       .post('/api/login/resetPassword/confirm')
       .set('Cookie', cookieHeader)
+      .set('x-csrf-token', csrf)
       .send(payload)
       .expect(400);
 
     await api
       .post('/api/login/resetPassword/')
       .set('Cookie', cookieHeader)
+      .set('x-csrf-token', csrf)
       .send(payload)
       .expect(400);
 

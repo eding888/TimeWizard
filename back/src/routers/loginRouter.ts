@@ -110,7 +110,10 @@ loginRouter.post('/confirm', async (request: AuthenticatedRequest, response: Res
   user.isVerified = true;
   user.refreshToken = genRefreshToken();
   const savedUser: UserInterface = await user.save();
-  response.status(200).json(savedUser);
+
+  const token = tokens.create(config.SECRET);
+
+  response.status(200).json({ savedUser, csrf: token });
 });
 
 loginRouter.post('/resetPassword', async (request: AuthenticatedRequest, response: Response) => {

@@ -47,7 +47,6 @@ const parseToken = async (request: AuthenticatedRequest, response: Response, nex
       if (user.refreshToken !== null && (!verifyToken(user.refreshToken) || !user.username)) {
         return response.status(400).json({ error: 'refresh token expired' });
       }
-      console.log('expirar');
       token = await genAuthToken(user.username, user.passwordHash);
       response.cookie('token', token, {
         httpOnly: true,
@@ -81,10 +80,10 @@ const parseToken = async (request: AuthenticatedRequest, response: Response, nex
 const checkCsrf = (request: AuthenticatedRequest, response: Response, next: NextFunction) => {
   const csrf = request.headers['x-csrf-token'];
   if (!csrf || Array.isArray(csrf)) {
-    return response.status(400).json({ error: 'no csrf provided' });
+    return response.status(403).json({ error: 'no csrf provided' });
   }
   if (!tokens.verify(config.SECRET, csrf)) {
-    return response.status(401).json({ error: 'invalid csrf' });
+    return response.status(403).json({ error: 'invalid csrf' });
   }
   next();
 };

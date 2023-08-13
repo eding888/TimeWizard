@@ -1,12 +1,9 @@
 import express, { Response, Router } from 'express';
 import User, { UserInterface } from '../models/user.js';
-import config from '../utils/config.js';
 import 'express-async-errors';
 import { AuthenticatedRequest } from 'utils/middleware.js';
 import { genAuthToken } from '../utils/genToken.js';
 import { checkSanitizedInput, passDetails, passwordToHash } from '../utils/routerHelper.js';
-import Tokens from 'csrf';
-const tokens = new Tokens();
 
 const newUserRouter: Router = express.Router();
 
@@ -45,14 +42,12 @@ newUserRouter.post('/', async (request: AuthenticatedRequest, response: Response
   const savedUser = await user.save();
 
   const starterAuthToken = await genAuthToken(username, passwordHash);
-  const token = tokens.create(config.SECRET);
-
   response.cookie('token', starterAuthToken, {
     httpOnly: true,
     secure: true
   });
 
-  response.status(201).json({ savedUser, csrf: token });
+  response.status(201).json({ savedUser });
 });
 
 export default newUserRouter;
