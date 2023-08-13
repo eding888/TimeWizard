@@ -1,7 +1,7 @@
 import express from 'express';
 import bcrypt from 'bcrypt';
 import { genRefreshToken, genAuthToken, genEmailCode } from '../utils/genToken.js';
-import { sendConfirmationEmail, checkSanitizedInput, passwordToHash, MailType } from '../utils/routerHelper.js';
+import { sendEmail, checkSanitizedInput, passwordToHash, MailType } from '../utils/routerHelper.js';
 import jwt from 'jsonwebtoken';
 import config from '../utils/config.js';
 import User from '../models/user.js';
@@ -10,7 +10,7 @@ const tokens = new Tokens();
 const loginRouter = express.Router();
 const sendEmailWithCode = async (email, mailType, subject) => {
     const code = genEmailCode();
-    const response = await sendConfirmationEmail(email, mailType, subject, code.digits);
+    const response = await sendEmail(email, mailType, subject, code.digits);
     if (response === null) {
         return null;
     }

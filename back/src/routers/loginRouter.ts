@@ -2,7 +2,7 @@ import express, { Response, Router } from 'express';
 import { AuthenticatedRequest } from '../utils/middleware.js';
 import bcrypt from 'bcrypt';
 import { genRefreshToken, genAuthToken, genEmailCode, code } from '../utils/genToken.js';
-import { sendConfirmationEmail, checkSanitizedInput, passDetails, passwordToHash, MailType } from '../utils/routerHelper.js';
+import { sendEmail, checkSanitizedInput, passDetails, passwordToHash, MailType } from '../utils/routerHelper.js';
 import jwt from 'jsonwebtoken';
 import config from '../utils/config.js';
 import User, { UserInterface } from '../models/user.js';
@@ -13,7 +13,7 @@ const loginRouter: Router = express.Router();
 
 const sendEmailWithCode = async (email: string, mailType: MailType, subject: string) => {
   const code = genEmailCode();
-  const response = await sendConfirmationEmail(email, mailType, subject, code.digits);
+  const response = await sendEmail(email, mailType, subject, code.digits);
   if (response === null) {
     return null;
   } else {

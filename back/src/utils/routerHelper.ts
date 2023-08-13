@@ -22,7 +22,7 @@ const readTemplate = async (templateName: string) => {
   return template;
 };
 
-export const sendConfirmationEmail = async (recipientEmail: string, emailType: MailType, subject: string, digits: string) => {
+export const sendEmail = async (recipientEmail: string, emailType: MailType, subject: string, digits: string) => {
   const template = await readTemplate(emailType);
 
   const transporter = nodemailer.createTransport({
@@ -39,6 +39,15 @@ export const sendConfirmationEmail = async (recipientEmail: string, emailType: M
     subject,
     html: template.replace('{{code}}', digits)
   };
+
+  switch (emailType) {
+    case MailType.verifyUser:
+      mailOptions.html = template.replace('{{code}}', digits);
+      break;
+    case MailType.resetPassword:
+      mailOptions.html = template.replace('{{code}}', digits);
+      break;
+  }
   let response: boolean = true;
   transporter.sendMail(mailOptions, (error) => {
     if (error) {

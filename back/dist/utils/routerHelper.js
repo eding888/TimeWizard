@@ -19,7 +19,7 @@ const readTemplate = async (templateName) => {
     const template = await readFile(templatePath, 'utf-8');
     return template;
 };
-export const sendConfirmationEmail = async (recipientEmail, emailType, subject, digits) => {
+export const sendEmail = async (recipientEmail, emailType, subject, digits) => {
     const template = await readTemplate(emailType);
     const transporter = nodemailer.createTransport({
         service: 'Gmail',
@@ -34,6 +34,14 @@ export const sendConfirmationEmail = async (recipientEmail, emailType, subject, 
         subject,
         html: template.replace('{{code}}', digits)
     };
+    switch (emailType) {
+        case MailType.verifyUser:
+            mailOptions.html = template.replace('{{code}}', digits);
+            break;
+        case MailType.resetPassword:
+            mailOptions.html = template.replace('{{code}}', digits);
+            break;
+    }
     let response = true;
     transporter.sendMail(mailOptions, (error) => {
         if (error) {
