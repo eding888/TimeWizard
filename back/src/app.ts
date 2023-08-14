@@ -9,6 +9,8 @@ import sample from './routers/sample.js';
 import middleware from './utils/middleware.js';
 import rateLimit from 'express-rate-limit';
 import cookieParser from 'cookie-parser';
+import cron from 'node-cron';
+import Task, { TaskInterface } from 'models/task.js';
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -25,6 +27,28 @@ const accountLimiter = rateLimit({
   legacyHeaders: false,
   message: 'Too many accounts created, please try again later.'
 });
+
+const updateTasks = () => {
+  Task.find({}, (err: Error, tasks: TaskInterface[]) => {
+    if (err) {
+      console.error(err);
+      return;
+    }
+    tasks.forEach(async (task: TaskInterface) => {
+      switch (task.type) {
+        case 'deadline':
+          task.deadlineOptions.timeRemaining -= (task.totalTimeToday - task.timeLeftToday + task.overtimeToday);
+          break;
+        case 'recurring':
+          task.recurringOptions.debt += (task.timeLeftToday - task.overtimeToday);
+      }
+
+      await task.save();
+    });
+  });
+};
+
+cron.schedule('0 0 * * *', updateTasks);
 
 const app: Express = express();
 

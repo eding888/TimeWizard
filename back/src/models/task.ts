@@ -24,6 +24,9 @@ export interface TaskInterface extends mongoose.Document {
   type: TaskType,
   deadlineOptions: DeadlineOptions,
   recurringOptions: RecurringOptions,
+  totalTimeToday: number,
+  timeLeftToday: number,
+  overtimeToday: number,
   daysOld: number
 }
 const taskSchema = new mongoose.Schema({
@@ -45,6 +48,14 @@ const taskSchema = new mongoose.Schema({
       timeRemaining: Number
     },
     default: null
+  },
+  timeLeftToday: {
+    type: Number,
+    deafult: 0
+  },
+  overtimeToday: {
+    type: Number,
+    deafult: 0
   },
   daysOld: {
     type: Number,
