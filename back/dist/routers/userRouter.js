@@ -1,14 +1,15 @@
 import express from 'express';
-import User from '../models/user.js';
 import 'express-async-errors';
 const userRouter = express.Router();
-userRouter.get('/all', async (request, response) => {
-    const users = await User.find({});
-    if (users !== null) {
-        response.json(users);
+userRouter.get('/current', async (request, response) => {
+    if (!request.user) {
+        return response.status(401).json({ error: 'User/token not found' });
     }
-    else {
-        response.status(400);
-    }
+    const user = request.user;
+    await user.populate({
+        path: 'tasks.id',
+        select: '_id name type deadlineOptions recurringOptions daysOfWeek totalTimeToday timeLeftToday overtimeToday daysOld user'
+    });
+    response.status(200).json(user);
 });
 export default userRouter;

@@ -6,11 +6,13 @@ import newUserRouter from './routers/newUser.js';
 import userRouter from './routers/userRouter.js';
 import loginRouter from './routers/loginRouter.js';
 import sample from './routers/sample.js';
+import taskRouter from './routers/taskRouter.js';
 import middleware from './utils/middleware.js';
 import rateLimit from 'express-rate-limit';
 import cookieParser from 'cookie-parser';
 import cron from 'node-cron';
-import Task, { TaskInterface } from 'models/task.js';
+import Task, { TaskInterface } from './models/task.js';
+import { countDays } from './utils/dayOfWeekHelper.js';
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -38,11 +40,13 @@ const updateTasks = () => {
       switch (task.type) {
         case 'deadline':
           task.deadlineOptions.timeRemaining -= (task.totalTimeToday - task.timeLeftToday + task.overtimeToday);
+          task.timeLeftToday = (task.deadlineOptions.timeRemaining / (countDays(task.daysOfWeek, task.deadlineOptions.deadline)));
           break;
         case 'recurring':
           task.recurringOptions.debt += (task.timeLeftToday - task.overtimeToday);
+          task.timeLeftToday = ((task.recurringOptions.timePerWeek + (task.recurringOptions.debt / 10)) / task.daysOfWeek.length);
       }
-
+      task.daysOld += 1;
       await task.save();
     });
   });
@@ -56,10 +60,9 @@ app.use(cors({
   origin: `http://localhost:${config.PORT}`
 }));
 
-const { MONGO_URI } = config;
 mongoose.set('strictQuery', false);
 
-mongoose.connect(MONGO_URI)
+mongoose.connect(config.MONGO_URI)
   .then(() => {
     console.log('Connected to MongoDB');
   })
@@ -79,6 +82,7 @@ app.use(middleware.parseToken);
 app.use(middleware.checkCsrf);
 
 app.use('/api/users', limiter, userRouter);
+app.use('/api/task', limiter, taskRouter);
 app.use('/api/sample', limiter, sample);
 
 app.use(middleware.errorHandler);

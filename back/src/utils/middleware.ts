@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import config from './config.js';
 import User, { UserInterface } from '../models/user.js';
-import { verifyToken, genAuthToken, jwtSubject } from './genToken.js';
+import { verifyToken, genAuthToken, tokenPayload } from './genToken.js';
 import Tokens from 'csrf';
 const tokens = new Tokens();
 
@@ -32,7 +32,7 @@ const parseToken = async (request: AuthenticatedRequest, response: Response, nex
     if (!verifyToken(token)) {
       let expiredToken;
       try {
-        expiredToken = jwt.decode(token) as jwtSubject;
+        expiredToken = jwt.decode(token) as tokenPayload;
       } catch (error) {
         return response.status(401).json({ error: 'token invalid' }); // token is nonsense
       }
@@ -54,7 +54,7 @@ const parseToken = async (request: AuthenticatedRequest, response: Response, nex
       });
     }
     try {
-      const decodedToken: jwtSubject = jwt.verify(token, config.SECRET) as jwtSubject;
+      const decodedToken: tokenPayload = jwt.verify(token, config.SECRET) as tokenPayload;
       const id = decodedToken._id;
       if (!id || !decodedToken.username || !decodedToken.passwordHash) {
         return response.status(401).json({ error: 'token invalid' });

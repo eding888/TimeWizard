@@ -1,39 +1,58 @@
 import mongoose from 'mongoose';
 import uniqueValidator from 'mongoose-unique-validator';
+import { validateDays } from '../utils/dayOfWeekHelper.js';
 
-interface Date {
+export interface Date {
   month: number;
   day: number;
   year: number;
 }
 
-interface RecurringOptions {
+export interface RecurringOptions {
   debt: number,
   timePerWeek: number
 }
 
-interface DeadlineOptions {
+export interface DeadlineOptions {
   deadline: Date,
   timeRemaining: number
 }
 
-type TaskType = 'deadline' | 'recurring';
+export type TaskType = 'deadline' | 'recurring';
 
 export interface TaskInterface extends mongoose.Document {
   _id: string,
+  name: string,
   type: TaskType,
   deadlineOptions: DeadlineOptions,
   recurringOptions: RecurringOptions,
+  daysOfWeek: number[],
   totalTimeToday: number,
   timeLeftToday: number,
   overtimeToday: number,
-  daysOld: number
+  daysOld: number,
+  user: string
 }
 const taskSchema = new mongoose.Schema({
   type: {
     type: String,
     enum: ['deadline', 'recurring'],
     required: [true, 'Task type is required']
+  },
+  name: {
+    type: String,
+    required: [true, 'Task name is required']
+  },
+  deadlineOptions: {
+    type: {
+      deadline: {
+        month: Number,
+        day: Number,
+        year: Number
+      },
+      timeRemaining: Number
+    },
+    default: null
   },
   recurringOptions: {
     type: {
@@ -42,12 +61,9 @@ const taskSchema = new mongoose.Schema({
     },
     default: null
   },
-  deadlineOptions: {
-    type: {
-      deadline: Date,
-      timeRemaining: Number
-    },
-    default: null
+  daysOfWeek: {
+    type: [Number],
+    required: [true, 'Days of week are required']
   },
   timeLeftToday: {
     type: Number,
@@ -60,6 +76,10 @@ const taskSchema = new mongoose.Schema({
   daysOld: {
     type: Number,
     deafult: 0
+  },
+  user: {
+    type: String,
+    ref: 'User'
   }
 });
 
@@ -79,6 +99,10 @@ taskSchema.pre('save', function (next) {
   }
   if ((this.type === 'deadline' && this.deadlineOptions === null) || (this.type === 'recurring' && this.recurringOptions === null)) {
     const error = new Error('Incorrect options provided');
+    return next(error);
+  }
+  if (!validateDays(this.daysOfWeek)) {
+    const error = new Error('Days of week not formatted correctly');
     return next(error);
   }
   next();

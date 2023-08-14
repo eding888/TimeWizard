@@ -1,17 +1,19 @@
 import express, { Response, Router } from 'express';
-import User, { UserInterface } from '../models/user.js';
 import 'express-async-errors';
 import { AuthenticatedRequest } from 'utils/middleware.js';
 
 const userRouter: Router = express.Router();
 
-userRouter.get('/all', async (request: AuthenticatedRequest, response: Response) => {
-  const users: UserInterface[] | null = await User.find({})!;
-  if (users !== null) {
-    response.json(users);
-  } else {
-    response.status(400);
+userRouter.get('/current', async (request: AuthenticatedRequest, response: Response) => {
+  if (!request.user) {
+    return response.status(401).json({ error: 'User/token not found' });
   }
+  const user = request.user;
+  await user.populate({
+    path: 'tasks.id',
+    select: '_id name type deadlineOptions recurringOptions daysOfWeek totalTimeToday timeLeftToday overtimeToday daysOld user'
+  });
+  response.status(200).json(user);
 });
 
 export default userRouter;

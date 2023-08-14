@@ -7,6 +7,12 @@ interface PassResetDetails {
   passResetCooldown: number | null,
 }
 
+interface UserTask {
+  id: string,
+  active: boolean,
+  startTime: number,
+}
+
 export interface UserInterface extends mongoose.Document {
   _id: string,
   username: string,
@@ -16,6 +22,7 @@ export interface UserInterface extends mongoose.Document {
   emailCode: string | null,
   passReset: PassResetDetails,
   refreshToken: string | null,
+  tasks: UserTask[];
 }
 const userSchema = new mongoose.Schema({
   username: {
@@ -57,7 +64,21 @@ const userSchema = new mongoose.Schema({
   refreshToken: {
     type: String,
     default: null
-  }
+  },
+  tasks: [{
+    id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Task'
+    },
+    active: {
+      type: Boolean,
+      default: false
+    },
+    startTime: {
+      type: Number,
+      default: -1
+    }
+  }]
 });
 
 userSchema.set('toJSON', {

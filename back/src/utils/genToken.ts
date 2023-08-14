@@ -3,7 +3,7 @@ import crypto from 'crypto';
 import config from './config.js';
 import User from '../models/user.js';
 
-export interface jwtSubject{
+export interface tokenPayload{
   _id: string;
   username: string,
   passwordHash: string,
@@ -27,7 +27,7 @@ export const genAuthToken = async (username : string, passwordHash: string) => {
   const user = await User.findOne({ username });
   if (user !== null) {
     const id: string = user._id.toString();
-    const jwtSubject:jwtSubject = {
+    const jwtSubject:tokenPayload = {
       _id: id,
       username,
       passwordHash,
