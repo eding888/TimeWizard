@@ -25,17 +25,17 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: null
     },
-    passResetCode: {
-        type: String,
-        default: null
-    },
-    passResetAttempts: {
-        type: String,
-        default: null
-    },
-    passResetCooldown: {
-        type: Number,
-        default: null
+    passReset: {
+        type: {
+            passResetCode: String,
+            passResetAttempts: Number,
+            passResetCooldown: Number
+        },
+        default: {
+            passResetCode: null,
+            passResetAttempts: null,
+            passResetCooldown: null
+        }
     },
     refreshToken: {
         type: String,

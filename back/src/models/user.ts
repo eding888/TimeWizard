@@ -1,6 +1,12 @@
 import mongoose from 'mongoose';
 import uniqueValidator from 'mongoose-unique-validator';
 
+interface PassResetDetails {
+  passResetCode: string | null,
+  passResetAttempts: number | null,
+  passResetCooldown: number | null,
+}
+
 export interface UserInterface extends mongoose.Document {
   _id: string,
   username: string,
@@ -8,9 +14,7 @@ export interface UserInterface extends mongoose.Document {
   passwordHash: string,
   isVerified: boolean,
   emailCode: string | null,
-  passResetCode: string | null,
-  passResetAttempts: number | null,
-  passResetCooldown: number | null,
+  passReset: PassResetDetails,
   refreshToken: string | null,
 }
 const userSchema = new mongoose.Schema({
@@ -38,17 +42,17 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: null
   },
-  passResetCode: {
-    type: String,
-    default: null
-  },
-  passResetAttempts: {
-    type: String,
-    default: null
-  },
-  passResetCooldown: {
-    type: Number,
-    default: null
+  passReset: {
+    type: {
+      passResetCode: String,
+      passResetAttempts: Number,
+      passResetCooldown: Number
+    },
+    default: {
+      passResetCode: null,
+      passResetAttempts: null,
+      passResetCooldown: null
+    }
   },
   refreshToken: {
     type: String,

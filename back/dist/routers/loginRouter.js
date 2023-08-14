@@ -122,7 +122,7 @@ loginRouter.post('/resetPassword', async (request, response) => {
     }
     const date = new Date();
     const time = date.getTime();
-    if (user.passResetCooldown && user.passResetCooldown > time) {
+    if (user.passReset.passResetCooldown && user.passReset.passResetCooldown > time) {
         return response.status(400).json({
             error: 'user still on password reset cooldown'
         });
@@ -133,8 +133,8 @@ loginRouter.post('/resetPassword', async (request, response) => {
             error: 'error with sending email'
         });
     }
-    user.passResetCode = resetCodeToken;
-    user.passResetAttempts = 5;
+    user.passReset.passResetCode = resetCodeToken;
+    user.passReset.passResetAttempts = 5;
     await user.save();
     response.status(200).end();
 });
@@ -156,34 +156,35 @@ loginRouter.post('/resetPassword/confirm', async (request, response) => {
             error: 'email not found in system'
         });
     }
-    if (!user.passResetCode) {
+    const passResetCode = user.passReset.passResetCode;
+    if (!passResetCode) {
         return response.status(400).json({
             error: 'user has no password reset code'
         });
     }
     const date = new Date();
     const time = date.getTime();
-    if (user.passResetCooldown && user.passResetCooldown > time) {
+    if (user.passReset.passResetCooldown && user.passReset.passResetCooldown > time) {
         return response.status(400).json({
             error: 'user still on password reset cooldown'
         });
     }
-    const userCode = jwt.verify(user.passResetCode, config.SECRET).code;
-    if (!user.passResetAttempts) {
+    const userCode = jwt.verify(passResetCode, config.SECRET).code;
+    if (!user.passReset.passResetAttempts) {
         return response.status(400).json({
             error: 'user does not have password reset attempts'
         });
     }
     if (userCode !== code) {
-        if (user.passResetAttempts <= 1) {
-            user.passResetAttempts = null;
-            user.passResetCooldown = time + (60 * 60 * 1000);
+        if (user.passReset.passResetAttempts <= 1) {
+            user.passReset.passResetAttempts = null;
+            user.passReset.passResetCooldown = time + (60 * 60 * 1000);
             await user.save();
             return response.status(401).json({
                 error: 'user has ran out of password reset attempts'
             });
         }
-        user.passResetAttempts = user.passResetAttempts - 1;
+        user.passReset.passResetAttempts = user.passReset.passResetAttempts - 1;
         await user.save();
         return response.status(401).json({
             error: 'code does not match'
