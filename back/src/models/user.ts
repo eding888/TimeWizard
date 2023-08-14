@@ -32,7 +32,7 @@ const userSchema = new mongoose.Schema({
   passwordHash: {
     type: String,
     minLength: 3,
-    required: true
+    required: [true, 'Password is required']
   },
   isVerified: {
     type: Boolean,
@@ -67,8 +67,7 @@ userSchema.set('toJSON', {
     delete returnedObject.__v;
     delete returnedObject.refreshToken;
     delete returnedObject.emailCode;
-    delete returnedObject.passResetCode;
-    // the passwordHash should not be revealed
+    delete returnedObject.passReset;
     delete returnedObject.passwordHash;
   }
 });
