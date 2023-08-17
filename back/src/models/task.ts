@@ -10,12 +10,12 @@ export interface Date {
 
 export interface RecurringOptions {
   debt: number,
-  timePerWeek: number
+  timePerWeek: number // seconds
 }
 
 export interface DeadlineOptions {
   deadline: Date,
-  timeRemaining: number
+  timeRemaining: number // seconds
 }
 
 export type TaskType = 'deadline' | 'recurring';
@@ -27,9 +27,8 @@ export interface TaskInterface extends mongoose.Document {
   deadlineOptions: DeadlineOptions,
   recurringOptions: RecurringOptions,
   daysOfWeek: number[],
-  totalTimeToday: number,
-  timeLeftToday: number,
-  overtimeToday: number,
+  totalTimeToday: number, // seconds
+  timeLeftToday: number, // seconds
   daysOld: number,
   user: string
 }
@@ -66,10 +65,6 @@ const taskSchema = new mongoose.Schema({
     required: [true, 'Days of week are required']
   },
   timeLeftToday: {
-    type: Number,
-    deafult: 0
-  },
-  overtimeToday: {
     type: Number,
     deafult: 0
   },

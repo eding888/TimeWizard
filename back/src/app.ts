@@ -39,11 +39,11 @@ const updateTasks = () => {
     tasks.forEach(async (task: TaskInterface) => {
       switch (task.type) {
         case 'deadline':
-          task.deadlineOptions.timeRemaining -= (task.totalTimeToday - task.timeLeftToday + task.overtimeToday);
+          task.deadlineOptions.timeRemaining -= (task.totalTimeToday - task.timeLeftToday);
           task.timeLeftToday = (task.deadlineOptions.timeRemaining / (countDays(task.daysOfWeek, task.deadlineOptions.deadline)));
           break;
         case 'recurring':
-          task.recurringOptions.debt += (task.timeLeftToday - task.overtimeToday);
+          task.recurringOptions.debt += (task.timeLeftToday - (((task.totalTimeToday - task.timeLeftToday) > 0) ? (task.totalTimeToday - task.timeLeftToday) : 0));
           task.timeLeftToday = ((task.recurringOptions.timePerWeek + (task.recurringOptions.debt / 10)) / task.daysOfWeek.length);
       }
       task.daysOld += 1;

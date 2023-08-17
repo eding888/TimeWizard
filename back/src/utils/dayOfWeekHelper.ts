@@ -28,3 +28,7 @@ export const validateDays = (daysOfWeek: number[]) => {
   }
   return true;
 };
+
+export const getCurrentEpochInSeconds = () => {
+  return (Math.round(Date.now() / 1000) * 1000);
+};
