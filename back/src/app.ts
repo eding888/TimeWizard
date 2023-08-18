@@ -58,7 +58,9 @@ const updateTasks = () => {
 cron.schedule('0 0 * * *', updateTasks);
 
 const app: Express = express();
-app.use(cors());
+app.use(cors({
+  origin: `http://localhost:${config.PORT}`
+}));
 app.options('*', cors());
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -70,12 +72,6 @@ const io = new Server(server, {
 handleSocket(io);
 
 server.listen(8081, () => console.log(`Listening on port ${8081}`));
-/*
-app.use(cors({
-  origin: `http://localhost:${config.PORT}`
-}));
-*/
-
 mongoose.set('strictQuery', false);
 
 mongoose.connect(config.MONGO_URI)
