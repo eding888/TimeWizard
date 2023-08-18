@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import LoginButton from './LoginButton';
 import DarkModeToggle from './DarkModeToggle';
+import SignupButton from './SignupButton';
 const NavBar1 = () => {
   const logoVariants = {
     small: 'https://i.ibb.co/bFJxNkL/logo-no-background.png',
@@ -27,18 +28,16 @@ const NavBar1 = () => {
     <>
       <Box w='100%' p={4} mb={5} boxShadow='sm' bg={darkAndLightModeColor} color= 'white' borderBottom='1px' borderBottomColor= {darkAndLightModeBorderColor}>
         <Flex align="center" justifyContent="space-around">
-          <Image
-          src= {variant}
-          objectFit='cover'
-          height="50px"
-          />
+          <Link to='/'>
+            <Image
+              src= {variant}
+              objectFit='cover'
+              height="50px"
+            />
+          </Link>
           <Flex gap="20px">
-            <Link to='/login'>
-              <LoginButton color = "purple"/>
-            </Link>
-            <Button colorScheme='purple' size='md'>
-              Sign Up
-            </Button>
+            <LoginButton color = "purple"/>
+            <SignupButton color='purple' size='md'/>
             <DarkModeToggle/>
           </Flex>
         </Flex>

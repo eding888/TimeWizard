@@ -1,7 +1,8 @@
 import React from 'react';
 import '../index.css';
-import { Image, Flex, Button, Heading } from '@chakra-ui/react';
-import NavBar1 from './NavBar1';
+import { Image, Flex, Button, Heading, Box } from '@chakra-ui/react';
+import NavBar1 from '../components/NavBar1';
+import SignupButton from '../components/SignupButton';
 
 function Home () {
   return (
@@ -22,9 +23,9 @@ function Home () {
           <Button colorScheme='purple' size='lg' animation="fadeInDelay2 3s ease-in-out forwards">
             Learn More
           </Button>
-          <Button colorScheme='teal' size='lg' animation="fadeInDelay2 3s ease-in-out forwards">
-            Sign Up
-          </Button>
+          <Box animation="fadeInDelay2 3s ease-in-out forwards">
+          <SignupButton color='teal' size='lg'/>
+          </Box>
         </Flex>
       </Flex>
     </>
