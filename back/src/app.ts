@@ -15,6 +15,7 @@ import Task, { TaskInterface } from './models/task.js';
 import { countDays } from './utils/dayOfWeekHelper.js';
 import http from 'http';
 import { Server } from 'socket.io';
+import { handleSocket } from './utils/socketConnection.js';
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -66,39 +67,7 @@ const io = new Server(server, {
     credentials: true
   }
 });
-
-io.on('connection', (socket) => {
-  console.log('WebSocket connected');
-
-  socket.on('subscribeToTask', async (taskId) => {
-    console.log('Subscribing to task:', taskId);
-
-    try {
-      const task = await Task.findById(taskId);
-
-      if (!task) {
-        console.log('Task not found');
-        return;
-      }
-
-      socket.emit('initialTaskData', task.toObject()); // Emit initial task data
-      const changeStream = Task.collection.watch([{ $match: { _id: task._id } }]);
-      // Listen for the 'taskSaved' event from the Mongoose schema's events
-      changeStream.on('change', (change) => {
-        if (change.operationType === 'update') {
-          socket.emit('taskChange', change.fullDocument);
-        }
-      });
-
-      socket.on('disconnect', () => {
-        console.log('WebSocket disconnected');
-        changeStream.close();
-      });
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  });
-});
+handleSocket(io);
 
 server.listen(8081, () => console.log(`Listening on port ${8081}`));
 /*

@@ -64,6 +64,10 @@ const taskSchema = new mongoose.Schema({
     type: [Number],
     required: [true, 'Days of week are required']
   },
+  totalTimeToday: {
+    type: Number,
+    deafult: 0
+  },
   timeLeftToday: {
     type: Number,
     deafult: 0

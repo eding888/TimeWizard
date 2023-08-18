@@ -17,7 +17,9 @@ interface NewUserInfo {
 
 const checkIfTimeSurpassed = async (startTime: number, task: TaskInterface) => {
   const time = getCurrentEpochInSeconds();
-  if (startTime !== -1 && task.timeLeftToday !== 0 && ((time - startTime) >= task.timeLeftToday)) {
+  console.log((time - startTime) / 1000);
+  if (startTime !== -1 && task.timeLeftToday !== 0 && (((time - startTime) / 1000) >= task.timeLeftToday)) {
+    console.log('hi');
     task.totalTimeToday += task.timeLeftToday;
     task.timeLeftToday = 0;
     await task.save();
@@ -58,12 +60,12 @@ taskRouter.post('/newTask', async (request: AuthenticatedRequest, response: Resp
     recurringOptions,
     daysOfWeek
   });
-  console.log(task);
   if (deadlineOptions) {
     task.timeLeftToday = (deadlineOptions.timeRemaining / (countDays(task.daysOfWeek, task.deadlineOptions.deadline)));
   } else {
     task.timeLeftToday = (recurringOptions.timePerWeek / task.daysOfWeek.length);
   }
+  task.totalTimeToday = 0;
   task.user = user._id;
   const res = await task.save();
   user.tasks = user.tasks.concat({ id: res._id, active: false, startTime: -1 });
@@ -82,26 +84,26 @@ taskRouter.post('/startTask/:id', async (request: AuthenticatedRequest, response
   if (!task) {
     return response.status(404).json({ error: 'task not found' });
   }
-  if (user._id !== task.user) {
+  if (user._id.toString() !== task.user) {
     return response.status(401).json({ error: 'task does not belong to user' });
   }
   const startTime = getCurrentEpochInSeconds();
-  user.tasks.forEach(userTask => {
-    if (userTask.id === task._id) {
-      if (userTask.startTime !== -1) {
-        return response.status(400).json({ error: 'task already started' });
-      }
-      userTask.active = true;
-      userTask.startTime = startTime;
-    } else {
-      userTask.active = false;
-      userTask.startTime = -1;
+  const userTaskIndex = user.tasks.findIndex(userTask => userTask.id.toString() === task._id.toString());
+
+  if (userTaskIndex !== -1) {
+    const userTask = user.tasks[userTaskIndex];
+    if (userTask.startTime !== -1) {
+      return response.status(400).json({ error: 'task already started' });
     }
-  });
-  response.status(200).json({ startTime });
+    userTask.active = true;
+    userTask.startTime = startTime;
+    await user.save();
+    return response.status(200).json({ startTime });
+  }
+  response.status(404).json({ error: 'task not found at id' });
 });
 
-taskRouter.post('/stopTaskTimer/:id', async (request: AuthenticatedRequest, response: Response) => {
+taskRouter.post('/stopTask/:id', async (request: AuthenticatedRequest, response: Response) => {
   const id = request.params.id;
   if (!request.user) {
     return response.status(401).json({ error: 'User/token not found' });
@@ -111,24 +113,29 @@ taskRouter.post('/stopTaskTimer/:id', async (request: AuthenticatedRequest, resp
   if (!stoppedTask) {
     return response.status(404).json({ error: 'task not found' });
   }
-  if (user._id !== stoppedTask.user) {
+  if (user._id.toString() !== stoppedTask.user) {
     return response.status(401).json({ error: 'task does not belong to user' });
   }
-  const userTask = user.tasks.find(userTask => userTask.id === stoppedTask._id);
-  if (!userTask) {
+  console.log(user.tasks);
+  const userTaskIndex = user.tasks.findIndex(userTask => userTask.id.toString() === stoppedTask._id.toString());
+  if (userTaskIndex === -1) {
     return response.status(404).json({ error: 'user task not found' });
   }
+  const userTask = user.tasks[userTaskIndex];
   if (!userTask.active) {
     return response.status(400).json({ error: 'task was never started' });
   }
   const time = getCurrentEpochInSeconds();
   const startTime = userTask.startTime;
   if (!(await checkIfTimeSurpassed(startTime, stoppedTask))) {
-    stoppedTask.timeLeftToday -= (stoppedTask.timeLeftToday === 0 ? 0 : (time - startTime));
-    stoppedTask.totalTimeToday += time - userTask.startTime;
+    const elapsedTime = (time - startTime) / 1000;
+    stoppedTask.timeLeftToday -= (stoppedTask.timeLeftToday === 0 ? 0 : elapsedTime);
+    stoppedTask.totalTimeToday += elapsedTime;
+    await stoppedTask.save();
   }
   userTask.active = false;
   userTask.startTime = -1;
+  await user.save();
   response.status(200).json({ startTime });
 });
 
