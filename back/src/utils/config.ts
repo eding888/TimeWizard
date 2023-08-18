@@ -15,6 +15,7 @@ const TEST: boolean = process.env.NODE_ENV === 'test';
 const MONGO_URI: string = (TEST
   ? process.env.TEST_MONGO_URI!
   : process.env.MONGO_URI!);
+console.log(MONGO_URI);
 const SECRET: string = process.env.SECRET!;
 const EMAIL: string = process.env.EMAIL!;
 const EMAIL_PASS: string = process.env.EMAIL_PASS!;
