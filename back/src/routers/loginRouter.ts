@@ -33,6 +33,7 @@ loginRouter.post('/', async (request: AuthenticatedRequest, response: Response) 
       error: 'improper formatting of username'
     });
   }
+  console.log(username);
   const user: UserInterface = await User.findOne({ username }) as UserInterface;
 
   if (!user) {

@@ -11,7 +11,7 @@ userRouter.get('/current', async (request: AuthenticatedRequest, response: Respo
   const user = request.user;
   await user.populate({
     path: 'tasks.id',
-    select: '_id name type deadlineOptions recurringOptions daysOfWeek totalTimeToday timeLeftToday overtimeToday daysOld user'
+    select: '_id name type deadlineOptions recurringOptions discrete daysOfWeek totalTimeToday timeLeftToday daysOld user'
   });
   response.status(200).json(user);
 });
