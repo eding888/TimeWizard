@@ -26,6 +26,7 @@ export interface TaskInterface extends mongoose.Document {
   type: TaskType,
   deadlineOptions: DeadlineOptions,
   recurringOptions: RecurringOptions,
+  discrete: boolean,
   daysOfWeek: number[],
   totalTimeToday: number, // seconds
   timeLeftToday: number, // seconds
@@ -59,6 +60,10 @@ const taskSchema = new mongoose.Schema({
       timePerWeek: Number
     },
     default: null
+  },
+  discrete: {
+    type: Boolean,
+    default: false
   },
   daysOfWeek: {
     type: [Number],

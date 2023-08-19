@@ -24,7 +24,7 @@ function Home () {
             Learn More
           </Button>
           <Box animation="fadeInDelay2 3s ease-in-out forwards">
-          <SignupButton color='teal' size='lg'/>
+            <SignupButton color='teal' size='lg'/>
           </Box>
         </Flex>
       </Flex>

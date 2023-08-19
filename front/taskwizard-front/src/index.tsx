@@ -12,6 +12,7 @@ root.render(
   <React.StrictMode>
     <ChakraProvider>
       <BrowserRouter>
+        <ColorModeScript initialColorMode="dark" />
         <Routes />
       </BrowserRouter>
     </ChakraProvider>

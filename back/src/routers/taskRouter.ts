@@ -12,6 +12,7 @@ interface NewUserInfo {
   name: string,
   deadlineOptions: DeadlineOptions,
   recurringOptions: RecurringOptions,
+  discrete: boolean,
   daysOfWeek: number[]
 }
 
@@ -45,8 +46,8 @@ taskRouter.get('/current', async (request: AuthenticatedRequest, response: Respo
   response.status(200).json({ tasks });
 });
 taskRouter.post('/newTask', async (request: AuthenticatedRequest, response: Response) => {
-  const { type, name, deadlineOptions, recurringOptions, daysOfWeek }: NewUserInfo = request.body;
-  if (!type || !name || (!deadlineOptions && !recurringOptions) || (deadlineOptions && recurringOptions) || !daysOfWeek) {
+  const { type, name, deadlineOptions, recurringOptions, discrete, daysOfWeek }: NewUserInfo = request.body;
+  if (!type || !name || !discrete || (!deadlineOptions && !recurringOptions) || (deadlineOptions && recurringOptions) || !daysOfWeek) {
     return response.status(400).json({ error: 'Missing arguments' });
   }
   if (!request.user) {
@@ -58,6 +59,7 @@ taskRouter.post('/newTask', async (request: AuthenticatedRequest, response: Resp
     name,
     deadlineOptions,
     recurringOptions,
+    discrete,
     daysOfWeek
   });
   if (deadlineOptions) {
@@ -83,6 +85,9 @@ taskRouter.post('/startTask/:id', async (request: AuthenticatedRequest, response
   const task = await Task.findById(id);
   if (!task) {
     return response.status(404).json({ error: 'task not found' });
+  }
+  if (task.discrete) {
+    return response.status(400).json({ error: 'discrete task cannot be started' });
   }
   if (user._id.toString() !== task.user) {
     return response.status(401).json({ error: 'task does not belong to user' });
@@ -127,12 +132,18 @@ taskRouter.post('/stopTask/:id', async (request: AuthenticatedRequest, response:
   }
   const time = getCurrentEpochInSeconds();
   const startTime = userTask.startTime;
-  if (!(await checkIfTimeSurpassed(startTime, stoppedTask))) {
+  if (stoppedTask.discrete) {
+    if (!(stoppedTask.timeLeftToday <= 0)) {
+      stoppedTask.timeLeftToday -= 1;
+    }
+    stoppedTask.totalTimeToday += 1;
+  } else if (!(await checkIfTimeSurpassed(startTime, stoppedTask))) {
     const elapsedTime = (time - startTime) / 1000;
     stoppedTask.timeLeftToday -= (stoppedTask.timeLeftToday === 0 ? 0 : elapsedTime);
     stoppedTask.totalTimeToday += elapsedTime;
-    await stoppedTask.save();
   }
+  await stoppedTask.save();
+
   userTask.active = false;
   userTask.startTime = -1;
   await user.save();
