@@ -42,3 +42,13 @@ export const confirm = async (code: string, username: string) => {
     return errorMsg;
   }
 };
+
+export const getCurrentUser = async () => {
+  try {
+    const res = await axios.get(`${backendUrl}/api/users/current`);
+    return res;
+  } catch (error: any) {
+    const errorMsg: string = error.response.data.error;
+    return errorMsg;
+  }
+};

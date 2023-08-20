@@ -35,6 +35,7 @@ function Login () {
   const submitLogin = async (event: SyntheticEvent) => {
     event.preventDefault();
     const res = await login(DOMPurify.sanitize(email), DOMPurify.sanitize(password));
+    console.log(res);
     if (res !== 'OK') {
       toast({
         title: res,
