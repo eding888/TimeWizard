@@ -4,6 +4,7 @@ import '../index.css';
 import { useToast, Button, FormControl, Input, FormLabel, FormHelperText, Flex, Heading, Image, useMediaQuery } from '@chakra-ui/react';
 import DOMPurify from 'dompurify';
 import NavBar1 from '../components/NavBar1';
+import { useNavigate } from 'react-router-dom';
 import { login } from '../utils/routing';
 function Login () {
   const [screenCutoff] = useMediaQuery('(min-width: 600px)');
@@ -23,10 +24,10 @@ function Login () {
     setPassword(target.value);
   };
   const toast = useToast();
+  const navigate = useNavigate();
   const submitLogin = async (event: SyntheticEvent) => {
     event.preventDefault();
     const res = await login(DOMPurify.sanitize(email), DOMPurify.sanitize(password));
-    console.log(res);
     if (res !== 'OK') {
       toast({
         title: res,
@@ -34,7 +35,7 @@ function Login () {
         isClosable: true
       });
     } else {
-      console.log('good');
+      navigate('/dashboard');
     }
   };
   return (

@@ -26,7 +26,13 @@ function ConfirmAccount () {
       return false;
     }
     const res = await confirm(DOMPurify.sanitize(code), DOMPurify.sanitize(user));
-    if (res === 'OK') {
+    if (res !== 'OK') {
+      toast({
+        title: res,
+        status: 'error',
+        isClosable: true
+      });
+    } else {
       toast({
         title: 'Success! You may now log in.',
         status: 'success',

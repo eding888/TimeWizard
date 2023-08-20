@@ -64,8 +64,13 @@ app.use(cors({
   origin: `http://localhost:${config.PORT}`
 }));
 */
-app.use(cors());
-app.options('*', cors());
+const corsOptions = {
+  origin: 'http://localhost:3000',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true // Allow cookies to be sent cross-origin
+};
+
+app.use(cors(corsOptions));
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {

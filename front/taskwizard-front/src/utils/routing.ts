@@ -22,7 +22,13 @@ export const newUser = async (username: string, email: string, password: string)
 
 export const login = async (email: string, password: string) => {
   try {
-    await axios.post(`${backendUrl}/api/login`, { email, password });
+    const response = await axios.post(`${backendUrl}/api/login`, { email, password }, {
+      withCredentials: true
+    });
+    console.log(response);
+    if (response.headers['set-cookie'] && response.headers['set-cookie'][0] !== undefined) {
+      window.localStorage.setItem('token', response.headers['set-cookie'][0]);
+    }
     return 'OK';
   } catch (error: any) {
     const errorMsg: string = error.response.data.error;
@@ -37,16 +43,6 @@ export const confirm = async (code: string, username: string) => {
   try {
     await axios.post(`${backendUrl}/api/login/confirm`, { code, username });
     return 'OK';
-  } catch (error: any) {
-    const errorMsg: string = error.response.data.error;
-    return errorMsg;
-  }
-};
-
-export const getCurrentUser = async () => {
-  try {
-    const res = await axios.get(`${backendUrl}/api/users/current`);
-    return res;
   } catch (error: any) {
     const errorMsg: string = error.response.data.error;
     return errorMsg;

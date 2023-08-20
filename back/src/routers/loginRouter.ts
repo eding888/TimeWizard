@@ -72,6 +72,8 @@ loginRouter.post('/', async (request: AuthenticatedRequest, response: Response) 
     httpOnly: true,
     secure: true
   });
+  console.log(user);
+  console.log(authToken);
   const token = tokens.create(config.SECRET);
 
   response.status(200).json({ csrf: token });
