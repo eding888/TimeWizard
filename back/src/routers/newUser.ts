@@ -9,7 +9,6 @@ const newUserRouter: Router = express.Router();
 
 newUserRouter.post('/', async (request: AuthenticatedRequest, response: Response) => {
   const { username, email, password } = request.body;
-
   if (!username || !email || !password) {
     return response.status(400).json({
       error: 'no username or password or email'

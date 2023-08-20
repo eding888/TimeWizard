@@ -7,7 +7,7 @@ import NavBar1 from '../components/NavBar1';
 function Login () {
   const [screenCutoff] = useMediaQuery('(min-width: 600px)');
   useEffect(() => {
-    console.log('hi');
+    console.log('');
   }, [screenCutoff]);
   return (
     <>

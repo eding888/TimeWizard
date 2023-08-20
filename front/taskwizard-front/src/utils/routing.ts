@@ -1,10 +1,17 @@
 import axios, { AxiosError } from 'axios';
+import { useState } from 'react';
 const csrf = '';
 const backendUrl = 'http://localhost:8080';
 
-const newUser = async (username: string, email: string, password: string) => {
+let user = '';
+
+export const getUser = () => {
+  return user;
+};
+
+export const newUser = async (username: string, email: string, password: string) => {
   try {
-    const response = await axios.post(`${backendUrl}/api/newUser`, { username, email, password });
+    await axios.post(`${backendUrl}/api/newUser`, { username, email, password });
     return 'OK';
   } catch (error: any) {
     const errorMsg: string = error.response.data.error;
@@ -18,4 +25,27 @@ const newUser = async (username: string, email: string, password: string) => {
   }
 };
 
-export default newUser;
+export const login = async (username: string, password: string) => {
+  try {
+    await axios.post(`${backendUrl}/api/login`, { username, password });
+    user = username;
+    return 'OK';
+  } catch (error: any) {
+    user = username;
+    const errorMsg: string = error.response.data.error;
+    if (errorMsg.includes('not verified')) {
+      return 'CONFIRMATION';
+    }
+    return errorMsg;
+  }
+};
+
+export const confirm = async (code: string, username: string) => {
+  try {
+    await axios.post(`${backendUrl}/api/login/confirm`, { code, username });
+    return 'OK';
+  } catch (error: any) {
+    const errorMsg: string = error.response.data.error;
+    return errorMsg;
+  }
+};

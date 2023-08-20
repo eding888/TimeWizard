@@ -105,7 +105,7 @@ loginRouter.post('/confirm', async (request: AuthenticatedRequest, response: Res
   const userCode: string = (jwt.verify(user.emailCode, config.SECRET) as code).code;
   if (userCode !== code) {
     return response.status(401).json({
-      error: 'code does not match'
+      error: 'Incorrect code'
     });
   }
   user.isVerified = true;

@@ -5,7 +5,8 @@ import { useToast, FormControl, Input, FormLabel, FormErrorMessage, Flex, Headin
 import DarkModeToggle from '../components/DarkModeToggle';
 import NavBar1 from '../components/NavBar1';
 import DOMPurify from 'dompurify';
-import newUser from '../utils/routing';
+import { newUser, login } from '../utils/routing';
+import { useNavigate } from 'react-router-dom';
 function Signup () {
   interface TextAndError {
     text: string,
@@ -96,6 +97,7 @@ function Signup () {
   };
 
   const toast = useToast();
+  const navigate = useNavigate();
   const submit = async (event: SyntheticEvent) => {
     event.preventDefault();
     if (username.error === '' && email.error === '' && password.error === '' && confirmPassword.error === '') {
@@ -106,11 +108,22 @@ function Signup () {
           status: 'error',
           isClosable: true
         });
+      } else {
+        const res = await login(username.text, password.text);
+        if (res !== 'CONFIRMATION') {
+          toast({
+            title: res,
+            status: 'error',
+            isClosable: true
+          });
+        } else {
+          navigate('/confirm');
+        }
       }
     }
   };
   useEffect(() => {
-    console.log('hi');
+    ; // eslint-disable-line
   }, [screenCutoff]);
   return (
     <>
