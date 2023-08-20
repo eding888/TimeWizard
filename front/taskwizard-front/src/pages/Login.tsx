@@ -28,7 +28,8 @@ function Login () {
               <FormLabel>Password</FormLabel>
               <Input type='password' />
             </FormControl>
-            <Button mt = '5' w='100%' type='submit'>Login</Button>
+            <Button colorScheme='purple' mt = '5' w='100%' type='submit'>Login</Button>
+            <Button mt = '5' w='100%'>Forgot Password?</Button>
         </Flex>
       </Flex>
     </>

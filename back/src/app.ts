@@ -27,7 +27,8 @@ const limiter = rateLimit({
 const maxAccounts = config.TEST ? 1000 : 3;
 const accountLimiter = rateLimit({
   windowMs: 120 * 60 * 1000,
-  max: maxAccounts,
+  // max: maxAccounts,
+  max: 1000,
   standardHeaders: true,
   legacyHeaders: false,
   message: 'Too many accounts created, please try again later.'
@@ -58,14 +59,17 @@ const updateTasks = () => {
 cron.schedule('0 0 * * *', updateTasks);
 
 const app: Express = express();
+/*
 app.use(cors({
   origin: `http://localhost:${config.PORT}`
 }));
+*/
+app.use(cors());
 app.options('*', cors());
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: 'http://localhost:3001',
+    origin: 'http://localhost:3000',
     credentials: true
   }
 });

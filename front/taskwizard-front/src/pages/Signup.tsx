@@ -1,10 +1,11 @@
 import React, { useState, useEffect, SyntheticEvent } from 'react';
 import '../index.css';
 
-import { FormControl, Input, FormLabel, FormErrorMessage, Flex, Heading, Image, useMediaQuery, Button } from '@chakra-ui/react';
+import { useToast, FormControl, Input, FormLabel, FormErrorMessage, Flex, Heading, Image, useMediaQuery, Button } from '@chakra-ui/react';
 import DarkModeToggle from '../components/DarkModeToggle';
 import NavBar1 from '../components/NavBar1';
 import DOMPurify from 'dompurify';
+import newUser from '../utils/routing';
 function Signup () {
   interface TextAndError {
     text: string,
@@ -47,6 +48,16 @@ function Signup () {
     setUsername(newData);
   };
 
+  const handleEmail = (event: SyntheticEvent): void => {
+    const target = event.target as HTMLInputElement;
+    const newEmail = target.value;
+    const newData: TextAndError = {
+      text: newEmail,
+      error: ''
+    };
+    setEmail(newData);
+  };
+
   const handlePassword = (event: SyntheticEvent): void => {
     const target = event.target as HTMLInputElement;
     const newPassword = target.value;
@@ -83,6 +94,21 @@ function Signup () {
     }
     setConfirmPassword(newData);
   };
+
+  const toast = useToast();
+  const submit = async (event: SyntheticEvent) => {
+    event.preventDefault();
+    if (username.error === '' && email.error === '' && password.error === '' && confirmPassword.error === '') {
+      const res = await newUser(username.text, email.text, password.text);
+      if (res !== 'OK') {
+        toast({
+          title: res,
+          status: 'error',
+          isClosable: true
+        });
+      }
+    }
+  };
   useEffect(() => {
     console.log('hi');
   }, [screenCutoff]);
@@ -100,7 +126,7 @@ function Signup () {
         />
         <Flex justifyContent='center' direction='column' width = 'clamp(100px, 50%, 300px)'>
           <Heading mb = '5' textAlign={screenCutoff ? 'right' : 'left'}>Sign Up</Heading>
-            <form>
+            <form onSubmit={submit}>
               <FormControl isRequired isInvalid={username.error !== ''}>
                 <FormLabel>Username</FormLabel>
                 <Input onChange={handleUsername} type='text' />
@@ -108,7 +134,7 @@ function Signup () {
               </FormControl>
               <FormControl isRequired>
                 <FormLabel mt = '5'>Email</FormLabel>
-                <Input type='email' />
+                <Input onChange={handleEmail} type='email' />
               </FormControl>
               <FormControl isRequired isInvalid={password.error !== ''}>
                 <FormLabel mt = '5'>Password</FormLabel>
@@ -124,7 +150,7 @@ function Signup () {
                 <Input onChange={handleConfirmPassword} type='password' />
                 <FormErrorMessage>{confirmPassword.error}</FormErrorMessage>
               </FormControl>
-              <Button mt = '5' w='100%' type='submit'>Create Account</Button>
+              <Button colorScheme='purple' mt = '5' w='100%' type='submit'>Create Account</Button>
             </form>
         </Flex>
       </Flex>
