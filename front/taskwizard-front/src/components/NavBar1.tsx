@@ -38,7 +38,7 @@ const NavBar1 = () => {
             />
           </Link>
           <Flex gap="20px">
-            <IconButton aria-label='info'>
+            <IconButton aria-label='info' colorScheme='purple'>
               <InfoIcon/>
             </IconButton>
             <LoginButton color = "purple"/>
