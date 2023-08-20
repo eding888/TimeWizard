@@ -3,13 +3,8 @@ import { useState } from 'react';
 const csrf = '';
 const backendUrl = 'http://localhost:8080';
 
-let user = '';
-
-export const getUser = () => {
-  return user;
-};
-
 export const newUser = async (username: string, email: string, password: string) => {
+  console.log(username, email);
   try {
     await axios.post(`${backendUrl}/api/newUser`, { username, email, password });
     return 'OK';
@@ -25,13 +20,11 @@ export const newUser = async (username: string, email: string, password: string)
   }
 };
 
-export const login = async (username: string, password: string) => {
+export const login = async (email: string, password: string) => {
   try {
-    await axios.post(`${backendUrl}/api/login`, { username, password });
-    user = username;
+    await axios.post(`${backendUrl}/api/login`, { email, password });
     return 'OK';
   } catch (error: any) {
-    user = username;
     const errorMsg: string = error.response.data.error;
     if (errorMsg.includes('not verified')) {
       return 'CONFIRMATION';

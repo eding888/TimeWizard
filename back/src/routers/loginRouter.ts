@@ -22,19 +22,18 @@ const sendEmailWithCode = async (email: string, mailType: MailType, subject: str
 };
 
 loginRouter.post('/', async (request: AuthenticatedRequest, response: Response) => {
-  const { username, password } = request.body;
-  if (!username || !password) {
+  const { email, password } = request.body;
+  if (!email || !password) {
     return response.status(400).json({
-      error: 'no username/password provided'
+      error: 'no email/password provided'
     });
   }
-  if (!checkSanitizedInput(username, 'none')) {
+  if (!checkSanitizedInput(email, 'email')) {
     return response.status(400).json({
-      error: 'improper formatting of username'
+      error: 'Improper formatting of email'
     });
   }
-  console.log(username);
-  const user: UserInterface = await User.findOne({ username }) as UserInterface;
+  const user: UserInterface = await User.findOne({ email }) as UserInterface;
 
   if (!user) {
     return response.status(404).json({
@@ -47,7 +46,7 @@ loginRouter.post('/', async (request: AuthenticatedRequest, response: Response) 
 
   if (!passwordCorrect) {
     return response.status(401).json({
-      error: 'invalid password'
+      error: 'Invalid password'
     });
   }
   if (!user.isVerified) {

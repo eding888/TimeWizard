@@ -4,8 +4,11 @@ import '../index.css';
 import { useToast, Text, Button, FormControl, Input, FormLabel, FormHelperText, Flex, Heading, Image, useMediaQuery } from '@chakra-ui/react';
 import DarkModeToggle from '../components/DarkModeToggle';
 import NavBar1 from '../components/NavBar1';
-import { confirm, getUser } from '../utils/routing';
+import { confirm } from '../utils/routing';
+import DOMPurify from 'dompurify';
+import { useParams } from 'react-router-dom';
 function ConfirmAccount () {
+  const { user } = useParams();
   const [screenCutoff] = useMediaQuery('(min-width: 600px)');
   useEffect(() => {
     ; // eslint-disable-line
@@ -19,7 +22,10 @@ function ConfirmAccount () {
   const toast = useToast();
   const submit = async (event: SyntheticEvent) => {
     event.preventDefault();
-    const res = await confirm(code, getUser());
+    if (!user) {
+      return false;
+    }
+    const res = await confirm(DOMPurify.sanitize(code), DOMPurify.sanitize(user));
     if (res !== 'OK') {
       toast({
         title: res,

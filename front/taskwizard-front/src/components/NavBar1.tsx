@@ -1,14 +1,16 @@
-import { Box, Image, Flex, Button, IconButton, useMediaQuery, useColorModeValue, Heading, Center, Spacer } from '@chakra-ui/react';
+import { useColorMode, Box, Image, Flex, Button, IconButton, useMediaQuery, useColorModeValue, Heading, Center, Spacer } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import LoginButton from './LoginButton';
 import DarkModeToggle from './DarkModeToggle';
 import SignupButton from './SignupButton';
+import { InfoIcon } from '@chakra-ui/icons';
 const NavBar1 = () => {
   const logoVariants = {
     small: 'https://i.ibb.co/bFJxNkL/logo-no-background.png',
     large: 'https://i.ibb.co/5F9p1T9/logo-no-background.png'
   };
+  const { colorMode } = useColorMode();
   const [screenCutoff] = useMediaQuery('(min-width: 600px)');
   const darkAndLightModeColor = useColorModeValue('white', 'gray.800');
   const darkAndLightModeBorderColor = useColorModeValue('gray.200', 'gray.800');
@@ -36,12 +38,19 @@ const NavBar1 = () => {
             />
           </Link>
           <Flex gap="20px">
+            <IconButton aria-label='info' colorScheme='purple'>
+              <InfoIcon/>
+            </IconButton>
             <LoginButton color = "purple"/>
             <SignupButton color='purple' size='md'/>
             <DarkModeToggle/>
           </Flex>
         </Flex>
       </Box>
+      <Flex onClick = {() => { window.location.href = 'https://github.com/eding888'; }}cursor='pointer' gap='6px' alignItems='center' fontWeight='light' fontSize='xs' position='fixed' top = '96%' left="50%" transform="translateX(-50%)">
+        <Image filter={colorMode === 'dark' ? 'invert(100%)' : ''}src='https://cdn-icons-png.flaticon.com/512/25/25231.png' height='20px'></Image>
+        eding888
+      </Flex>
     </>
   );
 };

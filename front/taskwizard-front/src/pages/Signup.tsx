@@ -37,6 +37,7 @@ function Signup () {
   }
 
   const handleUsername = (event: SyntheticEvent): void => {
+    const pattern = /^[a-zA-Z0-9]*$/;
     const target = event.target as HTMLInputElement;
     const newUsername = target.value;
     const newData: TextAndError = {
@@ -45,6 +46,9 @@ function Signup () {
     };
     if (newUsername !== '' && newUsername.length < 3) {
       newData.error = 'Username must be at least 3 characters.';
+    }
+    if (!pattern.test(newUsername)) {
+      newData.error = 'Username cannot contain special characters';
     }
     setUsername(newData);
   };
@@ -101,7 +105,7 @@ function Signup () {
   const submit = async (event: SyntheticEvent) => {
     event.preventDefault();
     if (username.error === '' && email.error === '' && password.error === '' && confirmPassword.error === '') {
-      const res = await newUser(username.text, email.text, password.text);
+      const res = await newUser(DOMPurify.sanitize(username.text), DOMPurify.sanitize(email.text), DOMPurify.sanitize(password.text));
       if (res !== 'OK') {
         toast({
           title: res,
@@ -109,7 +113,7 @@ function Signup () {
           isClosable: true
         });
       } else {
-        const res = await login(username.text, password.text);
+        const res = await login(DOMPurify.sanitize(email.text), DOMPurify.sanitize(password.text));
         if (res !== 'CONFIRMATION') {
           toast({
             title: res,
@@ -117,7 +121,7 @@ function Signup () {
             isClosable: true
           });
         } else {
-          navigate('/confirm');
+          navigate(`/confirm/${username.text}`);
         }
       }
     }
