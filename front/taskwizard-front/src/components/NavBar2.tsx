@@ -1,11 +1,11 @@
 import { useColorMode, Box, Image, Flex, Button, IconButton, useMediaQuery, useColorModeValue, Heading, Center, Spacer } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import LoginButton from './LoginButton';
+import LogoutButton from './LogoutButton';
 import DarkModeToggle from './DarkModeToggle';
 import SignupButton from './SignupButton';
 import { InfoIcon } from '@chakra-ui/icons';
-const NavBar1 = () => {
+const NavBar2 = () => {
   const logoVariants = {
     small: 'https://i.ibb.co/bFJxNkL/logo-no-background.png',
     large: 'https://i.ibb.co/5F9p1T9/logo-no-background.png'
@@ -38,11 +38,10 @@ const NavBar1 = () => {
             />
           </Link>
           <Flex gap="20px">
-            <IconButton aria-label='info'>
+            <IconButton aria-label='info' colorScheme='purple'>
               <InfoIcon/>
             </IconButton>
-            <LoginButton color = "purple"/>
-            <SignupButton color='purple' size='md'/>
+            <LogoutButton color = "purple"/>
             <DarkModeToggle/>
           </Flex>
         </Flex>
@@ -55,4 +54,4 @@ const NavBar1 = () => {
   );
 };
 
-export default NavBar1;
+export default NavBar2;

@@ -5,7 +5,16 @@ import { useToast, Button, FormControl, Input, FormLabel, FormHelperText, Flex, 
 import DOMPurify from 'dompurify';
 import NavBar1 from '../components/NavBar1';
 import { login } from '../utils/routing';
+import { useNavigate } from 'react-router-dom';
+import { checkToken } from '../utils/checkToken';
 function Login () {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (checkToken()) {
+      navigate('/dashboard');
+    }
+  }, []);
   const [screenCutoff] = useMediaQuery('(min-width: 600px)');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -33,7 +42,7 @@ function Login () {
         isClosable: true
       });
     } else {
-      console.log('good');
+      navigate('/dashboard');
     }
   };
   return (
