@@ -1,16 +1,22 @@
 import React, { useState, useEffect, SyntheticEvent } from 'react';
 import '../index.css';
 
-import { useToast, Button, FormControl, Input, FormLabel, FormHelperText, Flex, Heading, Image, useMediaQuery } from '@chakra-ui/react';
+import { useToast, Button, FormControl, Input, FormLabel, Flex, Heading, Image, useMediaQuery } from '@chakra-ui/react';
 import DOMPurify from 'dompurify';
 import NavBar1 from '../components/NavBar1';
 import { useNavigate } from 'react-router-dom';
 import { login } from '../utils/routing';
 import { checkToken } from '../utils/checkToken';
+import Loader from '../components/Loader';
 function Login () {
   const [screenCutoff] = useMediaQuery('(min-width: 600px)');
+  const [screenHeightCutoff] = useMediaQuery('(min-height: 400px)');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isNotLoaded, setIsNotLoaded] = useState(true);
+  const handleLoad = () => {
+    setIsNotLoaded(false);
+  };
 
   const navigate = useNavigate();
 
@@ -49,14 +55,15 @@ function Login () {
   };
   return (
     <>
+      {isNotLoaded && <Loader/>}
       <NavBar1/>
-      <Flex alignItems='center' justifyContent='center' direction={screenCutoff ? 'row' : 'column'} height = 'calc(82vh - 95px)' gap = '30px'>
+      <Flex onLoad = {handleLoad} alignItems='center' justifyContent='center' direction={screenCutoff ? 'row' : 'column'} height = 'calc(82vh - 95px)' gap = '30px'>
         <Image
           src= 'https://cdn-icons-png.flaticon.com/512/477/477103.png'
           height={!screenCutoff ? 'clamp(50px, 25%, 300px)' : 'clamp(100px, 40%, 300px)'}
           animation="bounce 2s ease-in-out infinite"
         />
-        <Flex justifyContent='center' direction='column' width = 'clamp(100px, 50%, 300px)'>
+        <Flex flexWrap = 'wrap' justifyContent='center' direction='column' width = 'clamp(100px, 50%, 300px)'>
           <Heading mb = '5' textAlign='left'>Login</Heading>
             <form onSubmit={submitLogin}>
               <FormControl>
@@ -67,8 +74,8 @@ function Login () {
                 <FormLabel>Password</FormLabel>
                 <Input onChange={handlePassword} type='password' />
               </FormControl>
-              <Button colorScheme='purple' mt = '5' w='100%' type='submit'>Login</Button>
-              <Button mt = '5' w='100%'>Forgot Password?</Button>
+              <Button colorScheme='purple' mt = '5' w={ screenHeightCutoff ? '100%' : '40%' } ms= {screenHeightCutoff ? '0' : '5%'} type='submit'>Login</Button>
+              <Button mt = '5' w={ screenHeightCutoff ? '100%' : '40%' } ms= {screenHeightCutoff ? '0' : '5%'} fontSize={screenHeightCutoff ? 'md' : 'xs'} >Forgot Password?</Button>
             </form>
         </Flex>
       </Flex>

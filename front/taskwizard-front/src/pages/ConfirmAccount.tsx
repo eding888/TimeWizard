@@ -1,15 +1,19 @@
 import React, { useState, useEffect, SyntheticEvent } from 'react';
 import '../index.css';
 
-import { useToast, Text, Button, FormControl, Input, FormLabel, FormHelperText, Flex, Heading, Image, useMediaQuery } from '@chakra-ui/react';
-import DarkModeToggle from '../components/DarkModeToggle';
+import { useToast, Text, Button, Input, Flex, Heading, Image, useMediaQuery } from '@chakra-ui/react';
 import NavBar1 from '../components/NavBar1';
 import { confirm } from '../utils/routing';
 import DOMPurify from 'dompurify';
 import { useParams } from 'react-router-dom';
+import Loader from '../components/Loader';
 function ConfirmAccount () {
   const { user } = useParams();
   const [screenCutoff] = useMediaQuery('(min-width: 600px)');
+  const [isNotLoaded, setIsNotLoaded] = useState(true);
+  const handleLoad = () => {
+    setIsNotLoaded(false);
+  };
   useEffect(() => {
     ; // eslint-disable-line
   }, [screenCutoff]);
@@ -42,8 +46,9 @@ function ConfirmAccount () {
   };
   return (
     <>
+      {isNotLoaded && <Loader/>}
       <NavBar1/>
-      <Flex alignItems='center' justifyContent='center' direction='column' height = 'calc(82vh - 95px)' gap = '30px'>
+      <Flex onLoad={handleLoad} alignItems='center' justifyContent='center' direction='column' height = 'calc(82vh - 95px)' gap = '30px'>
         <Image
           src= 'https://cdn-icons-png.flaticon.com/512/477/477103.png'
           height={!screenCutoff ? 'clamp(50px, 25%, 300px)' : 'clamp(100px, 40%, 300px)'}

@@ -1,4 +1,4 @@
-import { useColorMode, Box, Image, Flex, Button, IconButton, useMediaQuery, useColorModeValue, Heading, Center, Spacer } from '@chakra-ui/react';
+import { useColorMode, Box, Image, Flex, IconButton, useMediaQuery, useColorModeValue } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import LoginButton from './LoginButton';
@@ -12,6 +12,7 @@ const NavBar1 = () => {
   };
   const { colorMode } = useColorMode();
   const [screenCutoff] = useMediaQuery('(min-width: 600px)');
+  const [screenHeightCutoff] = useMediaQuery('(min-height: 400px)');
   const darkAndLightModeColor = useColorModeValue('white', 'gray.800');
   const darkAndLightModeBorderColor = useColorModeValue('gray.200', 'gray.800');
   const [variant, setVariant] = useState(logoVariants.large);
@@ -41,13 +42,13 @@ const NavBar1 = () => {
             <IconButton aria-label='info'>
               <InfoIcon/>
             </IconButton>
-            <LoginButton color = "purple"/>
-            <SignupButton color='purple' size='md'/>
+            <LoginButton color = "purple" padding = {screenCutoff ? 'md' : '3'} fontSize = {screenCutoff ? 'md' : 'xs'}/>
+            <SignupButton color='purple' padding = {screenCutoff ? 'md' : '3'} fontSize = {screenCutoff ? 'md' : 'xs'} size='md'/>
             <DarkModeToggle/>
           </Flex>
         </Flex>
       </Box>
-      <Flex onClick = {() => { window.location.href = 'https://github.com/eding888'; }}cursor='pointer' gap='6px' alignItems='center' fontWeight='light' fontSize='xs' position='fixed' top = '96%' left="50%" transform="translateX(-50%)">
+      <Flex display={ screenHeightCutoff ? 'flex' : 'none' } onClick = {() => { window.location.href = 'https://github.com/eding888'; }}cursor='pointer' gap='6px' alignItems='center' fontWeight='light' fontSize='xs' position='fixed' top = '96%' left="50%" transform="translateX(-50%)">
         <Image filter={colorMode === 'dark' ? 'invert(100%)' : ''}src='https://cdn-icons-png.flaticon.com/512/25/25231.png' height='20px'></Image>
         eding888
       </Flex>

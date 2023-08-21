@@ -1,11 +1,16 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import '../index.css';
 import { Image, Flex, Button, Heading, Box } from '@chakra-ui/react';
 import NavBar1 from '../components/NavBar1';
 import SignupButton from '../components/SignupButton';
 import { checkToken } from '../utils/checkToken';
 import { useNavigate } from 'react-router-dom';
+import Loader from '../components/Loader';
 function Home () {
+  const [isNotLoaded, setIsNotLoaded] = useState(true);
+  const handleLoad = () => {
+    setIsNotLoaded(false);
+  };
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -15,8 +20,9 @@ function Home () {
   }, []);
   return (
     <>
+      {isNotLoaded && <Loader/>}
       <NavBar1/>
-      <Flex flexDirection='column' alignItems='center' justifyContent='center' gap='25px' height = 'calc(90vh - 83px)'>
+      <Flex onLoad={handleLoad} flexDirection='column' alignItems='center' justifyContent='center' gap='25px' height = 'calc(90vh - 83px)'>
         <Image
         src= 'https://cdn-icons-png.flaticon.com/512/477/477103.png'
         objectFit='cover'
@@ -32,7 +38,7 @@ function Home () {
             Learn More
           </Button>
           <Box animation="fadeInDelay2 3s ease-in-out forwards">
-            <SignupButton color='teal' size='lg'/>
+            <SignupButton color='teal' padding = 'md' fontSize = 'md' size='lg'/>
           </Box>
         </Flex>
       </Flex>

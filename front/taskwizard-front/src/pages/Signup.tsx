@@ -2,22 +2,27 @@ import React, { useState, useEffect, SyntheticEvent } from 'react';
 import '../index.css';
 
 import { useToast, FormControl, Input, FormLabel, FormErrorMessage, Flex, Heading, Image, useMediaQuery, Button } from '@chakra-ui/react';
-import DarkModeToggle from '../components/DarkModeToggle';
 import NavBar1 from '../components/NavBar1';
 import DOMPurify from 'dompurify';
 import { newUser, login } from '../utils/routing';
 import { useNavigate } from 'react-router-dom';
 import { checkToken } from '../utils/checkToken';
+import Loader from '../components/Loader';
 function Signup () {
   interface TextAndError {
     text: string,
     error: string
   }
   const [screenCutoff] = useMediaQuery('(min-width: 600px)');
+  const [screenHeightCutoff] = useMediaQuery('(min-height: 400px)');
   const [username, setUsername] = useState({ text: '', error: '' });
   const [email, setEmail] = useState({ text: '', error: '' });
   const [password, setPassword] = useState({ text: '', error: '' });
   const [confirmPassword, setConfirmPassword] = useState({ text: '', error: '' });
+  const [isNotLoaded, setIsNotLoaded] = useState(true);
+  const handleLoad = () => {
+    setIsNotLoaded(false);
+  };
 
   const navigate = useNavigate();
 
@@ -139,8 +144,9 @@ function Signup () {
   }, [screenCutoff]);
   return (
     <>
+      {isNotLoaded && <Loader/>}
       <NavBar1/>
-      <Flex alignItems='center' justifyContent='center' direction={screenCutoff ? 'row-reverse' : 'column'} height = 'calc(82vh - 95px)' gap = '30px'>
+      <Flex onLoad = {handleLoad} alignItems='center' justifyContent='center' direction={screenCutoff ? 'row-reverse' : 'column'} height = 'calc(82vh - 95px)' gap = '30px'>
         <Image
           src= 'https://cdn-icons-png.flaticon.com/512/477/477103.png'
           height={!screenCutoff ? 'clamp(50px, 20%, 300px)' : 'clamp(100px, 40%, 300px)'}
@@ -149,7 +155,7 @@ function Signup () {
           left={ screenCutoff ? '0px' : '60px' }
           animation="bounce 2s ease-in-out infinite"
         />
-        <Flex justifyContent='center' direction='column' width = 'clamp(100px, 50%, 300px)'>
+        <Flex mt = {screenHeightCutoff ? '0' : '30%'} justifyContent='center' direction='column' width = 'clamp(100px, 50%, 300px)'>
           <Heading mb = '5' textAlign={screenCutoff ? 'right' : 'left'}>Sign Up</Heading>
             <form onSubmit={submit}>
               <FormControl isRequired isInvalid={username.error !== ''}>

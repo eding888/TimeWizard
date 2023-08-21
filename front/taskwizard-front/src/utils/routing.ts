@@ -1,6 +1,4 @@
-import axios, { AxiosError } from 'axios';
-import { useState } from 'react';
-const csrf = '';
+import axios from 'axios';
 const backendUrl = 'http://localhost:8080';
 
 export const newUser = async (username: string, email: string, password: string) => {
@@ -22,7 +20,7 @@ export const newUser = async (username: string, email: string, password: string)
 
 export const login = async (email: string, password: string) => {
   try {
-    const response = await axios.post(`${backendUrl}/api/login`, { email, password }, {
+    await axios.post(`${backendUrl}/api/login`, { email, password }, {
       withCredentials: true
     });
     return 'OK';
