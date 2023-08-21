@@ -53,6 +53,10 @@ function Login () {
       navigate('/dashboard');
     }
   };
+  const resetPassword = (event: SyntheticEvent) => {
+    event.preventDefault();
+    navigate('/resetPassword');
+  };
   return (
     <>
       {isNotLoaded && <Loader/>}
@@ -75,7 +79,7 @@ function Login () {
                 <Input onChange={handlePassword} type='password' />
               </FormControl>
               <Button colorScheme='purple' mt = '5' w={ screenHeightCutoff ? '100%' : '40%' } ms= {screenHeightCutoff ? '0' : '5%'} type='submit'>Login</Button>
-              <Button mt = '5' w={ screenHeightCutoff ? '100%' : '40%' } ms= {screenHeightCutoff ? '0' : '5%'} fontSize={screenHeightCutoff ? 'md' : 'xs'} >Forgot Password?</Button>
+              <Button onClick= {resetPassword} mt = '5' w={ screenHeightCutoff ? '100%' : '40%' } ms= {screenHeightCutoff ? '0' : '5%'} fontSize={screenHeightCutoff ? 'md' : 'xs'} >Forgot Password?</Button>
             </form>
         </Flex>
       </Flex>
