@@ -7,6 +7,7 @@ import NavBar1 from '../components/NavBar1';
 import DOMPurify from 'dompurify';
 import { newUser, login } from '../utils/routing';
 import { useNavigate } from 'react-router-dom';
+import { checkToken } from '../utils/checkToken';
 function Signup () {
   interface TextAndError {
     text: string,
@@ -17,6 +18,14 @@ function Signup () {
   const [email, setEmail] = useState({ text: '', error: '' });
   const [password, setPassword] = useState({ text: '', error: '' });
   const [confirmPassword, setConfirmPassword] = useState({ text: '', error: '' });
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (checkToken()) {
+      navigate('/dashboard');
+    }
+  }, []);
 
   function hasCapitalLetter (inputString: string): boolean {
     for (let i = 0; i < inputString.length; i++) {
@@ -101,7 +110,6 @@ function Signup () {
   };
 
   const toast = useToast();
-  const navigate = useNavigate();
   const submit = async (event: SyntheticEvent) => {
     event.preventDefault();
     if (username.error === '' && email.error === '' && password.error === '' && confirmPassword.error === '') {

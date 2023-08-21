@@ -25,10 +25,6 @@ export const login = async (email: string, password: string) => {
     const response = await axios.post(`${backendUrl}/api/login`, { email, password }, {
       withCredentials: true
     });
-    console.log(response);
-    if (response.headers['set-cookie'] && response.headers['set-cookie'][0] !== undefined) {
-      window.localStorage.setItem('token', response.headers['set-cookie'][0]);
-    }
     return 'OK';
   } catch (error: any) {
     const errorMsg: string = error.response.data.error;

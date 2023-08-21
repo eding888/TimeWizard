@@ -1,14 +1,13 @@
 import React, { useRef, SyntheticEvent } from 'react';
 import { useDisclosure, Button, AlertDialog, AlertDialogOverlay, AlertDialogContent, AlertDialogHeader, AlertDialogBody, AlertDialogFooter } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
-import Cookies from 'js-cookie';
 const LogoutButton = ({ color }: {color: string}) => {
   const navigate = useNavigate();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const cancelRef = useRef(null);
   const handleLogout = async (event: SyntheticEvent) => {
     event.preventDefault();
-    Cookies.set('token', 'INVALID');
+    window.localStorage.setItem('logged', 'false');
     navigate('/');
   };
   return (

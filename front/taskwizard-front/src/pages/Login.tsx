@@ -6,10 +6,19 @@ import DOMPurify from 'dompurify';
 import NavBar1 from '../components/NavBar1';
 import { useNavigate } from 'react-router-dom';
 import { login } from '../utils/routing';
+import { checkToken } from '../utils/checkToken';
 function Login () {
   const [screenCutoff] = useMediaQuery('(min-width: 600px)');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (checkToken()) {
+      navigate('/dashboard');
+    }
+  }, []);
 
   useEffect(() => {
     ; // eslint-disable-line
@@ -24,7 +33,6 @@ function Login () {
     setPassword(target.value);
   };
   const toast = useToast();
-  const navigate = useNavigate();
   const submitLogin = async (event: SyntheticEvent) => {
     event.preventDefault();
     const res = await login(DOMPurify.sanitize(email), DOMPurify.sanitize(password));
@@ -35,6 +43,7 @@ function Login () {
         isClosable: true
       });
     } else {
+      window.localStorage.setItem('logged', 'true');
       navigate('/dashboard');
     }
   };
