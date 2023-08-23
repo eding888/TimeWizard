@@ -30,11 +30,9 @@ export const handleSocket = (io: Server) => {
           }
         });
         userChangeStream.on('change', async (change) => {
-          console.log(change);
           if (change.documentKey._id.toString() === user._id.toString()) {
             const user = await User.findById(userId);
             ids = getTaskIdsFromUser(user);
-            console.log(ids);
             socket.emit('userChange', change);
           }
         });
