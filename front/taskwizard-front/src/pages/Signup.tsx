@@ -7,12 +7,9 @@ import DOMPurify from 'dompurify';
 import { newUser, login } from '../utils/routing';
 import { useNavigate } from 'react-router-dom';
 import { checkToken } from '../utils/checkToken';
+import { hasCapitalLetter, hasNumber, TextAndError } from '../utils/formValidation';
 import Loader from '../components/Loader';
 function Signup () {
-  interface TextAndError {
-    text: string,
-    error: string
-  }
   const [screenCutoff] = useMediaQuery('(min-width: 600px)');
   const [screenHeightCutoff] = useMediaQuery('(min-height: 400px)');
   const [username, setUsername] = useState({ text: '', error: '' });
@@ -31,24 +28,6 @@ function Signup () {
       navigate('/dashboard');
     }
   }, []);
-
-  function hasCapitalLetter (inputString: string): boolean {
-    for (let i = 0; i < inputString.length; i++) {
-      if (inputString[i] !== inputString[i].toLowerCase()) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  function hasNumber (inputString: string): boolean {
-    for (let i = 0; i < inputString.length; i++) {
-      if (!isNaN(parseInt(inputString[i]))) {
-        return true;
-      }
-    }
-    return false;
-  }
 
   const handleUsername = (event: SyntheticEvent): void => {
     const pattern = /^[a-zA-Z0-9]*$/;

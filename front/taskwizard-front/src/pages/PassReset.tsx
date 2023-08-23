@@ -3,12 +3,11 @@ import '../index.css';
 
 import { useToast, Text, Button, Input, Flex, Heading, Image, useMediaQuery } from '@chakra-ui/react';
 import NavBar1 from '../components/NavBar1';
-import { confirm } from '../utils/routing';
+import { confirm, confirmResetPassword, resetPassword } from '../utils/routing';
 import DOMPurify from 'dompurify';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import Loader from '../components/Loader';
 function PassReset () {
-  const { user } = useParams();
   const [screenCutoff] = useMediaQuery('(min-width: 600px)');
   const [isNotLoaded, setIsNotLoaded] = useState(true);
   const handleLoad = () => {
@@ -23,8 +22,10 @@ function PassReset () {
     setEmail(target.value);
   };
   const toast = useToast();
+  const navigate = useNavigate();
   const submit = async (event: SyntheticEvent) => {
-    const res = 'OK';
+    event.preventDefault();
+    const res = await resetPassword(DOMPurify.sanitize(email));
     if (res !== 'OK') {
       toast({
         title: res,
@@ -32,11 +33,7 @@ function PassReset () {
         isClosable: true
       });
     } else {
-      toast({
-        title: 'Success! You may now log in.',
-        status: 'success',
-        isClosable: true
-      });
+      navigate(`/confirmReset/${email}`);
     }
   };
   return (

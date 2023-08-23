@@ -186,7 +186,14 @@ loginRouter.post('/resetPassword/confirm', async (request: AuthenticatedRequest,
       error: 'user still on password reset cooldown'
     });
   }
-  const userCode: string = (jwt.verify(passResetCode, config.SECRET) as code).code;
+  let userCode: string;
+  try {
+    userCode = (jwt.verify(passResetCode, config.SECRET) as code).code;
+  } catch (error) {
+    return response.status(400).json({
+      error: 'Password reset attempt expired, please try again.'
+    });
+  }
   if (!user.passReset.passResetAttempts) {
     return response.status(400).json({
       error: 'user does not have password reset attempts'

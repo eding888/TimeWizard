@@ -42,3 +42,23 @@ export const confirm = async (code: string, username: string) => {
     return errorMsg;
   }
 };
+
+export const resetPassword = async (email: string) => {
+  try {
+    await axios.post(`${backendUrl}/api/login/resetPassword`, { email });
+    return 'OK';
+  } catch (error: any) {
+    const errorMsg: string = error.response.data.error;
+    return errorMsg;
+  }
+};
+
+export const confirmResetPassword = async (email: string, code: string, newPassword: string) => {
+  try {
+    await axios.post(`${backendUrl}/api/login/resetPassword/confirm`, { email, code, newPassword });
+    return 'OK';
+  } catch (error: any) {
+    const errorMsg: string = error.response.data.error;
+    return errorMsg;
+  }
+};
