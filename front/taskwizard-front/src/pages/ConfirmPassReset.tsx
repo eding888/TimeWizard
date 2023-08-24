@@ -12,7 +12,7 @@ import { hasCapitalLetter, hasNumber, TextAndError } from '../utils/formValidati
 function ConfirmPasswordReset () {
   const { email } = useParams();
   const [screenCutoff] = useMediaQuery('(min-width: 600px)');
-  const [screenHeightCutoff] = useMediaQuery('(min-height: 400px)');
+  const [screenHeightCutoff] = useMediaQuery('(min-height: 450px)');
   const [code, setCode] = useState('');
   const [password, setPassword] = useState({ text: '', error: '' });
   const [confirmPassword, setConfirmPassword] = useState({ text: '', error: '' });

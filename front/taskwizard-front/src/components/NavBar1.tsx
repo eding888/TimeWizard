@@ -12,7 +12,7 @@ const NavBar1 = () => {
   };
   const { colorMode } = useColorMode();
   const [screenCutoff] = useMediaQuery('(min-width: 600px)');
-  const [screenHeightCutoff] = useMediaQuery('(min-height: 400px)');
+  const [screenHeightCutoff] = useMediaQuery('(min-height: 450px)');
   const darkAndLightModeColor = useColorModeValue('white', 'gray.800');
   const darkAndLightModeBorderColor = useColorModeValue('gray.200', 'gray.800');
   const [variant, setVariant] = useState(logoVariants.large);

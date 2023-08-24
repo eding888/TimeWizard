@@ -10,7 +10,7 @@ import { checkToken } from '../utils/checkToken';
 import Loader from '../components/Loader';
 function Login () {
   const [screenCutoff] = useMediaQuery('(min-width: 600px)');
-  const [screenHeightCutoff] = useMediaQuery('(min-height: 400px)');
+  const [screenHeightCutoff] = useMediaQuery('(min-height: 450px)');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isNotLoaded, setIsNotLoaded] = useState(true);
@@ -70,11 +70,11 @@ function Login () {
         <Flex flexWrap = 'wrap' justifyContent='center' direction='column' width = 'clamp(100px, 50%, 300px)'>
           <Heading mb = '5' textAlign='left'>Login</Heading>
             <form onSubmit={submitLogin}>
-              <FormControl>
+              <FormControl isRequired>
                 <FormLabel>Email</FormLabel>
                 <Input onChange={handleEmail} mb = '5' type='email' />
               </FormControl>
-              <FormControl>
+              <FormControl isRequired>
                 <FormLabel>Password</FormLabel>
                 <Input onChange={handlePassword} type='password' />
               </FormControl>

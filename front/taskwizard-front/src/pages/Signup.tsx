@@ -11,7 +11,7 @@ import { hasCapitalLetter, hasNumber, TextAndError } from '../utils/formValidati
 import Loader from '../components/Loader';
 function Signup () {
   const [screenCutoff] = useMediaQuery('(min-width: 600px)');
-  const [screenHeightCutoff] = useMediaQuery('(min-height: 400px)');
+  const [screenHeightCutoff] = useMediaQuery('(min-height: 450px)');
   const [username, setUsername] = useState({ text: '', error: '' });
   const [email, setEmail] = useState({ text: '', error: '' });
   const [password, setPassword] = useState({ text: '', error: '' });
