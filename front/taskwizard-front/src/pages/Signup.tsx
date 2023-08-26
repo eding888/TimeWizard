@@ -4,7 +4,7 @@ import '../index.css';
 import { useToast, FormControl, Input, FormLabel, FormErrorMessage, Flex, Heading, Image, useMediaQuery, Button } from '@chakra-ui/react';
 import NavBar1 from '../components/NavBar1';
 import DOMPurify from 'dompurify';
-import { newUser, login } from '../utils/routing';
+import { newUser, login, loginResponse } from '../utils/routing';
 import { useNavigate } from 'react-router-dom';
 import { checkToken } from '../utils/checkToken';
 import { hasCapitalLetter, hasNumber, TextAndError } from '../utils/formValidation';
@@ -105,10 +105,10 @@ function Signup () {
           isClosable: true
         });
       } else {
-        const res = await login(DOMPurify.sanitize(email.text), DOMPurify.sanitize(password.text));
-        if (res !== 'CONFIRMATION') {
+        const res: loginResponse = await login(DOMPurify.sanitize(email.text), DOMPurify.sanitize(password.text));
+        if (res.status !== 'CONFIRMATION') {
           toast({
-            title: res,
+            title: res.status,
             status: 'error',
             isClosable: true
           });
@@ -144,7 +144,7 @@ function Signup () {
               </FormControl>
               <FormControl isRequired>
                 <FormLabel mt = '5'>Email</FormLabel>
-                <Input onChange={handleEmail} type='email' />
+                <Input onChange={handleEmail} type='email'/>
               </FormControl>
               <FormControl isRequired isInvalid={password.error !== ''}>
                 <FormLabel mt = '5'>Password</FormLabel>

@@ -1,9 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit';
-import csrfReducer from './csrfSlice';
-
+import sessionReducer from './sessionSlice';
+export interface ReduxState {
+  session: string
+}
 const store = configureStore({
   reducer: {
-    csrf: csrfReducer
+    session: sessionReducer
   }
 });
 

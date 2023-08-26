@@ -5,15 +5,19 @@ import { useToast, Button, FormControl, Input, FormLabel, Flex, Heading, Image, 
 import DOMPurify from 'dompurify';
 import NavBar1 from '../components/NavBar1';
 import { useNavigate } from 'react-router-dom';
-import { login } from '../utils/routing';
+import { login, loginResponse } from '../utils/routing';
 import { checkToken } from '../utils/checkToken';
 import Loader from '../components/Loader';
+import { useDispatch } from 'react-redux';
+import { setCsrf } from '../redux/sessionSlice';
+
 function Login () {
   const [screenCutoff] = useMediaQuery('(min-width: 600px)');
   const [screenHeightCutoff] = useMediaQuery('(min-height: 450px)');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isNotLoaded, setIsNotLoaded] = useState(true);
+
   const handleLoad = () => {
     setIsNotLoaded(false);
   };
@@ -39,16 +43,18 @@ function Login () {
     setPassword(target.value);
   };
   const toast = useToast();
+  const dispatch = useDispatch();
   const submitLogin = async (event: SyntheticEvent) => {
     event.preventDefault();
-    const res = await login(DOMPurify.sanitize(email), DOMPurify.sanitize(password));
-    if (res !== 'OK') {
+    const res: loginResponse = await login(DOMPurify.sanitize(email), DOMPurify.sanitize(password));
+    if (res.status !== 'OK') {
       toast({
-        title: res,
+        title: res.status,
         status: 'error',
         isClosable: true
       });
     } else {
+      dispatch(setCsrf(res.token));
       window.localStorage.setItem('logged', 'true');
       navigate('/dashboard');
     }
@@ -72,11 +78,11 @@ function Login () {
             <form onSubmit={submitLogin}>
               <FormControl isRequired>
                 <FormLabel>Email</FormLabel>
-                <Input onChange={handleEmail} mb = '5' type='email' />
+                <Input onChange={handleEmail} mb = '5' type='email' autoComplete='email'/>
               </FormControl>
               <FormControl isRequired>
                 <FormLabel>Password</FormLabel>
-                <Input onChange={handlePassword} type='password' />
+                <Input onChange={handlePassword} type='password' autoComplete='password'/>
               </FormControl>
               <Button colorScheme='purple' mt = '5' w={ screenHeightCutoff ? '100%' : '40%' } ms= {screenHeightCutoff ? '0' : '5%'} type='submit'>Login</Button>
               <Button onClick= {resetPassword} mt = '5' w={ screenHeightCutoff ? '100%' : '40%' } ms= {screenHeightCutoff ? '0' : '5%'} fontSize={screenHeightCutoff ? 'md' : 'xs'} >Forgot Password?</Button>

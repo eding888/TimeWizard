@@ -18,18 +18,30 @@ export const newUser = async (username: string, email: string, password: string)
   }
 };
 
+export interface loginResponse {
+  status: string,
+  token: string | null
+}
 export const login = async (email: string, password: string) => {
   try {
-    await axios.post(`${backendUrl}/api/login`, { email, password }, {
+    const res = await axios.post(`${backendUrl}/api/login`, { email, password }, {
       withCredentials: true
     });
-    return 'OK';
+    let output: loginResponse;
+    if (!res.data.csrf) {
+      output = { status: 'No CSRF response', token: null };
+      return output;
+    }
+    output = { status: 'OK', token: res.data.csrf };
+    return output;
   } catch (error: any) {
     const errorMsg: string = error.response.data.error;
+    let status: string = errorMsg;
     if (errorMsg.includes('not verified')) {
-      return 'CONFIRMATION';
+      status = 'CONFIRMATION';
     }
-    return errorMsg;
+    const output = { status, token: null };
+    return output;
   }
 };
 

@@ -4,8 +4,8 @@ const initialState = {
   csrf: ''
 };
 
-const csrfSlice = createSlice({
-  name: 'csrf',
+const sessionSlice = createSlice({
+  name: 'session',
   initialState,
   reducers: {
     setCsrf: (state, action) => {
@@ -14,5 +14,5 @@ const csrfSlice = createSlice({
   }
 });
 
-export const { setCsrf } = csrfSlice.actions;
-export default csrfSlice.reducer;
+export const { setCsrf } = sessionSlice.actions;
+export default sessionSlice.reducer;
