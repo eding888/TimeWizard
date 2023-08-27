@@ -87,7 +87,7 @@ const DataPrompt = ({ stateMethod }: {stateMethod: React.Dispatch<React.SetState
                     <Flex w = '100%' justifyContent='space-around'>
                       <FormControl w ='30%'>
                         <FormLabel>Hours</FormLabel>
-                        <NumberInput max={999} min={0}>
+                        <NumberInput max={999} min={0} defaultValue={0}>
                           <NumberInputField />
                           <NumberInputStepper>
                             <NumberIncrementStepper />
@@ -97,7 +97,7 @@ const DataPrompt = ({ stateMethod }: {stateMethod: React.Dispatch<React.SetState
                       </FormControl>
                       <FormControl w ='30%'>
                         <FormLabel>Minutes</FormLabel>
-                        <NumberInput max={59} min={0}>
+                        <NumberInput max={59} min={0} defaultValue={0}>
                           <NumberInputField />
                           <NumberInputStepper>
                             <NumberIncrementStepper />
@@ -156,7 +156,7 @@ const NewTask = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void}) =
                     <Box fontSize='xs' mb ='4'>This task will be fufilled by completing a certain number of something (eg. doing practice problems with a goal of 50 a week). </Box>
                   </Flex>
                   <DataPrompt stateMethod={setCountTaskData}></DataPrompt>
-                  <Button isDisabled = {countIncomplete} onClick = {() => { onClose(); submitTime(); }}>Submit</Button>
+                  <Button mt='5' isDisabled = {countIncomplete} onClick = {() => { onClose(); submitTime(); }}>Submit</Button>
                 </TabPanel>
                 <TabPanel>
                   <Flex gap = '20px'>

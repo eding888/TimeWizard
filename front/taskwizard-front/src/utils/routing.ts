@@ -1,10 +1,15 @@
 import axios from 'axios';
+import DOMPurify from 'dompurify';
 const backendUrl = 'http://localhost:8080';
 
 export const newUser = async (username: string, email: string, password: string) => {
   console.log(username, email);
   try {
-    await axios.post(`${backendUrl}/api/newUser`, { username, email, password });
+    const purifyUsername = DOMPurify.sanitize(username);
+    const purifyEmail = DOMPurify.sanitize(email);
+    const purifyPassword = DOMPurify.sanitize(password);
+
+    await axios.post(`${backendUrl}/api/newUser`, { username: purifyUsername, email: purifyEmail, password: purifyPassword });
     return 'OK';
   } catch (error: any) {
     const errorMsg: string = error.response.data.error;
@@ -24,7 +29,9 @@ export interface loginResponse {
 }
 export const login = async (email: string, password: string) => {
   try {
-    const res = await axios.post(`${backendUrl}/api/login`, { email, password }, {
+    const purifyEmail = DOMPurify.sanitize(email);
+    const purifyPassword = DOMPurify.sanitize(password);
+    const res = await axios.post(`${backendUrl}/api/login`, { email: purifyEmail, password: purifyPassword }, {
       withCredentials: true
     });
     let output: loginResponse;
@@ -47,7 +54,9 @@ export const login = async (email: string, password: string) => {
 
 export const confirm = async (code: string, username: string) => {
   try {
-    await axios.post(`${backendUrl}/api/login/confirm`, { code, username });
+    const purifyUsername = DOMPurify.sanitize(username);
+    const purifyCode = DOMPurify.sanitize(code);
+    await axios.post(`${backendUrl}/api/login/confirm`, { code: purifyCode, username: purifyUsername });
     return 'OK';
   } catch (error: any) {
     const errorMsg: string = error.response.data.error;
@@ -57,7 +66,8 @@ export const confirm = async (code: string, username: string) => {
 
 export const resetPassword = async (email: string) => {
   try {
-    await axios.post(`${backendUrl}/api/login/resetPassword`, { email });
+    const purifyEmail = DOMPurify.sanitize(email);
+    await axios.post(`${backendUrl}/api/login/resetPassword`, { email: purifyEmail });
     return 'OK';
   } catch (error: any) {
     const errorMsg: string = error.response.data.error;
@@ -67,7 +77,10 @@ export const resetPassword = async (email: string) => {
 
 export const confirmResetPassword = async (email: string, code: string, newPassword: string) => {
   try {
-    await axios.post(`${backendUrl}/api/login/resetPassword/confirm`, { email, code, newPassword });
+    const purifyCode = DOMPurify.sanitize(code);
+    const purifyEmail = DOMPurify.sanitize(email);
+    const purifyNewPassword = DOMPurify.sanitize(newPassword);
+    await axios.post(`${backendUrl}/api/login/resetPassword/confirm`, { email: purifyEmail, code: purifyCode, password: purifyNewPassword });
     return 'OK';
   } catch (error: any) {
     const errorMsg: string = error.response.data.error;

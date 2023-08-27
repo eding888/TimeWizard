@@ -46,7 +46,7 @@ function Login () {
   const dispatch = useDispatch();
   const submitLogin = async (event: SyntheticEvent) => {
     event.preventDefault();
-    const res: loginResponse = await login(DOMPurify.sanitize(email), DOMPurify.sanitize(password));
+    const res: loginResponse = await login(email, password);
     if (res.status !== 'OK') {
       toast({
         title: res.status,

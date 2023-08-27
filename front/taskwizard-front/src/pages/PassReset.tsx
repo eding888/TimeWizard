@@ -26,7 +26,7 @@ function PassReset () {
   const navigate = useNavigate();
   const submit = async (event: SyntheticEvent) => {
     event.preventDefault();
-    const res = await resetPassword(DOMPurify.sanitize(email));
+    const res = await resetPassword(email);
     if (res !== 'OK') {
       toast({
         title: res,

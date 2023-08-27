@@ -97,7 +97,7 @@ function Signup () {
   const submit = async (event: SyntheticEvent) => {
     event.preventDefault();
     if (username.error === '' && email.error === '' && password.error === '' && confirmPassword.error === '') {
-      const res = await newUser(DOMPurify.sanitize(username.text), DOMPurify.sanitize(email.text), DOMPurify.sanitize(password.text));
+      const res = await newUser(username.text, email.text, password.text);
       if (res !== 'OK') {
         toast({
           title: res,
@@ -105,7 +105,7 @@ function Signup () {
           isClosable: true
         });
       } else {
-        const res: loginResponse = await login(DOMPurify.sanitize(email.text), DOMPurify.sanitize(password.text));
+        const res: loginResponse = await login(email.text, password.text);
         if (res.status !== 'CONFIRMATION') {
           toast({
             title: res.status,

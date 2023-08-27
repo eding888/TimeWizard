@@ -80,7 +80,7 @@ function ConfirmPasswordReset () {
     if (email === undefined) {
       return false;
     }
-    const res = await confirmResetPassword(DOMPurify.sanitize(email), DOMPurify.sanitize(code), DOMPurify.sanitize(password.text));
+    const res = await confirmResetPassword(email, code, password.text);
     if (res !== 'OK') {
       toast({
         title: res,

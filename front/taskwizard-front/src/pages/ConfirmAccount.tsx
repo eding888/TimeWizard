@@ -29,7 +29,7 @@ function ConfirmAccount () {
     if (!user) {
       return false;
     }
-    const res = await confirm(DOMPurify.sanitize(code), DOMPurify.sanitize(user));
+    const res = await confirm(code, user);
     if (res !== 'OK') {
       toast({
         title: res,
