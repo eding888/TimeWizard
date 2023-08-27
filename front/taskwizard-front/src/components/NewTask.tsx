@@ -1,23 +1,24 @@
-import { Input, FormControl, FormLabel, NumberInput, NumberInputField, NumberIncrementStepper, NumberDecrementStepper, NumberInputStepper, RadioGroup, Stack, Radio, Image, Flex, Button, Heading, Box, Modal, useDisclosure, ModalOverlay, ModalContent, ModalHeader, ModalFooter, ModalBody, ModalCloseButton, Tabs, TabList, Tab, TabPanel, TabPanels } from '@chakra-ui/react';
+import { Checkbox, Input, FormControl, FormLabel, NumberInput, NumberInputField, NumberIncrementStepper, NumberDecrementStepper, NumberInputStepper, RadioGroup, Stack, Radio, Image, Flex, Button, Heading, Box, Modal, useDisclosure, ModalOverlay, ModalContent, ModalHeader, ModalFooter, ModalBody, ModalCloseButton, Tabs, TabList, Tab, TabPanel, TabPanels } from '@chakra-ui/react';
 import { InfoIcon } from '@chakra-ui/icons';
 import { useState, SyntheticEvent, useEffect } from 'react';
-
-enum CompletionType {
+export enum CompletionType {
   COUNT,
   TIMER
 }
 
-enum Type {
+export enum Type {
   RECURRING,
   DEADLINE,
   NONE
 }
-interface TaskData {
+export interface TaskData {
   completionType: CompletionType | null,
   type: Type | null,
   deadlineDate: Date | null,
   hours: number | null,
-  minutes: number | null
+  minutes: number | null,
+  selectedDays: number[] | null,
+  name: string | null
 }
 
 const emptyData: TaskData = {
@@ -25,7 +26,9 @@ const emptyData: TaskData = {
   type: null,
   deadlineDate: null,
   hours: 0,
-  minutes: null
+  minutes: null,
+  selectedDays: null,
+  name: null
 };
 const DataPrompt = ({ stateMethod }: {stateMethod: React.Dispatch<React.SetStateAction<any>>}) => {
   const [currentData, setCurrentData] = useState(emptyData);
@@ -92,12 +95,69 @@ const DataPrompt = ({ stateMethod }: {stateMethod: React.Dispatch<React.SetState
     stateMethod(newData);
   };
 
+  const daysOfWeek = [
+    { id: 0, name: 'Sun' },
+    { id: 1, name: 'Mon' },
+    { id: 2, name: 'Tue' },
+    { id: 3, name: 'Wed' },
+    { id: 4, name: 'Thu' },
+    { id: 5, name: 'Fri' },
+    { id: 6, name: 'Sat' }
+  ];
+
+  const handleName = (event: SyntheticEvent): void => {
+    const target = event.target as HTMLInputElement;
+    const name = target.value;
+    const newData = { ...currentData };
+    newData.name = name.length === 0 ? null : name;
+    setCurrentData(newData);
+    stateMethod(newData);
+  };
+
+  const toggleDay = (dayId: number) => {
+    const newData = { ...currentData };
+    if (!currentData.selectedDays) {
+      const newDays = [];
+      newDays.push(dayId);
+      newData.selectedDays = newDays;
+      setCurrentData(newData);
+      stateMethod(newData);
+    } else {
+      let newDays: number[] | null = [...currentData.selectedDays];
+      if (newDays.includes(dayId)) {
+        newDays = newDays.filter(id => id !== dayId);
+        if (newDays.length === 0) {
+          newDays = null;
+        }
+      } else {
+        newDays.push(dayId);
+      }
+      newData.selectedDays = newDays;
+      console.log(newData);
+      setCurrentData(newData);
+      stateMethod(newData);
+    }
+  };
+
   const today = new Date().toISOString().substr(0, 10);
   const oneYearFromNow = new Date();
   oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1);
   const maxDate = oneYearFromNow.toISOString().substr(0, 10);
   return (
     <>
+      <Box mb='2' fontWeight='bold'>Task Name:</Box>
+      <Input type='text' maxLength={100} onChange ={handleName} mb ='2'></Input>
+      <Box mb='2' fontWeight='bold'>Days of Week:</Box>
+      <Flex mb = '5' justifyContent='space-evenly'>
+      {daysOfWeek.map(day => {
+        return (
+          <Flex direction='column' alignItems='center'>
+            <Box fontSize ='xs'>{day.name}</Box>
+            <Checkbox key={day.id} onChange={() => toggleDay(day.id)} isChecked = {!currentData.selectedDays ? false : currentData.selectedDays.includes(day.id)}></Checkbox>
+          </Flex>
+        );
+      })}
+      </Flex>
       <RadioGroup onChange={handleRadioChange} mb = '5'>
         <Stack direction='row'>
           <Radio value='recurring'>Recurring</Radio>
@@ -186,8 +246,8 @@ const NewTask = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void}) =
   const [countIncomplete, setCountIncomplete] = useState(true);
   const [timerIncomplete, setTimerIncomplete] = useState(true);
   const checkData = (taskData: TaskData): boolean => {
-    const deadlineKeys: (keyof TaskData)[] = ['hours', 'minutes', 'deadlineDate'];
-    const recurringKeys: (keyof TaskData)[] = ['hours', 'minutes'];
+    const deadlineKeys: (keyof TaskData)[] = ['hours', 'minutes', 'deadlineDate', 'name', 'selectedDays'];
+    const recurringKeys: (keyof TaskData)[] = ['hours', 'minutes', 'name', 'selectedDays'];
 
     if ('type' in taskData) {
       if (taskData.type === Type.DEADLINE) {
