@@ -8,8 +8,12 @@ import { checkToken } from '../utils/checkToken';
 import { useNavigate } from 'react-router-dom';
 import Loader from '../components/Loader';
 import NewTask from '../components/NewTask';
+import { newSession } from '../utils/routing';
 function Dashboard () {
   const [isNotLoaded, setIsNotLoaded] = useState(true);
+  useEffect(() => {
+    newSession();
+  }, []);
   const handleLoad = () => {
     setIsNotLoaded(false);
   };

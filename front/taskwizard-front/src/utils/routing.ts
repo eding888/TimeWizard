@@ -1,9 +1,21 @@
 import axios from 'axios';
 import DOMPurify from 'dompurify';
+import { CompletionType, Type } from '../components/NewTask';
+import store from '../redux/store';
+import { setCsrf } from '../redux/sessionSlice';
 const backendUrl = 'http://localhost:8080';
 
+export interface RecurringOptions {
+  debt: number,
+  timePerWeek: number // seconds
+}
+
+export interface DeadlineOptions {
+  deadline: Date,
+  timeRemaining: number // seconds
+}
+
 export const newUser = async (username: string, email: string, password: string) => {
-  console.log(username, email);
   try {
     const purifyUsername = DOMPurify.sanitize(username);
     const purifyEmail = DOMPurify.sanitize(email);
@@ -83,6 +95,31 @@ export const confirmResetPassword = async (email: string, code: string, newPassw
     await axios.post(`${backendUrl}/api/login/resetPassword/confirm`, { email: purifyEmail, code: purifyCode, password: purifyNewPassword });
     return 'OK';
   } catch (error: any) {
+    const errorMsg: string = error.response.data.error;
+    return errorMsg;
+  }
+};
+
+export const newTask = async (type: Type, name: string, completionType: CompletionType, daysOfWeek: number[], deadlineDate: Date | null = null, hours: number, minutes: number) => {
+  try {
+    const purifyName = DOMPurify.sanitize(name);
+    const time = (hours * 60 * 60) + minutes * 60;
+    const typeToVal = type === Type.RECURRING ? 0 : 1;
+    await axios.post(`${backendUrl}/api/task/newTask`, { type: typeToVal, name: purifyName, discrete: (completionType === CompletionType.COUNT), daysOfWeek, deadlineDate, time }, { headers: { 'x-csrf-token': store.getState().session.csrf }, withCredentials: true });
+    return 'OK';
+  } catch (error: any) {
+    const errorMsg: string = error.response.data.error;
+    return errorMsg;
+  }
+};
+
+export const newSession = async () => {
+  try {
+    const res = await axios.get(`${backendUrl}/api/newSession`, { withCredentials: true });
+    store.dispatch(setCsrf(res.data.csrf));
+    return 'OK';
+  } catch (error: any) {
+    console.log(error);
     const errorMsg: string = error.response.data.error;
     return errorMsg;
   }

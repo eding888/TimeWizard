@@ -2,25 +2,23 @@ import express, { Response, Router } from 'express';
 import { countDays, getCurrentEpochInSeconds } from '../utils/dayOfWeekHelper.js';
 import 'express-async-errors';
 import { AuthenticatedRequest } from 'utils/middleware.js';
-import Task, { TaskType, DeadlineOptions, RecurringOptions, TaskInterface } from '../models/task.js';
+import Task, { DeadlineOptions, RecurringOptions, TaskInterface } from '../models/task.js';
 import { UserInterface } from '../models/user.js';
 
 const taskRouter: Router = express.Router();
 
 interface NewUserInfo {
-  type: TaskType,
+  type: number,
   name: string,
-  deadlineOptions: DeadlineOptions,
-  recurringOptions: RecurringOptions,
   discrete: boolean,
-  daysOfWeek: number[]
+  daysOfWeek: number[],
+  deadlineDate: Date,
+  time: number
 }
 
 const checkIfTimeSurpassed = async (startTime: number, task: TaskInterface) => {
   const time = getCurrentEpochInSeconds();
-  console.log((time - startTime) / 1000);
   if (startTime !== -1 && task.timeLeftToday !== 0 && (((time - startTime) / 1000) >= task.timeLeftToday)) {
-    console.log('hi');
     task.totalTimeToday += task.timeLeftToday;
     task.timeLeftToday = 0;
     await task.save();
@@ -46,16 +44,44 @@ taskRouter.get('/current', async (request: AuthenticatedRequest, response: Respo
   response.status(200).json({ tasks });
 });
 taskRouter.post('/newTask', async (request: AuthenticatedRequest, response: Response) => {
-  const { type, name, deadlineOptions, recurringOptions, discrete, daysOfWeek }: NewUserInfo = request.body;
-  if (!type || !name || !discrete || (!deadlineOptions && !recurringOptions) || (deadlineOptions && recurringOptions) || !daysOfWeek) {
+  const { type, name, discrete, daysOfWeek, deadlineDate, time }: NewUserInfo = request.body;
+  if (type === null || type === undefined) {
+    return response.status(400).json({ error: 'Missing task type' });
+  }
+  const taskType = type === 0 ? 'recurring' : 'deadline';
+  if (
+    name === null || name === undefined ||
+    discrete === null || discrete === undefined ||
+    (taskType === 'deadline' && (deadlineDate === null || deadlineDate === undefined)) ||
+    time === null || time === undefined ||
+    daysOfWeek === null || daysOfWeek === undefined
+  ) {
     return response.status(400).json({ error: 'Missing arguments' });
   }
   if (!request.user) {
     return response.status(401).json({ error: 'User/token not found' });
   }
+  const date = new Date(deadlineDate);
+  console.log(deadlineDate, date);
+  const deadlineOptions: DeadlineOptions | null = taskType !== 'deadline'
+    ? null
+    : {
+        deadline: {
+          month: date.getMonth(),
+          day: date.getDay(),
+          year: date.getFullYear()
+        },
+        timeRemaining: time
+      };
+  const recurringOptions: RecurringOptions | null = taskType !== 'recurring'
+    ? null
+    : {
+        debt: 0,
+        timePerWeek: time
+      };
   const user: UserInterface = request.user;
   const task: TaskInterface = new Task({
-    type,
+    type: taskType,
     name,
     deadlineOptions,
     recurringOptions,
@@ -64,8 +90,10 @@ taskRouter.post('/newTask', async (request: AuthenticatedRequest, response: Resp
   });
   if (deadlineOptions) {
     task.timeLeftToday = (deadlineOptions.timeRemaining / (countDays(task.daysOfWeek, task.deadlineOptions.deadline)));
-  } else {
+  } else if (recurringOptions) {
     task.timeLeftToday = (recurringOptions.timePerWeek / task.daysOfWeek.length);
+  } else {
+    return response.status(400).json({ error: 'Missing necessary task arguments.' });
   }
   task.totalTimeToday = 0;
   task.user = user._id;
@@ -121,7 +149,6 @@ taskRouter.post('/stopTask/:id', async (request: AuthenticatedRequest, response:
   if (user._id.toString() !== stoppedTask.user) {
     return response.status(401).json({ error: 'task does not belong to user' });
   }
-  console.log(user.tasks);
   const userTaskIndex = user.tasks.findIndex(userTask => userTask.id.toString() === stoppedTask._id.toString());
   if (userTaskIndex === -1) {
     return response.status(404).json({ error: 'user task not found' });

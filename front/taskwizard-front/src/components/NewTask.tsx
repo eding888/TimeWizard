@@ -1,6 +1,8 @@
-import { Checkbox, Input, FormControl, FormLabel, NumberInput, NumberInputField, NumberIncrementStepper, NumberDecrementStepper, NumberInputStepper, RadioGroup, Stack, Radio, Image, Flex, Button, Heading, Box, Modal, useDisclosure, ModalOverlay, ModalContent, ModalHeader, ModalFooter, ModalBody, ModalCloseButton, Tabs, TabList, Tab, TabPanel, TabPanels } from '@chakra-ui/react';
+import { useToast, Checkbox, Input, FormControl, FormLabel, NumberInput, NumberInputField, NumberIncrementStepper, NumberDecrementStepper, NumberInputStepper, RadioGroup, Stack, Radio, Image, Flex, Button, Heading, Box, Modal, useDisclosure, ModalOverlay, ModalContent, ModalHeader, ModalFooter, ModalBody, ModalCloseButton, Tabs, TabList, Tab, TabPanel, TabPanels } from '@chakra-ui/react';
 import { InfoIcon } from '@chakra-ui/icons';
 import { useState, SyntheticEvent, useEffect } from 'react';
+import { newTask } from '../utils/routing';
+import { current } from '@reduxjs/toolkit';
 export enum CompletionType {
   COUNT,
   TIMER
@@ -58,6 +60,7 @@ const DataPrompt = ({ stateMethod }: {stateMethod: React.Dispatch<React.SetState
   const handleDate = (event: SyntheticEvent): void => {
     const target = event.target as HTMLInputElement;
     const date = new Date(target.value);
+    date.setDate(date.getDate() + 1);
     const newData = { ...currentData };
     newData.deadlineDate = date;
     setCurrentData(newData);
@@ -240,6 +243,24 @@ const DataPrompt = ({ stateMethod }: {stateMethod: React.Dispatch<React.SetState
     </>
   );
 };
+const countDays = (daysOfWeek: number[], endDate: Date) => {
+  const start = new Date();
+  start.setHours(0, 0, 0, 0);
+  const end = endDate;
+
+  let count = 0;
+  const currentDate = new Date(start);
+  console.log('end', endDate);
+  while (currentDate <= end) { //eslint-disable-line
+    console.log(currentDate);
+    if (daysOfWeek.includes(currentDate.getDay())) {
+      count++;
+    }
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+
+  return count;
+};
 const NewTask = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void}) => {
   const [countTaskData, setCountTaskData] = useState(emptyData);
   const [timerTaskData, setTimerTaskData] = useState(emptyData);
@@ -248,9 +269,12 @@ const NewTask = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void}) =
   const checkData = (taskData: TaskData): boolean => {
     const deadlineKeys: (keyof TaskData)[] = ['hours', 'minutes', 'deadlineDate', 'name', 'selectedDays'];
     const recurringKeys: (keyof TaskData)[] = ['hours', 'minutes', 'name', 'selectedDays'];
-
     if ('type' in taskData) {
       if (taskData.type === Type.DEADLINE) {
+        const date = taskData.deadlineDate;
+        if (taskData.selectedDays !== null && date !== null && countDays(taskData.selectedDays, date) === 0) {
+          return false;
+        }
         for (const key of deadlineKeys) {
           if (!(key in taskData && taskData[key] !== null)) {
             return false;
@@ -286,8 +310,21 @@ const NewTask = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void}) =
       setTimerIncomplete(true);
     }
   }, [timerTaskData]);
-  const submitTime = () => {
-    console.log('as');
+  const toast = useToast();
+  const createNewTask = async (data: TaskData, completionType: CompletionType) => {
+    if (data.type === null || data.name === null || !data.selectedDays || data.hours === null || data.minutes === null) {
+      return false;
+    }
+    const res = await newTask(data.type, data.name, completionType, data.selectedDays, data.deadlineDate, data.hours, data.minutes);
+    if (res !== 'OK') {
+      toast({
+        title: res,
+        status: 'error',
+        isClosable: true
+      });
+    } else {
+      console.log('poop');
+    }
   };
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
@@ -309,7 +346,7 @@ const NewTask = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void}) =
                     <Box fontSize='xs' mb ='4'>This task will be fufilled by completing a certain number of something (eg. doing practice problems with a goal of 50 a week). </Box>
                   </Flex>
                   <DataPrompt stateMethod={setCountTaskData}></DataPrompt>
-                  <Button mt='5' w='100%' colorScheme='purple' isDisabled = {countIncomplete} onClick = {() => { onClose(); submitTime(); }}>Submit</Button>
+                  <Button mt='5' w='100%' colorScheme='purple' isDisabled = {countIncomplete} onClick = {async () => { await createNewTask(countTaskData, CompletionType.COUNT); onClose(); }}>Submit</Button>
                 </TabPanel>
                 <TabPanel>
                   <Flex gap = '20px'>
@@ -317,7 +354,7 @@ const NewTask = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void}) =
                     <Box fontSize='xs' mb ='4'>This task will be fufilled by doing something for a set amount of time (eg. studying with a goal of 7 hrs a week). </Box>
                   </Flex>
                   <DataPrompt stateMethod={setTimerTaskData}></DataPrompt>
-                  <Button mt='5' w='100%' colorScheme='purple' isDisabled = {timerIncomplete} onClick = {() => { onClose(); submitTime(); }}>Submit</Button>
+                  <Button mt='5' w='100%' colorScheme='purple' isDisabled = {timerIncomplete} onClick = {async () => { await createNewTask(countTaskData, CompletionType.TIMER); onClose(); }}>Submit</Button>
                 </TabPanel>
               </TabPanels>
             </Tabs>

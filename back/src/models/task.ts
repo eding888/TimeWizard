@@ -97,14 +97,6 @@ taskSchema.set('toJSON', {
 taskSchema.plugin(uniqueValidator);
 
 taskSchema.pre('save', function (next) {
-  if (this.recurringOptions === null && this.deadlineOptions === null) {
-    const error = new Error('Options must be provided for Task');
-    return next(error);
-  }
-  if ((this.type === 'deadline' && this.deadlineOptions === null) || (this.type === 'recurring' && this.recurringOptions === null)) {
-    const error = new Error('Incorrect options provided');
-    return next(error);
-  }
   if (!validateDays(this.daysOfWeek)) {
     const error = new Error('Days of week not formatted correctly');
     return next(error);

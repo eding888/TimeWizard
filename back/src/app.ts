@@ -7,6 +7,7 @@ import userRouter from './routers/userRouter.js';
 import loginRouter from './routers/loginRouter.js';
 import sample from './routers/sample.js';
 import taskRouter from './routers/taskRouter.js';
+import newSessionRouter from './routers/newSession.js';
 import middleware from './utils/middleware.js';
 import rateLimit from 'express-rate-limit';
 import cookieParser from 'cookie-parser';
@@ -100,6 +101,7 @@ app.use('/api/login', limiter, loginRouter);
 app.use('/api/newUser', accountLimiter, newUserRouter);
 
 app.use(middleware.parseToken);
+app.use('/api/newSession', limiter, newSessionRouter);
 app.use(middleware.checkCsrf);
 
 app.use('/api/users', limiter, userRouter);
