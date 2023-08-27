@@ -3,7 +3,8 @@ export const countDays = (daysOfWeek: number[], endDate: Date) => {
   const start = new Date();
   start.setHours(0, 0, 0, 0);
   const end = new Date(`${endDate.year}-${endDate.month}-${endDate.day}`);
-
+  end.setDate(end.getDate() + 1);
+  console.log(end);
   let count = 0;
   const currentDate = new Date(start);
 

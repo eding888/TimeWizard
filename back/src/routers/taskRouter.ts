@@ -62,13 +62,13 @@ taskRouter.post('/newTask', async (request: AuthenticatedRequest, response: Resp
     return response.status(401).json({ error: 'User/token not found' });
   }
   const date = new Date(deadlineDate);
-  console.log(deadlineDate, date);
+  console.log(deadlineDate, date, date.getDay());
   const deadlineOptions: DeadlineOptions | null = taskType !== 'deadline'
     ? null
     : {
         deadline: {
-          month: date.getMonth(),
-          day: date.getDay(),
+          month: date.getMonth() + 1,
+          day: date.getDate(),
           year: date.getFullYear()
         },
         timeRemaining: time
