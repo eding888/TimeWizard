@@ -1,7 +1,6 @@
 import { Input, FormControl, FormLabel, NumberInput, NumberInputField, NumberIncrementStepper, NumberDecrementStepper, NumberInputStepper, RadioGroup, Stack, Radio, Image, Flex, Button, Heading, Box, Modal, useDisclosure, ModalOverlay, ModalContent, ModalHeader, ModalFooter, ModalBody, ModalCloseButton, Tabs, TabList, Tab, TabPanel, TabPanels } from '@chakra-ui/react';
 import { InfoIcon } from '@chakra-ui/icons';
 import { useState, SyntheticEvent, useEffect } from 'react';
-import { updateNonNullChain } from 'typescript';
 
 enum CompletionType {
   COUNT,
@@ -15,14 +14,18 @@ enum Type {
 }
 interface TaskData {
   completionType: CompletionType | null,
-  type: Type | null
-  deadlineDate: Date | null
+  type: Type | null,
+  deadlineDate: Date | null,
+  hours: number | null,
+  minutes: number | null
 }
 
 const emptyData: TaskData = {
   completionType: null,
   type: null,
-  deadlineDate: null
+  deadlineDate: null,
+  hours: 0,
+  minutes: null
 };
 const DataPrompt = ({ stateMethod }: {stateMethod: React.Dispatch<React.SetStateAction<any>>}) => {
   const [currentData, setCurrentData] = useState(emptyData);
@@ -58,6 +61,41 @@ const DataPrompt = ({ stateMethod }: {stateMethod: React.Dispatch<React.SetState
     stateMethod(newData);
   };
 
+  const handleTimeHours = (newValue: string): void => {
+    let hours: number | null = parseInt(newValue);
+    if (!hours) {
+      hours = 0;
+    }
+    if (hours === 0 && currentData.minutes === 0) {
+      hours = null;
+    }
+    const newData = { ...currentData };
+    if (!currentData.minutes && hours !== 0) {
+      newData.minutes = 0;
+    }
+    newData.hours = hours;
+    setCurrentData(newData);
+    stateMethod(newData);
+  };
+
+  const handleTimeMinutes = (newValue: string): void => {
+    let minutes: number | null = parseInt(newValue);
+    if (!minutes) {
+      minutes = 0;
+    }
+    if (minutes === 0 && currentData.hours === 0) {
+      minutes = null;
+    }
+    const newData = { ...currentData };
+    newData.minutes = minutes;
+    setCurrentData(newData);
+    stateMethod(newData);
+  };
+
+  const today = new Date().toISOString().substr(0, 10);
+  const oneYearFromNow = new Date();
+  oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1);
+  const maxDate = oneYearFromNow.toISOString().substr(0, 10);
   return (
     <>
       <RadioGroup onChange={handleRadioChange} mb = '5'>
@@ -69,7 +107,31 @@ const DataPrompt = ({ stateMethod }: {stateMethod: React.Dispatch<React.SetState
       <Box>
         {(checkedTask === Type.RECURRING)
           ? (
-            <div>hi</div>
+            <>
+              <Box mb='2' fontWeight='bold'>Desired time per week:</Box>
+                <Flex w = '100%' justifyContent='space-around'>
+                  <FormControl w ='30%'>
+                    <FormLabel>Hours</FormLabel>
+                    <NumberInput onChange={handleTimeHours} max={150} min={0} defaultValue={!currentData.hours ? 0 : currentData.hours}>
+                      <NumberInputField />
+                      <NumberInputStepper>
+                        <NumberIncrementStepper />
+                        <NumberDecrementStepper />
+                      </NumberInputStepper>
+                    </NumberInput>
+                  </FormControl>
+                  <FormControl w ='30%'>
+                    <FormLabel>Minutes</FormLabel>
+                    <NumberInput onChange={handleTimeMinutes} max={59} min={0} defaultValue={!currentData.minutes ? 0 : currentData.minutes}>
+                      <NumberInputField />
+                      <NumberInputStepper>
+                        <NumberIncrementStepper />
+                        <NumberDecrementStepper />
+                      </NumberInputStepper>
+                    </NumberInput>
+                  </FormControl>
+                </Flex>
+              </>
             )
           : (
               (checkedTask === Type.DEADLINE)
@@ -82,12 +144,14 @@ const DataPrompt = ({ stateMethod }: {stateMethod: React.Dispatch<React.SetState
                       size="md"
                       type="date"
                       onChange={handleDate}
+                      min = {today}
+                      max = {maxDate}
                     />
                     <Box mb='2' fontWeight='bold'>Estimated Time for Completion:</Box>
                     <Flex w = '100%' justifyContent='space-around'>
                       <FormControl w ='30%'>
                         <FormLabel>Hours</FormLabel>
-                        <NumberInput max={999} min={0} defaultValue={0}>
+                        <NumberInput onChange={handleTimeHours} max={999} min={0} defaultValue={!currentData.hours ? 0 : currentData.hours}>
                           <NumberInputField />
                           <NumberInputStepper>
                             <NumberIncrementStepper />
@@ -97,7 +161,7 @@ const DataPrompt = ({ stateMethod }: {stateMethod: React.Dispatch<React.SetState
                       </FormControl>
                       <FormControl w ='30%'>
                         <FormLabel>Minutes</FormLabel>
-                        <NumberInput max={59} min={0} defaultValue={0}>
+                        <NumberInput onChange={handleTimeMinutes} max={59} min={0} defaultValue={!currentData.minutes ? 0 : currentData.minutes}>
                           <NumberInputField />
                           <NumberInputStepper>
                             <NumberIncrementStepper />
@@ -118,21 +182,50 @@ const DataPrompt = ({ stateMethod }: {stateMethod: React.Dispatch<React.SetState
 };
 const NewTask = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void}) => {
   const [countTaskData, setCountTaskData] = useState(emptyData);
-  const [timerTaskData, setTimerTaskData] = useState({});
+  const [timerTaskData, setTimerTaskData] = useState(emptyData);
   const [countIncomplete, setCountIncomplete] = useState(true);
+  const [timerIncomplete, setTimerIncomplete] = useState(true);
+  const checkData = (taskData: TaskData): boolean => {
+    const deadlineKeys: (keyof TaskData)[] = ['hours', 'minutes', 'deadlineDate'];
+    const recurringKeys: (keyof TaskData)[] = ['hours', 'minutes'];
+
+    if ('type' in taskData) {
+      if (taskData.type === Type.DEADLINE) {
+        for (const key of deadlineKeys) {
+          if (!(key in taskData && taskData[key] !== null)) {
+            return false;
+          }
+        }
+      } else if (taskData.type === Type.RECURRING) {
+        for (const key of recurringKeys) {
+          if (!(key in taskData && taskData[key] !== null)) {
+            return false;
+          }
+        }
+      } else {
+        return false;
+      }
+    } else {
+      return false;
+    }
+    return true;
+  };
   useEffect(() => {
     console.log(countTaskData);
-    const desiredKeys: (keyof TaskData)[] = ['type', 'deadlineDate'];
-    let includesAll = true;
-    for (const key of desiredKeys) {
-      if (!(key in countTaskData && countTaskData[key] !== null)) {
-        includesAll = false;
-      }
-    }
-    if (includesAll) {
+    if (checkData(countTaskData)) {
       setCountIncomplete(false);
+    } else {
+      setCountIncomplete(true);
     }
   }, [countTaskData]);
+  useEffect(() => {
+    console.log(timerTaskData);
+    if (checkData(timerTaskData)) {
+      setTimerIncomplete(false);
+    } else {
+      setTimerIncomplete(true);
+    }
+  }, [timerTaskData]);
   const submitTime = () => {
     console.log('as');
   };
@@ -156,7 +249,7 @@ const NewTask = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void}) =
                     <Box fontSize='xs' mb ='4'>This task will be fufilled by completing a certain number of something (eg. doing practice problems with a goal of 50 a week). </Box>
                   </Flex>
                   <DataPrompt stateMethod={setCountTaskData}></DataPrompt>
-                  <Button mt='5' isDisabled = {countIncomplete} onClick = {() => { onClose(); submitTime(); }}>Submit</Button>
+                  <Button mt='5' w='100%' colorScheme='purple' isDisabled = {countIncomplete} onClick = {() => { onClose(); submitTime(); }}>Submit</Button>
                 </TabPanel>
                 <TabPanel>
                   <Flex gap = '20px'>
@@ -164,6 +257,7 @@ const NewTask = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void}) =
                     <Box fontSize='xs' mb ='4'>This task will be fufilled by doing something for a set amount of time (eg. studying with a goal of 7 hrs a week). </Box>
                   </Flex>
                   <DataPrompt stateMethod={setTimerTaskData}></DataPrompt>
+                  <Button mt='5' w='100%' colorScheme='purple' isDisabled = {timerIncomplete} onClick = {() => { onClose(); submitTime(); }}>Submit</Button>
                 </TabPanel>
               </TabPanels>
             </Tabs>
