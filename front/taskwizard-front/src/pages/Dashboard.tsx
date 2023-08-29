@@ -8,13 +8,14 @@ import { checkToken } from '../utils/checkToken';
 import { useNavigate } from 'react-router-dom';
 import Loader from '../components/Loader';
 import NewTask from '../components/NewTask';
-import { newSession } from '../utils/routing';
+import { newSession, getTasks } from '../utils/routing';
 function Dashboard () {
   const [isNotLoaded, setIsNotLoaded] = useState(true);
   const navigate = useNavigate();
   useEffect(() => {
     const checkSession = async () => {
       const res = await newSession();
+      console.log(await getTasks());
       if (res !== 'OK') {
         window.localStorage.setItem('logged', 'false');
         navigate('/');

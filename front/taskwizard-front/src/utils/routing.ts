@@ -123,3 +123,13 @@ export const newSession = async () => {
     return errorMsg;
   }
 };
+
+export const getTasks = async () => {
+  try {
+    const res = await axios.get(`${backendUrl}/api/task/current`, { headers: { 'x-csrf-token': store.getState().session.csrf }, withCredentials: true });
+    return res.data.tasks;
+  } catch (error: any) {
+    const errorMsg: string = error.response.data.error;
+    return errorMsg;
+  }
+};

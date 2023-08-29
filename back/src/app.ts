@@ -41,15 +41,24 @@ const updateTasks = () => {
       console.error(err);
       return;
     }
+    const today = new Date();
     tasks.forEach(async (task: TaskInterface) => {
       switch (task.type) {
         case 'deadline':
           task.deadlineOptions.timeRemaining -= (task.totalTimeToday - task.timeLeftToday);
-          task.timeLeftToday = (task.deadlineOptions.timeRemaining / (countDays(task.daysOfWeek, task.deadlineOptions.deadline)));
+          if (task.daysOfWeek.includes(today.getDay())) {
+            task.timeLeftToday = (task.deadlineOptions.timeRemaining / (countDays(task.daysOfWeek, task.deadlineOptions.deadline)));
+          } else {
+            task.timeLeftToday = 0;
+          }
           break;
         case 'recurring':
           task.recurringOptions.debt += (task.timeLeftToday - (((task.totalTimeToday - task.timeLeftToday) > 0) ? (task.totalTimeToday - task.timeLeftToday) : 0));
-          task.timeLeftToday = ((task.recurringOptions.timePerWeek + (task.recurringOptions.debt / 10)) / task.daysOfWeek.length);
+          if (task.daysOfWeek.includes(today.getDay())) {
+            task.timeLeftToday = ((task.recurringOptions.timePerWeek + (task.recurringOptions.debt / 10)) / task.daysOfWeek.length);
+          } else {
+            task.timeLeftToday = 0;
+          }
       }
       task.daysOld += 1;
       await task.save();

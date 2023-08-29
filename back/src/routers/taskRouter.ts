@@ -62,7 +62,6 @@ taskRouter.post('/newTask', async (request: AuthenticatedRequest, response: Resp
     return response.status(401).json({ error: 'User/token not found' });
   }
   const date = new Date(deadlineDate);
-  console.log(deadlineDate, date, date.getDay());
   const deadlineOptions: DeadlineOptions | null = taskType !== 'deadline'
     ? null
     : {
@@ -88,10 +87,19 @@ taskRouter.post('/newTask', async (request: AuthenticatedRequest, response: Resp
     discrete,
     daysOfWeek
   });
+  const today = new Date();
   if (deadlineOptions) {
-    task.timeLeftToday = (deadlineOptions.timeRemaining / (countDays(task.daysOfWeek, task.deadlineOptions.deadline)));
+    if (task.daysOfWeek.includes(today.getDay())){
+      task.timeLeftToday = (deadlineOptions.timeRemaining / (countDays(task.daysOfWeek, task.deadlineOptions.deadline)));
+    } else {
+      task.timeLeftToday = 0;
+    }
   } else if (recurringOptions) {
-    task.timeLeftToday = (recurringOptions.timePerWeek / task.daysOfWeek.length);
+    if (task.daysOfWeek.includes(today.getDay())){
+      task.timeLeftToday = (recurringOptions.timePerWeek / task.daysOfWeek.length);
+    } else {
+      task.timeLeftToday = 0;
+    }
   } else {
     return response.status(400).json({ error: 'Missing necessary task arguments.' });
   }
