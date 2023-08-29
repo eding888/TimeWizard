@@ -119,7 +119,6 @@ export const newSession = async () => {
     store.dispatch(setCsrf(res.data.csrf));
     return 'OK';
   } catch (error: any) {
-    console.log(error);
     const errorMsg: string = error.response.data.error;
     return errorMsg;
   }

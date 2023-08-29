@@ -45,7 +45,7 @@ const parseToken = async (request: AuthenticatedRequest, response: Response, nex
         return response.status(401).json({ error: 'token password does not match' }); // due to password reset by user, esssentially logs all current users out
       }
       if (user.refreshToken !== null && (!verifyToken(user.refreshToken) || !user.username)) {
-        return response.status(400).json({ error: 'refresh token expired' });
+        return response.status(400).json({ error: 'Your session has expired. Please refresh and log back in.' });
       }
       token = await genAuthToken(user.username, user.passwordHash);
       response.cookie('token', token, {

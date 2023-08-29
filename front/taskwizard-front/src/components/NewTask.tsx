@@ -136,7 +136,6 @@ const DataPrompt = ({ stateMethod }: {stateMethod: React.Dispatch<React.SetState
         newDays.push(dayId);
       }
       newData.selectedDays = newDays;
-      console.log(newData);
       setCurrentData(newData);
       stateMethod(newData);
     }
@@ -250,9 +249,7 @@ const countDays = (daysOfWeek: number[], endDate: Date) => {
 
   let count = 0;
   const currentDate = new Date(start);
-  console.log('end', endDate);
   while (currentDate <= end) { //eslint-disable-line
-    console.log(currentDate);
     if (daysOfWeek.includes(currentDate.getDay())) {
       count++;
     }
@@ -295,7 +292,6 @@ const NewTask = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void}) =
     return true;
   };
   useEffect(() => {
-    console.log(countTaskData);
     if (checkData(countTaskData)) {
       setCountIncomplete(false);
     } else {
@@ -303,7 +299,6 @@ const NewTask = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void}) =
     }
   }, [countTaskData]);
   useEffect(() => {
-    console.log(timerTaskData);
     if (checkData(timerTaskData)) {
       setTimerIncomplete(false);
     } else {
