@@ -46,7 +46,7 @@ const NavBar2 = () => {
           </Flex>
         </Flex>
       </Box>
-      <Flex onClick = {() => { window.location.href = 'https://github.com/eding888'; }}cursor='pointer' gap='6px' alignItems='center' fontWeight='light' fontSize='xs' position='fixed' top = '96%' left="50%" transform="translateX(-50%)">
+      <Flex onClick = {() => { window.location.href = 'https://github.com/eding888'; }}cursor='pointer' gap='6px' alignItems='center' fontWeight='light' fontSize='xs' position='fixed' top = 'calc(100% - 35px)' left="50%" transform="translateX(-50%)">
         <Image filter={colorMode === 'dark' ? 'invert(100%)' : ''}src='https://cdn-icons-png.flaticon.com/512/25/25231.png' height='20px'></Image>
         eding888
       </Flex>
