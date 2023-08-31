@@ -33,12 +33,14 @@ export const handleSocket = (io: Server) => {
           if (change.documentKey._id.toString() === user._id.toString()) {
             const user = await User.findById(userId);
             ids = getTaskIdsFromUser(user);
+            console.log('update');
             socket.emit('userChange', change);
           }
         });
         socket.on('disconnect', () => {
           console.log('WebSocket disconnected');
-          changeStream.close();
+          taskChangeStream.close();
+          userChangeStream.close();
         });
       } catch (error) {
         console.error('Error:', error);

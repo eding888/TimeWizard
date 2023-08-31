@@ -21,6 +21,24 @@ function Dashboard () {
   const date = new Date();
   const today = date.getDay();
   const navigate = useNavigate();
+
+  const sortTasks = async () => {
+    const tasks: TaskInterface[] = await getTasks();
+    console.log(tasks);
+    if (typeof tasks === 'string') {
+      return false;
+    }
+    const taskEachDay: TaskInterface[][] = [[], [], [], [], [], [], []];
+    tasks.forEach(task => {
+      const days: number[] = task.daysOfWeek;
+      days.forEach(day => {
+        taskEachDay[day].push(task);
+      });
+    });
+    setAllTasks(taskEachDay);
+    setLoaded(true);
+  };
+
   useEffect(() => {
     console.log('hi');
     const checkSession = async () => {
@@ -29,22 +47,6 @@ function Dashboard () {
         window.localStorage.setItem('logged', 'false');
         navigate('/');
       }
-    };
-    const sortTasks = async () => {
-      const tasks: TaskInterface[] = await getTasks();
-      console.log(tasks);
-      if (typeof tasks === 'string') {
-        return false;
-      }
-      const taskEachDay: TaskInterface[][] = [[], [], [], [], [], [], []];
-      tasks.forEach(task => {
-        const days: number[] = task.daysOfWeek;
-        days.forEach(day => {
-          taskEachDay[day].push(task);
-        });
-      });
-      setAllTasks(taskEachDay);
-      setLoaded(true);
     };
 
     const fetch = async () => {
@@ -69,12 +71,20 @@ function Dashboard () {
   useEffect(() => {
     const getCurrentUserId = async () => {
       const res = await getCurrentUser();
-      return res;
+      return res.id;
     };
     const socket = io('http://localhost:8081');
-    getCurrentUserId();
     socket.on('connect', () => {
       console.log('Connected to server');
+      socket.emit('subscribeToUser', window.localStorage.getItem('loggedUser'));
+    });
+
+    socket.on('taskChange', () => {
+      sortTasks();
+    });
+
+    socket.on('userChange', () => {
+      sortTasks();
     });
 
     return () => {

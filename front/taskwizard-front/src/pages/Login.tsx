@@ -5,7 +5,7 @@ import { useToast, Button, FormControl, Input, FormLabel, Flex, Heading, Image, 
 import DOMPurify from 'dompurify';
 import NavBar1 from '../components/NavBar1';
 import { useNavigate } from 'react-router-dom';
-import { login, loginResponse } from '../utils/routing';
+import { login, loginResponse, getCurrentUser } from '../utils/routing';
 import { checkToken } from '../utils/checkToken';
 import Loader from '../components/Loader';
 import { useDispatch } from 'react-redux';
@@ -56,6 +56,8 @@ function Login () {
     } else {
       dispatch(setCsrf(res.token));
       window.localStorage.setItem('logged', 'true');
+      const user = await getCurrentUser();
+      window.localStorage.setItem('loggedUser', user.id);
       navigate('/dashboard');
     }
   };
