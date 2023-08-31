@@ -199,8 +199,12 @@ taskRouter.delete('/:id', async (request: AuthenticatedRequest, response: Respon
     return response.status(401).json({ error: 'task does not belong to user' });
   }
   await Task.findByIdAndDelete(id);
-  user.tasks = user.tasks.filter(task => task.id !== id);
+  user.tasks = user.tasks.filter(task => {
+    return task.id.toString() !== id;
+  });
+  console.log(user.tasks);
   await user.save();
+
   response.status(200);
 });
 

@@ -134,6 +134,15 @@ export const newSession = async () => {
   }
 };
 
+export const getCurrentUser = async () => {
+  try {
+    const res = await axios.get(`${backendUrl}/api/users/current`, { headers: { 'x-csrf-token': store.getState().session.csrf }, withCredentials: true });
+    return res.data;
+  } catch (error: any) {
+    console.log(error);
+  }
+};
+
 export const getTasks = async () => {
   try {
     const res = await axios.get(`${backendUrl}/api/task/current`, { headers: { 'x-csrf-token': store.getState().session.csrf }, withCredentials: true });

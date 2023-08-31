@@ -9,8 +9,9 @@ import { useNavigate } from 'react-router-dom';
 import Loader from '../components/Loader';
 import NewTask from '../components/NewTask';
 import ViewTask from '../components/ViewTask';
-import { newSession, getTasks } from '../utils/routing';
+import { newSession, getTasks, getCurrentUser } from '../utils/routing';
 import { TaskInterface } from '../../../../back/src/models/task';
+import io from 'socket.io-client';
 function Dashboard () {
   const [isNotLoaded, setIsNotLoaded] = useState(true);
   const [weekDates, setWeekDates] = useState<Date[]>([]);
@@ -20,7 +21,6 @@ function Dashboard () {
   const date = new Date();
   const today = date.getDay();
   const navigate = useNavigate();
-  console.log(allTasks);
   useEffect(() => {
     console.log('hi');
     const checkSession = async () => {
@@ -65,6 +65,21 @@ function Dashboard () {
     }
 
     setWeekDates(dates);
+  }, []);
+  useEffect(() => {
+    const getCurrentUserId = async () => {
+      const res = await getCurrentUser();
+      return res;
+    };
+    const socket = io('http://localhost:8081');
+    getCurrentUserId();
+    socket.on('connect', () => {
+      console.log('Connected to server');
+    });
+
+    return () => {
+      socket.disconnect();
+    };
   }, []);
   const handleLoad = () => {
     setIsNotLoaded(false);
