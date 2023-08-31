@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import '../index.css';
-import { useMediaQuery, Image, Flex, Button, Heading, Box, Modal, useDisclosure, ModalOverlay, ModalContent, ModalHeader, ModalFooter, ModalBody, ModalCloseButton, Tabs, TabList, Tab, TabPanel, TabPanels } from '@chakra-ui/react';
+import { Skeleton, useMediaQuery, Image, Flex, Button, Heading, Box, Modal, useDisclosure, ModalOverlay, ModalContent, ModalHeader, ModalFooter, ModalBody, ModalCloseButton, Tabs, TabList, Tab, TabPanel, TabPanels } from '@chakra-ui/react';
 import NavBar2 from '../components/NavBar2';
 import { AddIcon, HamburgerIcon } from '@chakra-ui/icons';
 import SignupButton from '../components/SignupButton';
@@ -16,6 +16,7 @@ function Dashboard () {
   const [weekDates, setWeekDates] = useState<Date[]>([]);
   const [screenCutoff] = useMediaQuery('(min-width: 600px)');
   const [allTasks, setAllTasks] = useState<TaskInterface[][]>([[], [], [], [], [], [], []]);
+  const [loaded, setLoaded] = useState(false);
   const date = new Date();
   const today = date.getDay();
   const navigate = useNavigate();
@@ -39,6 +40,7 @@ function Dashboard () {
         });
       });
       setAllTasks(taskEachDay);
+      setLoaded(true);
     };
 
     const fetch = async () => {
@@ -97,39 +99,55 @@ function Dashboard () {
         </TabList>
         <TabPanels>
           <TabPanel>
-            <Flex gap='30px' flexWrap='wrap' justifyContent='center' w='100%'>
-              { renderTasks(0) }
-            </Flex>
+            <Skeleton>
+            <Skeleton isLoaded={loaded}>
+              <Flex gap='30px' flexWrap='wrap' justifyContent='center' w='100%'>
+                { renderTasks(0) }
+              </Flex>
+            </Skeleton>
+            </Skeleton>
           </TabPanel>
           <TabPanel>
-            <Flex gap='30px' flexWrap='wrap' justifyContent='center' w='100%'>
-              { renderTasks(1) }
-            </Flex>
+          <Skeleton isLoaded={loaded}>
+              <Flex gap='30px' flexWrap='wrap' justifyContent='center' w='100%'>
+                { renderTasks(1) }
+              </Flex>
+            </Skeleton>
           </TabPanel>
           <TabPanel>
-            <Flex gap='30px' flexWrap='wrap' justifyContent='center' w='100%'>
-              { renderTasks(2) }
-            </Flex>
+            <Skeleton isLoaded={loaded}>
+              <Flex gap='30px' flexWrap='wrap' justifyContent='center' w='100%'>
+                { renderTasks(2) }
+              </Flex>
+            </Skeleton>
           </TabPanel>
           <TabPanel>
-            <Flex gap='30px' flexWrap='wrap' justifyContent='center' w='100%'>
-              { renderTasks(3) }
-            </Flex>
+            <Skeleton isLoaded={loaded}>
+              <Flex gap='30px' flexWrap='wrap' justifyContent='center' w='100%'>
+                { renderTasks(3) }
+              </Flex>
+            </Skeleton>
           </TabPanel>
           <TabPanel>
-          <Flex gap='30px' flexWrap='wrap' justifyContent='center' w='100%'>
-              { renderTasks(4) }
-            </Flex>
+            <Skeleton isLoaded={loaded}>
+              <Flex gap='30px' flexWrap='wrap' justifyContent='center' w='100%'>
+                { renderTasks(4) }
+              </Flex>
+            </Skeleton>
           </TabPanel>
           <TabPanel>
-            <Flex gap='30px' flexWrap='wrap' justifyContent='center' w='100%'>
-              { renderTasks(5) }
-            </Flex>
+            <Skeleton isLoaded={loaded}>
+              <Flex gap='30px' flexWrap='wrap' justifyContent='center' w='100%'>
+                { renderTasks(5) }
+              </Flex>
+            </Skeleton>
           </TabPanel>
           <TabPanel>
-            <Flex gap='30px' flexWrap='wrap' justifyContent='center' w='100%'>
-              { renderTasks(6) }
-            </Flex>
+            <Skeleton isLoaded={loaded}>
+              <Flex gap='30px' flexWrap='wrap' justifyContent='center' w='100%'>
+                { renderTasks(6) }
+              </Flex>
+            </Skeleton>
           </TabPanel>
         </TabPanels>
       </Tabs>
