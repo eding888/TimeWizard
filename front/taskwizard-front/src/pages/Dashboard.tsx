@@ -32,6 +32,10 @@ function Dashboard () {
     };
     const sortTasks = async () => {
       const tasks: TaskInterface[] = await getTasks();
+      console.log(tasks);
+      if (typeof tasks === 'string') {
+        return false;
+      }
       const taskEachDay: TaskInterface[][] = [[], [], [], [], [], [], []];
       tasks.forEach(task => {
         const days: number[] = task.daysOfWeek;

@@ -1,14 +1,57 @@
 import React, { useRef, SyntheticEvent } from 'react';
-import { useMediaQuery, Flex, Box, Heading, useDisclosure, Button, AlertDialog, AlertDialogOverlay, AlertDialogContent, AlertDialogHeader, AlertDialogBody, AlertDialogFooter, Card } from '@chakra-ui/react';
+import { useToast, useMediaQuery, Flex, Box, Heading, useDisclosure, Button, AlertDialog, AlertDialogOverlay, AlertDialogContent, AlertDialogHeader, AlertDialogBody, AlertDialogFooter, Card, Icon } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import { TaskInterface } from '../../../../back/src/models/task';
 import { formatTime } from '../utils/time';
+import { DeleteIcon } from '@chakra-ui/icons';
+import { deleteTask } from '../utils/routing';
 const ViewTask = ({ task }: { task: TaskInterface }) => {
   const [screenCutoff] = useMediaQuery('(min-width: 600px)');
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const cancelRef = useRef(null);
+
+  const toast = useToast();
+  const handleDeleteTask = async () => {
+    const res = await deleteTask(task.id);
+    if (res !== 'OK') {
+      toast({
+        title: res,
+        status: 'error',
+        isClosable: true
+      });
+    }
+  };
   return (
     <>
       <Card w={screenCutoff ? '400px' : '100%'} h='150px' justifyContent='center'>
         <Heading textAlign='center' position= 'absolute' top= '30px' left= '50%' transform= 'translate(-50%, -50%)'>{task.name}</Heading>
+        <DeleteIcon onClick = {onOpen} cursor='pointer' position ='absolute' left = '90%' top = '20px'></DeleteIcon>
+        <AlertDialog
+          isOpen={isOpen}
+          leastDestructiveRef={cancelRef}
+          onClose={onClose}
+          >
+          <AlertDialogOverlay>
+            <AlertDialogContent>
+              <AlertDialogHeader fontSize='lg' fontWeight='bold'>
+                Confirm Deletion
+              </AlertDialogHeader>
+
+              <AlertDialogBody>
+                Are you sure you want to delete task '{task.name}'?
+              </AlertDialogBody>
+
+              <AlertDialogFooter>
+                <Button ref={cancelRef} onClick={onClose}>
+                  Cancel
+                </Button>
+                <Button colorScheme='red' onClick={() => { onClose(); handleDeleteTask(); }} ml={3}>
+                  Delete
+                </Button>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialogOverlay>
+        </AlertDialog>
         <Flex mt = '10' direction = 'column' alignItems='center' justifyContent='center'>
         {
           task.deadlineOptions

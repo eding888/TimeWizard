@@ -185,4 +185,23 @@ taskRouter.post('/stopTask/:id', async (request: AuthenticatedRequest, response:
   response.status(200).json({ startTime });
 });
 
+taskRouter.delete('/:id', async (request: AuthenticatedRequest, response: Response) => {
+  const id = request.params.id;
+  if (!request.user) {
+    return response.status(401).json({ error: 'User/token not found' });
+  }
+  const user = request.user;
+  const task = await Task.findById(id);
+  if (!task) {
+    return response.status(404).json({ error: 'task not found' });
+  }
+  if (user._id.toString() !== task.user) {
+    return response.status(401).json({ error: 'task does not belong to user' });
+  }
+  await Task.findByIdAndDelete(id);
+  user.tasks = user.tasks.filter(task => task.id !== id);
+  await user.save();
+  response.status(200);
+});
+
 export default taskRouter;

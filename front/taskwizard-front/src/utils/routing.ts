@@ -113,6 +113,16 @@ export const newTask = async (type: Type, name: string, completionType: Completi
   }
 };
 
+export const deleteTask = async (id: string) => {
+  try {
+    await axios.delete(`${backendUrl}/api/task/${id}`, { headers: { 'x-csrf-token': store.getState().session.csrf }, withCredentials: true });
+    return 'OK';
+  } catch (error: any) {
+    const errorMsg: string = error.response.data.error;
+    return errorMsg;
+  }
+};
+
 export const newSession = async () => {
   try {
     const res = await axios.get(`${backendUrl}/api/newSession`, { withCredentials: true });
