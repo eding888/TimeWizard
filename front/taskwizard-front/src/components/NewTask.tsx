@@ -112,6 +112,7 @@ const DataPrompt = ({ stateMethod }: {stateMethod: React.Dispatch<React.SetState
     const target = event.target as HTMLInputElement;
     const name = target.value;
     const newData = { ...currentData };
+    console.log(newData);
     newData.name = name.length === 0 ? null : name;
     setCurrentData(newData);
     stateMethod(newData);
@@ -307,6 +308,8 @@ const NewTask = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void}) =
   }, [timerTaskData]);
   const toast = useToast();
   const createNewTask = async (data: TaskData, completionType: CompletionType) => {
+    console.log('hi');
+    console.log(data);
     if (data.type === null || data.name === null || !data.selectedDays || data.hours === null || data.minutes === null) {
       return false;
     }
@@ -349,7 +352,7 @@ const NewTask = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void}) =
                     <Box fontSize='xs' mb ='4'>This task will be fufilled by doing something for a set amount of time (eg. studying with a goal of 7 hrs a week). </Box>
                   </Flex>
                   <DataPrompt stateMethod={setTimerTaskData}></DataPrompt>
-                  <Button mt='5' w='100%' colorScheme='purple' isDisabled = {timerIncomplete} onClick = {async () => { await createNewTask(countTaskData, CompletionType.TIMER); onClose(); }}>Submit</Button>
+                  <Button mt='5' w='100%' colorScheme='purple' isDisabled = {timerIncomplete} onClick = {async () => { await createNewTask(timerTaskData, CompletionType.TIMER); onClose(); }}>Submit</Button>
                 </TabPanel>
               </TabPanels>
             </Tabs>

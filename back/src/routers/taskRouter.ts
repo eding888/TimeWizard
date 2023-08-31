@@ -89,13 +89,13 @@ taskRouter.post('/newTask', async (request: AuthenticatedRequest, response: Resp
   });
   const today = new Date();
   if (deadlineOptions) {
-    if (task.daysOfWeek.includes(today.getDay())){
+    if (task.daysOfWeek.includes(today.getDay())) {
       task.timeLeftToday = (deadlineOptions.timeRemaining / (countDays(task.daysOfWeek, task.deadlineOptions.deadline)));
     } else {
       task.timeLeftToday = 0;
     }
   } else if (recurringOptions) {
-    if (task.daysOfWeek.includes(today.getDay())){
+    if (task.daysOfWeek.includes(today.getDay())) {
       task.timeLeftToday = (recurringOptions.timePerWeek / task.daysOfWeek.length);
     } else {
       task.timeLeftToday = 0;

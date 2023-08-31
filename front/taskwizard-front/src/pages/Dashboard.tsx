@@ -2,12 +2,13 @@ import React, { useEffect, useState } from 'react';
 import '../index.css';
 import { useMediaQuery, Image, Flex, Button, Heading, Box, Modal, useDisclosure, ModalOverlay, ModalContent, ModalHeader, ModalFooter, ModalBody, ModalCloseButton, Tabs, TabList, Tab, TabPanel, TabPanels } from '@chakra-ui/react';
 import NavBar2 from '../components/NavBar2';
-import { AddIcon } from '@chakra-ui/icons';
+import { AddIcon, HamburgerIcon } from '@chakra-ui/icons';
 import SignupButton from '../components/SignupButton';
 import { checkToken } from '../utils/checkToken';
 import { useNavigate } from 'react-router-dom';
 import Loader from '../components/Loader';
 import NewTask from '../components/NewTask';
+import ViewTask from '../components/ViewTask';
 import { newSession, getTasks } from '../utils/routing';
 import { TaskInterface } from '../../../../back/src/models/task';
 function Dashboard () {
@@ -18,7 +19,7 @@ function Dashboard () {
   const date = new Date();
   const today = date.getDay();
   const navigate = useNavigate();
-
+  console.log(allTasks);
   useEffect(() => {
     console.log('hi');
     const checkSession = async () => {
@@ -68,12 +69,21 @@ function Dashboard () {
     }
     return `${date.getMonth()}/${date.getDate()}`;
   };
+  const renderTasks = (day: number) => {
+    return allTasks[day].map(task => {
+      return (
+        <ViewTask task={task}/>
+      );
+    });
+  };
   const { isOpen, onOpen, onClose } = useDisclosure();
   return (
     <>
       <NavBar2/>
-      <Button onClick={onOpen}><AddIcon mr ='3'></AddIcon>New Task</Button>
-
+      <Flex justifyContent='center' gap='30px' mb = '5'>
+      <Button colorScheme = 'purple' onClick={onOpen}><AddIcon mr ='3'></AddIcon>New Task</Button>
+      <Button onClick={onOpen}><HamburgerIcon mr ='3'></HamburgerIcon>View Friends</Button>
+      </Flex>
       <NewTask isOpen={isOpen} onClose= {onClose}></NewTask>
       <Tabs isFitted variant='enclosed' defaultIndex={today}>
         <TabList mb='1em'>
@@ -87,10 +97,39 @@ function Dashboard () {
         </TabList>
         <TabPanels>
           <TabPanel>
-            <p>one!</p>
+            <Flex gap='30px' flexWrap='wrap' justifyContent='center' w='100%'>
+              { renderTasks(0) }
+            </Flex>
           </TabPanel>
           <TabPanel>
-            <p>two!</p>
+            <Flex gap='30px' flexWrap='wrap' justifyContent='center' w='100%'>
+              { renderTasks(1) }
+            </Flex>
+          </TabPanel>
+          <TabPanel>
+            <Flex gap='30px' flexWrap='wrap' justifyContent='center' w='100%'>
+              { renderTasks(2) }
+            </Flex>
+          </TabPanel>
+          <TabPanel>
+            <Flex gap='30px' flexWrap='wrap' justifyContent='center' w='100%'>
+              { renderTasks(3) }
+            </Flex>
+          </TabPanel>
+          <TabPanel>
+          <Flex gap='30px' flexWrap='wrap' justifyContent='center' w='100%'>
+              { renderTasks(4) }
+            </Flex>
+          </TabPanel>
+          <TabPanel>
+            <Flex gap='30px' flexWrap='wrap' justifyContent='center' w='100%'>
+              { renderTasks(5) }
+            </Flex>
+          </TabPanel>
+          <TabPanel>
+            <Flex gap='30px' flexWrap='wrap' justifyContent='center' w='100%'>
+              { renderTasks(6) }
+            </Flex>
           </TabPanel>
         </TabPanels>
       </Tabs>

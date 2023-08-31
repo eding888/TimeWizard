@@ -12,6 +12,8 @@ const NavBar2 = () => {
   };
   const { colorMode } = useColorMode();
   const [screenCutoff] = useMediaQuery('(min-width: 600px)');
+  const [screenHeightCutoff] = useMediaQuery('(min-height: 450px)');
+  const cutoff = !screenCutoff || !screenHeightCutoff;
   const darkAndLightModeColor = useColorModeValue('white', 'gray.800');
   const darkAndLightModeBorderColor = useColorModeValue('gray.200', 'gray.800');
   const [variant, setVariant] = useState(logoVariants.large);
@@ -46,10 +48,14 @@ const NavBar2 = () => {
           </Flex>
         </Flex>
       </Box>
-      <Flex onClick = {() => { window.location.href = 'https://github.com/eding888'; }}cursor='pointer' gap='6px' alignItems='center' fontWeight='light' fontSize='xs' position='fixed' top = 'calc(100% - 35px)' left="50%" transform="translateX(-50%)">
-        <Image filter={colorMode === 'dark' ? 'invert(100%)' : ''}src='https://cdn-icons-png.flaticon.com/512/25/25231.png' height='20px'></Image>
-        eding888
-      </Flex>
+      {
+      (!cutoff)
+        ? <Flex onClick = {() => { window.location.href = 'https://github.com/eding888'; }}cursor='pointer' gap='6px' alignItems='center' fontWeight='light' fontSize='xs' position='fixed' top = 'calc(100% - 35px)' left="50%" transform="translateX(-50%)">
+            <Image filter={colorMode === 'dark' ? 'invert(100%)' : ''}src='https://cdn-icons-png.flaticon.com/512/25/25231.png' height='20px'></Image>
+            eding888
+          </Flex>
+        : <></>
+      }
     </>
   );
 };
