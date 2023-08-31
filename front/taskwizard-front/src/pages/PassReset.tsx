@@ -45,7 +45,6 @@ function PassReset () {
         <Image
           src= 'https://cdn-icons-png.flaticon.com/512/477/477103.png'
           height={!screenCutoff ? 'clamp(50px, 25%, 300px)' : 'clamp(100px, 40%, 300px)'}
-          mt = {screenHeightCutoff ? '0' : '20%'}
           animation="bounce 2s ease-in-out infinite"
         />
         <Heading>Reset Password</Heading>

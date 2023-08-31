@@ -1,11 +1,11 @@
 import React, { useRef, SyntheticEvent } from 'react';
-import { useToast, useMediaQuery, Flex, Box, Heading, useDisclosure, Button, AlertDialog, AlertDialogOverlay, AlertDialogContent, AlertDialogHeader, AlertDialogBody, AlertDialogFooter, Card, Icon } from '@chakra-ui/react';
+import { Progress, useToast, useMediaQuery, Flex, Box, Heading, useDisclosure, Button, AlertDialog, AlertDialogOverlay, AlertDialogContent, AlertDialogHeader, AlertDialogBody, AlertDialogFooter, Card, Icon } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import { TaskInterface } from '../../../../back/src/models/task';
 import { formatTime } from '../utils/time';
 import { DeleteIcon } from '@chakra-ui/icons';
 import { deleteTask } from '../utils/routing';
-const ViewTask = ({ task }: { task: TaskInterface }) => {
+const StartableTask = ({ task }: { task: TaskInterface }) => {
   const [screenCutoff] = useMediaQuery('(min-width: 600px)');
   const { isOpen, onOpen, onClose } = useDisclosure();
   const cancelRef = useRef(null);
@@ -23,7 +23,7 @@ const ViewTask = ({ task }: { task: TaskInterface }) => {
   };
   return (
     <>
-      <Card w={screenCutoff ? '400px' : '100%'} h='150px' justifyContent='center'>
+      <Card w={screenCutoff ? '400px' : '100%'} h='400px' justifyContent='center'>
         <Heading fontSize = 'xl' w= '80%' textAlign='center' position= 'absolute' top= '30px' left= '50%' transform= 'translate(-50%, -50%)'>{task.name}</Heading>
         <DeleteIcon onClick = {onOpen} cursor='pointer' position ='absolute' left = '90%' top = '20px'></DeleteIcon>
         <AlertDialog
@@ -64,10 +64,11 @@ const ViewTask = ({ task }: { task: TaskInterface }) => {
                 <Box fontWeight='semibold' color='red'>{task.discrete ? `Count in Debt: ${task.recurringOptions.debt}` : `Time in Debt: ${formatTime(task.recurringOptions.debt)}`}</Box>
               </>
         }
+        <Progress w='70%' borderRadius='lg' value={30}></Progress>
         </Flex>
       </Card>
     </>
   );
 };
 
-export default ViewTask;
+export default StartableTask;

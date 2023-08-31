@@ -92,7 +92,7 @@ export const confirmResetPassword = async (email: string, code: string, newPassw
     const purifyCode = DOMPurify.sanitize(code);
     const purifyEmail = DOMPurify.sanitize(email);
     const purifyNewPassword = DOMPurify.sanitize(newPassword);
-    await axios.post(`${backendUrl}/api/login/resetPassword/confirm`, { email: purifyEmail, code: purifyCode, password: purifyNewPassword });
+    await axios.post(`${backendUrl}/api/login/resetPassword/confirm`, { email: purifyEmail, code: purifyCode, newPassword: purifyNewPassword });
     return 'OK';
   } catch (error: any) {
     const errorMsg: string = error.response.data.error;

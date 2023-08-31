@@ -22,7 +22,7 @@ function Home () {
     <>
       {isNotLoaded && <Loader/>}
       <NavBar1/>
-      <Flex onLoad={handleLoad} flexDirection='column' alignItems='center' justifyContent='center' gap='25px' height = 'calc(90vh - 83px)'>
+      <Flex onLoad={handleLoad} flexDirection='column' alignItems='center' justifyContent='center' gap='25px' height = 'calc(85vh - 83px)'>
         <Image
         src= 'https://cdn-icons-png.flaticon.com/512/477/477103.png'
         objectFit='cover'

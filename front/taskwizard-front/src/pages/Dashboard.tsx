@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import '../index.css';
-import { Skeleton, useMediaQuery, Image, Flex, Button, Heading, Box, Modal, useDisclosure, ModalOverlay, ModalContent, ModalHeader, ModalFooter, ModalBody, ModalCloseButton, Tabs, TabList, Tab, TabPanel, TabPanels } from '@chakra-ui/react';
+import { Progress, Skeleton, useMediaQuery, Image, Flex, Button, Heading, Box, Modal, useDisclosure, ModalOverlay, ModalContent, ModalHeader, ModalFooter, ModalBody, ModalCloseButton, Tabs, TabList, Tab, TabPanel, TabPanels } from '@chakra-ui/react';
 import NavBar2 from '../components/NavBar2';
 import { AddIcon, HamburgerIcon } from '@chakra-ui/icons';
 import SignupButton from '../components/SignupButton';
@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import Loader from '../components/Loader';
 import NewTask from '../components/NewTask';
 import ViewTask from '../components/ViewTask';
+import StartableTask from '../components/StartableTask';
 import { newSession, getTasks, getCurrentUser } from '../utils/routing';
 import { TaskInterface } from '../../../../back/src/models/task';
 import io from 'socket.io-client';
@@ -100,20 +101,34 @@ function Dashboard () {
     }
     return `${date.getMonth()}/${date.getDate()}`;
   };
-  const renderTasks = (day: number) => {
+  const renderViewTasks = (day: number) => {
     return allTasks[day].map(task => {
       return (
         <ViewTask task={task}/>
       );
     });
   };
+  const renderStartableTasks = (day: number) => {
+    return allTasks[day].map(task => {
+      return (
+        <StartableTask task={task}/>
+      );
+    });
+  };
+  console.log(allTasks);
   const { isOpen, onOpen, onClose } = useDisclosure();
   return (
     <>
       <NavBar2/>
-      <Flex justifyContent='center' gap='30px' mb = '5'>
-      <Button colorScheme = 'purple' onClick={onOpen}><AddIcon mr ='3'></AddIcon>New Task</Button>
-      <Button onClick={onOpen}><HamburgerIcon mr ='3'></HamburgerIcon>View Friends</Button>
+      <Flex justifyContent='center' alignItems='center' gap = {screenCutoff ? '50px' : '0px'} direction = {screenCutoff ? 'row' : 'column'} mb='3'>
+        <Flex justifyContent='center' gap='30px' mb = '5'>
+          <Button colorScheme = 'purple' onClick={onOpen}><AddIcon mr ='3'></AddIcon>New Task</Button>
+          <Button onClick={onOpen}><HamburgerIcon mr ='3'></HamburgerIcon>View Friends</Button>
+        </Flex>
+        <Flex justifyContent='center' alignItems='center' direction='column' gap='30px' mb = '5'>
+          <Heading fontSize = 'xl' mb ='-3'>Today's Progress:</Heading>
+          <Progress w='300px' colorScheme='teal' borderRadius='lg' value={30}></Progress>
+      </Flex>
       </Flex>
       <NewTask isOpen={isOpen} onClose= {onClose}></NewTask>
       <Tabs isFitted variant='enclosed' defaultIndex={today}>
@@ -128,53 +143,51 @@ function Dashboard () {
         </TabList>
         <TabPanels>
           <TabPanel>
-            <Skeleton>
             <Skeleton isLoaded={loaded}>
               <Flex gap='30px' flexWrap='wrap' justifyContent='center' w='100%'>
-                { renderTasks(0) }
+                { today === 0 ? renderStartableTasks(0) : renderViewTasks(0) }
               </Flex>
-            </Skeleton>
             </Skeleton>
           </TabPanel>
           <TabPanel>
           <Skeleton isLoaded={loaded}>
               <Flex gap='30px' flexWrap='wrap' justifyContent='center' w='100%'>
-                { renderTasks(1) }
+                { today === 1 ? renderStartableTasks(1) : renderViewTasks(1) }
               </Flex>
             </Skeleton>
           </TabPanel>
           <TabPanel>
             <Skeleton isLoaded={loaded}>
               <Flex gap='30px' flexWrap='wrap' justifyContent='center' w='100%'>
-                { renderTasks(2) }
+                { today === 2 ? renderStartableTasks(2) : renderViewTasks(2) }
               </Flex>
             </Skeleton>
           </TabPanel>
           <TabPanel>
             <Skeleton isLoaded={loaded}>
               <Flex gap='30px' flexWrap='wrap' justifyContent='center' w='100%'>
-                { renderTasks(3) }
+                { today === 3 ? renderStartableTasks(3) : renderViewTasks(3) }
               </Flex>
             </Skeleton>
           </TabPanel>
           <TabPanel>
             <Skeleton isLoaded={loaded}>
               <Flex gap='30px' flexWrap='wrap' justifyContent='center' w='100%'>
-                { renderTasks(4) }
+                { today === 4 ? renderStartableTasks(4) : renderViewTasks(4) }
               </Flex>
             </Skeleton>
           </TabPanel>
           <TabPanel>
             <Skeleton isLoaded={loaded}>
               <Flex gap='30px' flexWrap='wrap' justifyContent='center' w='100%'>
-                { renderTasks(5) }
+                { today === 5 ? renderStartableTasks(5) : renderViewTasks(5) }
               </Flex>
             </Skeleton>
           </TabPanel>
           <TabPanel>
             <Skeleton isLoaded={loaded}>
               <Flex gap='30px' flexWrap='wrap' justifyContent='center' w='100%'>
-                { renderTasks(6) }
+                { today === 6 ? renderStartableTasks(6) : renderViewTasks(6) }
               </Flex>
             </Skeleton>
           </TabPanel>

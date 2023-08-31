@@ -32,7 +32,7 @@ const emptyData: TaskData = {
   selectedDays: null,
   name: null
 };
-const DataPrompt = ({ stateMethod }: {stateMethod: React.Dispatch<React.SetStateAction<any>>}) => {
+const DataPrompt = ({ stateMethod, completionType }: {stateMethod: React.Dispatch<React.SetStateAction<any>>, completionType: CompletionType}) => {
   const [currentData, setCurrentData] = useState(emptyData);
   const [checkedTask, setCheckedTask] = useState(Type.NONE);
 
@@ -98,6 +98,20 @@ const DataPrompt = ({ stateMethod }: {stateMethod: React.Dispatch<React.SetState
     stateMethod(newData);
   };
 
+  const handleCount = (newValue: string): void => {
+    let count: number | null = parseInt(newValue);
+    if (!count) {
+      count = 0;
+    }
+    if (count === 0 && currentData.hours === 0) {
+      count = null;
+    }
+    const newData = { ...currentData };
+    newData.minutes = !count ? null : (count / 60);
+    setCurrentData(newData);
+    stateMethod(newData);
+  };
+
   const daysOfWeek = [
     { id: 0, name: 'Sun' },
     { id: 1, name: 'Mon' },
@@ -149,7 +163,7 @@ const DataPrompt = ({ stateMethod }: {stateMethod: React.Dispatch<React.SetState
   return (
     <>
       <Box mb='2' fontWeight='bold'>Task Name:</Box>
-      <Input type='text' maxLength={100} onChange ={handleName} mb ='2'></Input>
+      <Input type='text' maxLength={24} onChange ={handleName} mb ='2'></Input>
       <Box mb='2' fontWeight='bold'>Days of Week:</Box>
       <Flex mb = '5' justifyContent='space-evenly'>
       {daysOfWeek.map(day => {
@@ -168,39 +182,94 @@ const DataPrompt = ({ stateMethod }: {stateMethod: React.Dispatch<React.SetState
         </Stack>
       </RadioGroup>
       <Box>
-        {(checkedTask === Type.RECURRING)
-          ? (
-            <>
-              <Box mb='2' fontWeight='bold'>Desired time per week:</Box>
-                <Flex w = '100%' justifyContent='space-around'>
-                  <FormControl w ='30%'>
-                    <FormLabel>Hours</FormLabel>
-                    <NumberInput onChange={handleTimeHours} max={150} min={0} defaultValue={!currentData.hours ? 0 : currentData.hours}>
-                      <NumberInputField />
-                      <NumberInputStepper>
-                        <NumberIncrementStepper />
-                        <NumberDecrementStepper />
-                      </NumberInputStepper>
-                    </NumberInput>
-                  </FormControl>
-                  <FormControl w ='30%'>
-                    <FormLabel>Minutes</FormLabel>
-                    <NumberInput onChange={handleTimeMinutes} max={59} min={0} defaultValue={!currentData.minutes ? 0 : currentData.minutes}>
-                      <NumberInputField />
-                      <NumberInputStepper>
-                        <NumberIncrementStepper />
-                        <NumberDecrementStepper />
-                      </NumberInputStepper>
-                    </NumberInput>
-                  </FormControl>
-                </Flex>
-              </>
-            )
-          : (
-              (checkedTask === Type.DEADLINE)
+        {
+          completionType === CompletionType.TIMER
+            ? (checkedTask === Type.RECURRING)
                 ? (
-                  <>
-                    <Box mb='2' fontWeight='bold'>Deadline:</Box>
+              <>
+                <Box mb='2' fontWeight='bold'>Desired Time Per Week:</Box>
+                  <Flex w = '100%' justifyContent='space-around'>
+                    <FormControl w ='30%'>
+                      <FormLabel>Hours</FormLabel>
+                      <NumberInput onChange={handleTimeHours} max={150} min={0} defaultValue={!currentData.hours ? 0 : currentData.hours}>
+                        <NumberInputField />
+                        <NumberInputStepper>
+                          <NumberIncrementStepper />
+                          <NumberDecrementStepper />
+                        </NumberInputStepper>
+                      </NumberInput>
+                    </FormControl>
+                    <FormControl w ='30%'>
+                      <FormLabel>Minutes</FormLabel>
+                      <NumberInput onChange={handleTimeMinutes} max={59} min={0} defaultValue={!currentData.minutes ? 0 : currentData.minutes}>
+                        <NumberInputField />
+                        <NumberInputStepper>
+                          <NumberIncrementStepper />
+                          <NumberDecrementStepper />
+                        </NumberInputStepper>
+                      </NumberInput>
+                    </FormControl>
+                  </Flex>
+                </>
+                  )
+                : (
+                    (checkedTask === Type.DEADLINE)
+                      ? (
+                    <>
+                      <Box mb='2' fontWeight='bold'>Deadline:</Box>
+                      <Input
+                        mb ='5'
+                        placeholder="Select Date"
+                        size="md"
+                        type="date"
+                        onChange={handleDate}
+                        min = {today}
+                        max = {maxDate}
+                      />
+                      <Box mb='2' fontWeight='bold'>Estimated Time for Completion:</Box>
+                      <Flex w = '100%' justifyContent='space-around'>
+                        <FormControl w ='30%'>
+                          <FormLabel>Hours</FormLabel>
+                          <NumberInput onChange={handleTimeHours} max={999} min={0} defaultValue={!currentData.hours ? 0 : currentData.hours}>
+                            <NumberInputField />
+                            <NumberInputStepper>
+                              <NumberIncrementStepper />
+                              <NumberDecrementStepper />
+                            </NumberInputStepper>
+                          </NumberInput>
+                        </FormControl>
+                        <FormControl w ='30%'>
+                          <FormLabel>Minutes</FormLabel>
+                          <NumberInput onChange={handleTimeMinutes} max={59} min={0} defaultValue={!currentData.minutes ? 0 : currentData.minutes}>
+                            <NumberInputField />
+                            <NumberInputStepper>
+                              <NumberIncrementStepper />
+                              <NumberDecrementStepper />
+                            </NumberInputStepper>
+                          </NumberInput>
+                        </FormControl>
+                      </Flex>
+                    </>
+                        )
+                      : (
+                          <div></div>
+                        )
+                  )
+            : checkedTask === Type.RECURRING
+              ? <>
+                  <Box mb='2' fontWeight='bold'>Count: </Box>
+                  <FormControl w ='30%'>
+                    <NumberInput onChange={handleCount} max={99999} min={0} defaultValue={!currentData.minutes ? 0 : currentData.minutes * 60}>
+                      <NumberInputField />
+                      <NumberInputStepper>
+                        <NumberIncrementStepper />
+                        <NumberDecrementStepper />
+                      </NumberInputStepper>
+                    </NumberInput>
+                  </FormControl>
+                </>
+              : checkedTask === Type.DEADLINE
+                ? <>
                     <Input
                       mb ='5'
                       placeholder="Select Date"
@@ -210,35 +279,19 @@ const DataPrompt = ({ stateMethod }: {stateMethod: React.Dispatch<React.SetState
                       min = {today}
                       max = {maxDate}
                     />
-                    <Box mb='2' fontWeight='bold'>Estimated Time for Completion:</Box>
-                    <Flex w = '100%' justifyContent='space-around'>
-                      <FormControl w ='30%'>
-                        <FormLabel>Hours</FormLabel>
-                        <NumberInput onChange={handleTimeHours} max={999} min={0} defaultValue={!currentData.hours ? 0 : currentData.hours}>
-                          <NumberInputField />
-                          <NumberInputStepper>
-                            <NumberIncrementStepper />
-                            <NumberDecrementStepper />
-                          </NumberInputStepper>
-                        </NumberInput>
-                      </FormControl>
-                      <FormControl w ='30%'>
-                        <FormLabel>Minutes</FormLabel>
-                        <NumberInput onChange={handleTimeMinutes} max={59} min={0} defaultValue={!currentData.minutes ? 0 : currentData.minutes}>
-                          <NumberInputField />
-                          <NumberInputStepper>
-                            <NumberIncrementStepper />
-                            <NumberDecrementStepper />
-                          </NumberInputStepper>
-                        </NumberInput>
-                      </FormControl>
-                    </Flex>
+                    <Box mb='2' fontWeight='bold'>Count: </Box>
+                    <FormControl w ='30%'>
+                      <NumberInput onChange={handleCount} max={99999} min={0} defaultValue={!currentData.minutes ? 0 : currentData.minutes * 60}>
+                        <NumberInputField />
+                        <NumberInputStepper>
+                          <NumberIncrementStepper />
+                          <NumberDecrementStepper />
+                        </NumberInputStepper>
+                      </NumberInput>
+                    </FormControl>
                   </>
-                  )
-                : (
-                  <div></div>
-                  )
-            )}
+                : <></>
+            }
       </Box>
     </>
   );
@@ -343,7 +396,7 @@ const NewTask = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void}) =
                     <InfoIcon mt='1'></InfoIcon>
                     <Box fontSize='xs' mb ='4'>This task will be fufilled by completing a certain number of something (eg. doing practice problems with a goal of 50 a week). </Box>
                   </Flex>
-                  <DataPrompt stateMethod={setCountTaskData}></DataPrompt>
+                  <DataPrompt completionType = {CompletionType.COUNT} stateMethod={setCountTaskData}></DataPrompt>
                   <Button mt='5' w='100%' colorScheme='purple' isDisabled = {countIncomplete} onClick = {async () => { await createNewTask(countTaskData, CompletionType.COUNT); onClose(); }}>Submit</Button>
                 </TabPanel>
                 <TabPanel>
@@ -351,7 +404,7 @@ const NewTask = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void}) =
                     <InfoIcon mt='1'></InfoIcon>
                     <Box fontSize='xs' mb ='4'>This task will be fufilled by doing something for a set amount of time (eg. studying with a goal of 7 hrs a week). </Box>
                   </Flex>
-                  <DataPrompt stateMethod={setTimerTaskData}></DataPrompt>
+                  <DataPrompt completionType = {CompletionType.TIMER} stateMethod={setTimerTaskData}></DataPrompt>
                   <Button mt='5' w='100%' colorScheme='purple' isDisabled = {timerIncomplete} onClick = {async () => { await createNewTask(timerTaskData, CompletionType.TIMER); onClose(); }}>Submit</Button>
                 </TabPanel>
               </TabPanels>

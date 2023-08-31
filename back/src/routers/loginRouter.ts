@@ -159,7 +159,7 @@ loginRouter.post('/resetPassword/confirm', async (request: AuthenticatedRequest,
   const { email, code, newPassword } = request.body;
   if (!email || !code || !newPassword) {
     return response.status(400).json({
-      error: 'email not provided'
+      error: 'One or more fields not provided.'
     });
   }
   if (!checkSanitizedInput(email, 'email')) {

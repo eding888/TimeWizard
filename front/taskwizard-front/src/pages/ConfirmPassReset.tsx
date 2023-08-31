@@ -112,7 +112,7 @@ function ConfirmPasswordReset () {
         <Flex flexWrap = 'wrap' justifyContent='center' direction='column' width = 'clamp(100px, 50%, 300px)'>
           <Heading mb = '5' textAlign='left'>Reset Password</Heading>
             <form onSubmit={submitPassReset}>
-              <FormControl>
+              <FormControl isRequired>
                 <FormLabel>Code</FormLabel>
                 <Input onChange={handleCode} mb = '5' type='number' />
               </FormControl>
