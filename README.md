@@ -1,5 +1,7 @@
 # taskwizard
 ![Alt text](https://img.shields.io/github/last-commit/eding888/taskwizard/main)
+![Alt text](https://img.shields.io/librariesio/github/eding888/taskwizard)
+
 ![Alt text](https://i.ibb.co/5F9p1T9/logo-no-background.png)
 An adaptive, innovative and easy to use task management website encouraging consistency and discouraging procrastination.
 
