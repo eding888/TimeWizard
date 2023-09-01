@@ -1,8 +1,9 @@
 # taskwizard
-![Alt text](https://img.shields.io/github/last-commit/eding888/taskwizard/main)
-![Alt text](https://img.shields.io/github/all-contributors/eding888/taskwizard/main)
+![lastcommit](https://img.shields.io/github/last-commit/eding888/taskwizard/main)
+![issues](https://img.shields.io/github/issues/eding888/taskwizard)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://makeapullrequest.com)
 
-![Alt text](https://i.ibb.co/5F9p1T9/logo-no-background.png)
+![taskwizard](https://i.ibb.co/5F9p1T9/logo-no-background.png)
 An adaptive, innovative and easy to use task management website encouraging consistency and discouraging procrastination.
 
 Allows users to create tasks for certain days of the week. These tasks can be fufilled daily by either fufilling the time or count requirement. These tasks can either be recurring weekly tasks with a certain goal time for each week, or specific deadline tasks with an allotment for how long one will spend working on the task. Any unused or uncompleted time for these tasks will be 'in debt', and will be allocated spread over future days.
