@@ -1,7 +1,7 @@
 import React, { useState, useEffect, SyntheticEvent } from 'react';
 import '../index.css';
 
-import { useToast, Button, FormControl, Input, FormLabel, Flex, Heading, Image, useMediaQuery } from '@chakra-ui/react';
+import { Checkbox, useToast, Button, FormControl, Input, FormLabel, Flex, Heading, Image, useMediaQuery } from '@chakra-ui/react';
 import DOMPurify from 'dompurify';
 import NavBar1 from '../components/NavBar1';
 import { useNavigate } from 'react-router-dom';
@@ -54,17 +54,43 @@ function Login () {
         isClosable: true
       });
     } else {
-      dispatch(setCsrf(res.token));
-      window.localStorage.setItem('logged', 'true');
-      const user = await getCurrentUser();
-      window.localStorage.setItem('loggedUser', user.id);
-      navigate('/dashboard');
+      try {
+        dispatch(setCsrf(res.token));
+        window.localStorage.setItem('logged', 'true');
+        const user = await getCurrentUser();
+        window.localStorage.setItem('loggedUser', user.id);
+        navigate('/dashboard');
+      } catch (error: any) {
+        if (error.message.includes('undefined is not an object')) {
+          toast({
+            title: 'Error in storing login cookie.',
+            status: 'error',
+            isClosable: true
+          });
+        } else {
+          toast({
+            title: error.message,
+            status: 'error',
+            isClosable: true
+          });
+        }
+      }
     }
   };
   const resetPassword = (event: SyntheticEvent) => {
     event.preventDefault();
     navigate('/resetPassword');
   };
+  async function requestStorage () {
+    try {
+      await document.requestStorageAccess();
+      console.log(await document.hasStorageAccess());
+      console.log('hi');
+    } catch (error) {
+      // Handle errors, e.g., if the browser doesn't support this API.
+      console.error('Error requesting storage access:', error);
+    }
+  }
   return (
     <>
       {isNotLoaded && <Loader/>}
@@ -84,8 +110,9 @@ function Login () {
               </FormControl>
               <FormControl isRequired>
                 <FormLabel>Password</FormLabel>
-                <Input onChange={handlePassword} type='password' autoComplete='password'/>
+                <Input onChange={handlePassword} mb = '5' type='password' autoComplete='password'/>
               </FormControl>
+              <Checkbox onChange={requestStorage} size='sm'>I allow the use of cookies to store TaskWizard login info.</Checkbox>
               <Button colorScheme='purple' mt = '5' w={ screenHeightCutoff ? '100%' : '40%' } ms= {screenHeightCutoff ? '0' : '5%'} type='submit'>Login</Button>
               <Button onClick= {resetPassword} mt = '5' w={ screenHeightCutoff ? '100%' : '40%' } ms= {screenHeightCutoff ? '0' : '5%'} fontSize={screenHeightCutoff ? 'md' : 'xs'} >Forgot Password?</Button>
             </form>
