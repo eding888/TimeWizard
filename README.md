@@ -2,7 +2,7 @@
 ![lastcommit](https://img.shields.io/github/last-commit/eding888/taskwizard/main)
 ![issues](https://img.shields.io/github/issues/eding888/taskwizard)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://makeapullrequest.com)
-![releases](https://img.shields.io/github/downloads/eding888/taskwizard/total)
+![GitHub all releases](https://img.shields.io/github/downloads/eding888/taskwizard/total)
 ![taskwizard](https://i.ibb.co/5F9p1T9/logo-no-background.png)
 
 
