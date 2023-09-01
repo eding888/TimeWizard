@@ -18,6 +18,7 @@ function Dashboard () {
   const [weekDates, setWeekDates] = useState<Date[]>([]);
   const [screenCutoff] = useMediaQuery('(min-width: 600px)');
   const [allTasks, setAllTasks] = useState<TaskInterface[][]>([[], [], [], [], [], [], []]);
+  const [progress, setProgress] = useState(0);
   const [loaded, setLoaded] = useState(false);
   const date = new Date();
   const today = date.getDay();
@@ -38,10 +39,23 @@ function Dashboard () {
     });
     setAllTasks(taskEachDay);
     setLoaded(true);
+    if (taskEachDay[today].length !== 0) {
+      let completedTime = 0;
+      let remainingTime = 0;
+      taskEachDay[today].map(task => {
+        let mult = 1;
+        if (task.discrete) {
+          mult = 60;
+        }
+        completedTime += task.totalTimeToday * mult;
+        remainingTime += task.timeLeftToday * mult;
+        return true;
+      });
+      setProgress(completedTime / (completedTime + remainingTime));
+    }
   };
 
   useEffect(() => {
-    console.log('hi');
     const checkSession = async () => {
       const res = await newSession();
       if (res !== 'OK') {
@@ -127,7 +141,7 @@ function Dashboard () {
         </Flex>
         <Flex justifyContent='center' alignItems='center' direction='column' gap='30px' mb = '5'>
           <Heading fontSize = 'xl' mb ='-3'>Today's Progress:</Heading>
-          <Progress w='300px' colorScheme='teal' borderRadius='lg' value={30}></Progress>
+          <Progress w='300px' colorScheme='teal' borderRadius='lg' value={progress}></Progress>
       </Flex>
       </Flex>
       <NewTask isOpen={isOpen} onClose= {onClose}></NewTask>
