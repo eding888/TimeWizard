@@ -61,7 +61,8 @@ function Login () {
         window.localStorage.setItem('loggedUser', user.id);
         navigate('/dashboard');
       } catch (error: any) {
-        if (error.message.includes('undefined is not an object')) {
+        console.log(error);
+        if (error.message && error.message.includes('undefined is not an object')) {
           toast({
             title: 'Error in storing login cookie.',
             status: 'error',

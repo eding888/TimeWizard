@@ -20,7 +20,7 @@ import { handleSocket } from './utils/socketConnection.js';
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 200,
+  max: 2000,
   standardHeaders: true,
   legacyHeaders: false,
   message: 'Too many requests, please try again later.'
@@ -35,40 +35,44 @@ const accountLimiter = rateLimit({
   message: 'Too many accounts created, please try again later.'
 });
 
-const updateTasks = () => {
-  Task.find({}, (err: Error, tasks: TaskInterface[]) => {
-    if (err) {
-      console.error(err);
-      return;
+const updateTasks = async () => {
+  console.log('hi');
+  const tasks: TaskInterface[] = await Task.find({});
+  console.log('hia');
+  const today = new Date();
+  tasks.forEach(async (task: TaskInterface) => {
+    console.log('lol');
+    switch (task.type) {
+      case 'deadline':
+        task.deadlineOptions.timeRemaining -= task.totalTimeToday;
+        if (countDays(task.daysOfWeek, task.deadlineOptions.deadline) <= 0) {
+          await task.deleteOne();
+        } else if (task.daysOfWeek.includes(today.getDay())) {
+          const time = Math.round((task.deadlineOptions.timeRemaining / (countDays(task.daysOfWeek, task.deadlineOptions.deadline))));
+          task.timeLeftToday = time;
+          task.originalTimeToday = time;
+        } else {
+          task.timeLeftToday = 0;
+          task.originalTimeToday = 0;
+        }
+        break;
+      case 'recurring':
+        task.recurringOptions.debt += task.originalTimeToday - task.totalTimeToday;
+        if (task.recurringOptions.debt < 0) {
+          task.recurringOptions.debt = 0;
+        }
+        if (task.daysOfWeek.includes(today.getDay())) {
+          const time = Math.round(((task.recurringOptions.timePerWeek + (task.recurringOptions.debt / 10)) / task.daysOfWeek.length));
+          task.timeLeftToday = time;
+          task.originalTimeToday = time;
+        } else {
+          task.timeLeftToday = 0;
+          task.originalTimeToday = 0;
+        }
     }
-    const today = new Date();
-    tasks.forEach(async (task: TaskInterface) => {
-      switch (task.type) {
-        case 'deadline':
-          task.deadlineOptions.timeRemaining -= (task.totalTimeToday - task.timeLeftToday);
-          if (task.daysOfWeek.includes(today.getDay())) {
-            const time = Math.round((task.deadlineOptions.timeRemaining / (countDays(task.daysOfWeek, task.deadlineOptions.deadline))));
-            task.timeLeftToday = time;
-            task.originalTimeToday = time;
-          } else {
-            task.timeLeftToday = 0;
-            task.originalTimeToday = 0;
-          }
-          break;
-        case 'recurring':
-          task.recurringOptions.debt += (task.timeLeftToday - (((task.totalTimeToday - task.timeLeftToday) > 0) ? (task.totalTimeToday - task.timeLeftToday) : 0));
-          if (task.daysOfWeek.includes(today.getDay())) {
-            const time = Math.round(((task.recurringOptions.timePerWeek + (task.recurringOptions.debt / 10)) / task.daysOfWeek.length));
-            task.timeLeftToday = time;
-            task.originalTimeToday = time;
-          } else {
-            task.timeLeftToday = 0;
-            task.originalTimeToday = 0;
-          }
-      }
-      task.daysOld += 1;
-      await task.save();
-    });
+    task.totalTimeToday = 0;
+    task.daysOld += 1;
+    await task.save();
   });
 };
 

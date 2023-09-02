@@ -97,6 +97,7 @@ function Dashboard () {
     });
 
     socket.on('taskChange', () => {
+      console.log('shit');
       sortTasks();
     });
 
@@ -120,14 +121,15 @@ function Dashboard () {
   const renderViewTasks = (day: number) => {
     return allTasks[day].map(task => {
       return (
-        <ViewTask task={task}/>
+        <ViewTask key={task.id} task={task}/>
       );
     });
   };
   const renderStartableTasks = (day: number) => {
     return allTasks[day].map(task => {
+      console.log(task);
       return (
-        <StartableTask task={task}/>
+        <StartableTask key={task.id} task={task}/>
       );
     });
   };

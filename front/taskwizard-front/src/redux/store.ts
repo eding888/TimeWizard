@@ -1,11 +1,16 @@
 import { configureStore } from '@reduxjs/toolkit';
 import sessionReducer from './sessionSlice';
-export interface ReduxState {
+import dashboardReducer from './dashboardSlice';
+export interface SessionState {
   session: string
+}
+export interface DashboardState {
+  started: string
 }
 const store = configureStore({
   reducer: {
-    session: sessionReducer
+    session: sessionReducer,
+    dashboard: dashboardReducer
   }
 });
 

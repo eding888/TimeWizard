@@ -1,22 +1,61 @@
-import React, { useRef, useState, SyntheticEvent } from 'react';
+import React, { useRef, useState, useEffect, SyntheticEvent } from 'react';
 import { NumberDecrementStepper, NumberIncrementStepper, NumberInput, NumberInputField, NumberInputStepper, Progress, useToast, useMediaQuery, Flex, Box, Heading, useDisclosure, Button, AlertDialog, AlertDialogOverlay, AlertDialogContent, AlertDialogHeader, AlertDialogBody, AlertDialogFooter, Card, Icon } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import { TaskInterface } from '../../../../back/src/models/task';
 import { formatTime } from '../utils/time';
 import { DeleteIcon } from '@chakra-ui/icons';
-import { deleteTask, stopTask } from '../utils/routing';
+import { deleteTask, stopTask, startTask } from '../utils/routing';
+import store from '../redux/store';
+import { useDispatch } from 'react-redux';
+import { setStart } from '../redux/dashboardSlice';
 
 const StartableTask = ({ task }: { task: TaskInterface }) => {
   const [screenCutoff] = useMediaQuery('(min-width: 600px)');
   const [countAmount, setCountAmount] = useState(1);
+  const [started, setStarted] = useState(false);
+  const [overtime, setOvertime] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(task.timeLeftToday);
+  const [totalTime, setTotalTime] = useState(task.totalTimeToday);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const cancelRef = useRef(null);
-
   const toast = useToast();
   const handleCountChange = (amount: string) => {
     const amountNum = parseInt(amount);
     setCountAmount(amountNum);
   };
+  useEffect(() => {
+    const firstStopTask = async () => {
+      const res = await stopTask(task.id);
+    };
+    firstStopTask();
+  }, []);
+  useEffect(() => {
+    console.log('x9');
+    setTimeLeft(task.timeLeftToday);
+    setTotalTime(task.totalTimeToday);
+  }, [task]);
+  useEffect(() => {
+    let timer1: NodeJS.Timer;
+    let timer2: NodeJS.Timer;
+    if (started) {
+      timer1 = setInterval(async () => {
+        setTimeLeft((prevSeconds) => prevSeconds - 1);
+        if (!overtime && timeLeft <= 1) {
+          await stopTask(task.id);
+          clearInterval(timer1);
+          clearInterval(timer2);
+          setStarted(false);
+          setOvertime(true);
+        }
+      }, 1000);
+      timer2 = setInterval(() => {
+        setTotalTime((prevSeconds) => prevSeconds + 1);
+      }, 1000);
+    }
+
+    return () => { clearInterval(timer1); clearInterval(timer2); };
+  }, [started, timeLeft]);
+
   const handleDeleteTask = async () => {
     const res = await deleteTask(task.id);
     if (res !== 'OK') {
@@ -25,6 +64,35 @@ const StartableTask = ({ task }: { task: TaskInterface }) => {
         status: 'error',
         isClosable: true
       });
+    }
+  };
+
+  const dispatch = useDispatch();
+  const handleTimedTask = async () => {
+    if (!started) {
+      const res = await startTask(task.id);
+      if (res !== 'OK') {
+        toast({
+          title: res,
+          status: 'error',
+          isClosable: true
+        });
+      } else {
+        dispatch(setStart(task.id));
+        setStarted(!started);
+      }
+    } else {
+      const res = await stopTask(task.id);
+      if (res !== 'OK') {
+        toast({
+          title: res,
+          status: 'error',
+          isClosable: true
+        });
+      } else {
+        dispatch(setStart(''));
+        setStarted(!started);
+      }
     }
   };
   const handleStopCountTask = async () => {
@@ -37,6 +105,7 @@ const StartableTask = ({ task }: { task: TaskInterface }) => {
       });
     }
   };
+  console.log((store.getState().dashboard.startedTask === 'none'));
   return (
     <>
       <Card w={screenCutoff ? '400px' : '100%'} h='400px' justifyContent='center'>
@@ -92,13 +161,13 @@ const StartableTask = ({ task }: { task: TaskInterface }) => {
           <Box mb = '-1' fontSize='m'>{task.timeLeftToday <= 0 ? 'Overtime Today' : (task.discrete ? 'Count Remaining Today' : 'Time Remaining Today')}</Box>
           {
             task.timeLeftToday <= 0
-              ? <Box fontSize='xl' fontWeight='bold'>{task.discrete ? (task.totalTimeToday - task.originalTimeToday) : formatTime((task.totalTimeToday - task.originalTimeToday))}</Box>
-              : <Box fontSize='xl' fontWeight='bold'>{task.discrete ? task.timeLeftToday : formatTime(task.timeLeftToday)}</Box>
+              ? <Box fontSize='xl' fontWeight='bold'>{task.discrete ? (task.totalTimeToday - task.originalTimeToday) : formatTime((totalTime - task.originalTimeToday))}</Box>
+              : <Box fontSize='xl' fontWeight='bold'>{task.discrete ? task.timeLeftToday : formatTime(timeLeft)}</Box>
           }
-          <Progress w='70%' mb = '3' borderRadius='lg' value={100 * (task.totalTimeToday / (task.totalTimeToday + task.timeLeftToday))}></Progress>
+          <Progress w='70%' mb = '3' borderRadius='lg' value={100 * (totalTime / (totalTime + timeLeft))}></Progress>
           {
           !task.discrete
-            ? <Button colorScheme='purple' w='70%'>Start</Button>
+            ? <Button isDisabled = {((store.getState().dashboard.startedTask !== '') && (store.getState().dashboard.startedTask !== task.id))} onClick = {() => { handleTimedTask(); }}colorScheme={started ? 'green' : 'purple'} w='70%'>{started ? 'Stop' : 'Start'}</Button>
             : <Flex w = '70%' justifyContent='space-between'>
                 <NumberInput onChange={handleCountChange} max={50} min={1} defaultValue={1} w = '47%'>
                   <NumberInputField />
@@ -107,7 +176,7 @@ const StartableTask = ({ task }: { task: TaskInterface }) => {
                     <NumberDecrementStepper />
                   </NumberInputStepper>
                 </NumberInput>
-                <Button onClick = {() => handleStopCountTask()} colorScheme='purple' w='47%'>Complete</Button>
+                <Button isDisabled = {((store.getState().dashboard.startedTask !== '') && (store.getState().dashboard.startedTask !== task.id))} onClick = {() => handleStopCountTask()} colorScheme='purple' w='47%'>Complete</Button>
               </Flex>
             }
         </Flex>

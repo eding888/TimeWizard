@@ -153,9 +153,19 @@ export const deleteTask = async (id: string) => {
   }
 };
 
-export const stopTask = async (id: string, countAmount: number) => {
+export const stopTask = async (id: string, countAmount?: number) => {
   try {
     const res = await axios.post(`${backendUrl}/api/task/stopTask/${id}`, { amount: countAmount }, { headers: { 'x-csrf-token': store.getState().session.csrf }, withCredentials: true });
+    return 'OK';
+  } catch (error: any) {
+    const errorMsg: string = error.response.data.error;
+    return errorMsg;
+  }
+};
+
+export const startTask = async (id: string) => {
+  try {
+    const res = await axios.post(`${backendUrl}/api/task/startTask/${id}`, {}, { headers: { 'x-csrf-token': store.getState().session.csrf }, withCredentials: true });
     return 'OK';
   } catch (error: any) {
     const errorMsg: string = error.response.data.error;
