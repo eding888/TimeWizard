@@ -57,6 +57,7 @@ const StartableTask = ({ task }: { task: TaskInterface }) => {
   }, [started, timeLeft]);
 
   const handleDeleteTask = async () => {
+    dispatch(setStart(''));
     const res = await deleteTask(task.id);
     if (res !== 'OK') {
       toast({
@@ -105,7 +106,7 @@ const StartableTask = ({ task }: { task: TaskInterface }) => {
       });
     }
   };
-  console.log((store.getState().dashboard.startedTask === 'none'));
+  console.log(store.getState().dashboard.startedTask);
   return (
     <>
       <Card w={screenCutoff ? '400px' : '100%'} h='400px' justifyContent='center'>
