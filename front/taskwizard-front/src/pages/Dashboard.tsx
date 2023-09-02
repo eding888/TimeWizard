@@ -47,11 +47,13 @@ function Dashboard () {
         if (task.discrete) {
           mult = 60;
         }
-        completedTime += task.totalTimeToday * mult;
+        completedTime += Math.min(task.totalTimeToday, task.originalTimeToday) * mult;
         remainingTime += task.timeLeftToday * mult;
         return true;
       });
       setProgress(completedTime / (completedTime + remainingTime));
+    } else {
+      setProgress(0);
     }
   };
 
@@ -141,7 +143,7 @@ function Dashboard () {
         </Flex>
         <Flex justifyContent='center' alignItems='center' direction='column' gap='30px' mb = '5'>
           <Heading fontSize = 'xl' mb ='-3'>Today's Progress:</Heading>
-          <Progress w='300px' colorScheme='teal' borderRadius='lg' value={progress}></Progress>
+          <Progress w='300px' colorScheme='teal' borderRadius='lg' value={100 * progress}></Progress>
       </Flex>
       </Flex>
       <NewTask isOpen={isOpen} onClose= {onClose}></NewTask>

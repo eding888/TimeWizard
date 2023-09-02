@@ -113,16 +113,6 @@ export const newTask = async (type: Type, name: string, completionType: Completi
   }
 };
 
-export const deleteTask = async (id: string) => {
-  try {
-    await axios.delete(`${backendUrl}/api/task/${id}`, { headers: { 'x-csrf-token': store.getState().session.csrf }, withCredentials: true });
-    return 'OK';
-  } catch (error: any) {
-    const errorMsg: string = error.response.data.error;
-    return errorMsg;
-  }
-};
-
 export const newSession = async () => {
   try {
     const res = await axios.get(`${backendUrl}/api/newSession`, { withCredentials: true });
@@ -147,6 +137,26 @@ export const getTasks = async () => {
   try {
     const res = await axios.get(`${backendUrl}/api/task/current`, { headers: { 'x-csrf-token': store.getState().session.csrf }, withCredentials: true });
     return res.data.tasks;
+  } catch (error: any) {
+    const errorMsg: string = error.response.data.error;
+    return errorMsg;
+  }
+};
+
+export const deleteTask = async (id: string) => {
+  try {
+    await axios.delete(`${backendUrl}/api/task/${id}`, { headers: { 'x-csrf-token': store.getState().session.csrf }, withCredentials: true });
+    return 'OK';
+  } catch (error: any) {
+    const errorMsg: string = error.response.data.error;
+    return errorMsg;
+  }
+};
+
+export const stopTask = async (id: string, countAmount: number) => {
+  try {
+    const res = await axios.post(`${backendUrl}/api/task/stopTask/${id}`, { amount: countAmount }, { headers: { 'x-csrf-token': store.getState().session.csrf }, withCredentials: true });
+    return 'OK';
   } catch (error: any) {
     const errorMsg: string = error.response.data.error;
     return errorMsg;

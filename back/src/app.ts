@@ -47,17 +47,23 @@ const updateTasks = () => {
         case 'deadline':
           task.deadlineOptions.timeRemaining -= (task.totalTimeToday - task.timeLeftToday);
           if (task.daysOfWeek.includes(today.getDay())) {
-            task.timeLeftToday = (task.deadlineOptions.timeRemaining / (countDays(task.daysOfWeek, task.deadlineOptions.deadline)));
+            const time = Math.round((task.deadlineOptions.timeRemaining / (countDays(task.daysOfWeek, task.deadlineOptions.deadline))));
+            task.timeLeftToday = time;
+            task.originalTimeToday = time;
           } else {
             task.timeLeftToday = 0;
+            task.originalTimeToday = 0;
           }
           break;
         case 'recurring':
           task.recurringOptions.debt += (task.timeLeftToday - (((task.totalTimeToday - task.timeLeftToday) > 0) ? (task.totalTimeToday - task.timeLeftToday) : 0));
           if (task.daysOfWeek.includes(today.getDay())) {
-            task.timeLeftToday = ((task.recurringOptions.timePerWeek + (task.recurringOptions.debt / 10)) / task.daysOfWeek.length);
+            const time = Math.round(((task.recurringOptions.timePerWeek + (task.recurringOptions.debt / 10)) / task.daysOfWeek.length));
+            task.timeLeftToday = time;
+            task.originalTimeToday = time;
           } else {
             task.timeLeftToday = 0;
+            task.originalTimeToday = 0;
           }
       }
       task.daysOld += 1;

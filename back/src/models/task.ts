@@ -30,6 +30,7 @@ export interface TaskInterface extends mongoose.Document {
   daysOfWeek: number[],
   totalTimeToday: number, // seconds
   timeLeftToday: number, // seconds
+  originalTimeToday: number, // seconds
   daysOld: number,
   user: string
 }
@@ -71,15 +72,19 @@ const taskSchema = new mongoose.Schema({
   },
   totalTimeToday: {
     type: Number,
-    deafult: 0
+    default: 0
   },
   timeLeftToday: {
     type: Number,
-    deafult: 0
+    default: 0
+  },
+  originalTimeToday: {
+    type: Number,
+    default: 0
   },
   daysOld: {
     type: Number,
-    deafult: 0
+    default: 0
   },
   user: {
     type: String,

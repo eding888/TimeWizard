@@ -90,15 +90,21 @@ taskRouter.post('/newTask', async (request: AuthenticatedRequest, response: Resp
   const today = new Date();
   if (deadlineOptions) {
     if (task.daysOfWeek.includes(today.getDay())) {
-      task.timeLeftToday = (deadlineOptions.timeRemaining / (countDays(task.daysOfWeek, task.deadlineOptions.deadline)));
+      const time = Math.round((deadlineOptions.timeRemaining / (countDays(task.daysOfWeek, task.deadlineOptions.deadline))));
+      task.timeLeftToday = time;
+      task.originalTimeToday = time;
     } else {
       task.timeLeftToday = 0;
+      task.originalTimeToday = 0;
     }
   } else if (recurringOptions) {
     if (task.daysOfWeek.includes(today.getDay())) {
-      task.timeLeftToday = (recurringOptions.timePerWeek / task.daysOfWeek.length);
+      const time = Math.round((recurringOptions.timePerWeek / task.daysOfWeek.length));
+      task.timeLeftToday = time;
+      task.originalTimeToday = time;
     } else {
       task.timeLeftToday = 0;
+      task.originalTimeToday = 0;
     }
   } else {
     return response.status(400).json({ error: 'Missing necessary task arguments.' });
@@ -162,16 +168,23 @@ taskRouter.post('/stopTask/:id', async (request: AuthenticatedRequest, response:
     return response.status(404).json({ error: 'user task not found' });
   }
   const userTask = user.tasks[userTaskIndex];
-  if (!userTask.active) {
+  if (!stoppedTask.discrete && !userTask.active) {
     return response.status(400).json({ error: 'task was never started' });
   }
   const time = getCurrentEpochInSeconds();
   const startTime = userTask.startTime;
   if (stoppedTask.discrete) {
-    if (!(stoppedTask.timeLeftToday <= 0)) {
-      stoppedTask.timeLeftToday -= 1;
+    const { amount } = request.body;
+    if (!amount) {
+      return response.status(400).json({ error: 'No amount for count tasks provided.' });
     }
-    stoppedTask.totalTimeToday += 1;
+    if (!(stoppedTask.timeLeftToday <= 0)) {
+      stoppedTask.timeLeftToday -= amount;
+      if (stoppedTask.timeLeftToday < 0) {
+        stoppedTask.timeLeftToday = 0;
+      }
+    }
+    stoppedTask.totalTimeToday += amount;
   } else if (!(await checkIfTimeSurpassed(startTime, stoppedTask))) {
     const elapsedTime = (time - startTime) / 1000;
     stoppedTask.timeLeftToday -= (stoppedTask.timeLeftToday === 0 ? 0 : elapsedTime);
