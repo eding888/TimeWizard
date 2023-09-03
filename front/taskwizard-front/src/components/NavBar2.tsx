@@ -1,6 +1,6 @@
 import { useColorMode, Box, Image, Flex, Button, IconButton, useMediaQuery, useColorModeValue, Heading, Center, Spacer } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import LogoutButton from './LogoutButton';
 import DarkModeToggle from './DarkModeToggle';
 import SignupButton from './SignupButton';
@@ -28,6 +28,7 @@ const NavBar2 = () => {
       }
     }
   }, [screenCutoff, variant]);
+  const navigate = useNavigate();
   return (
     <>
       <Box w='100%' p={4} mb={5} boxShadow='sm' bg={darkAndLightModeColor} color= 'white' borderBottom='1px' borderBottomColor= {darkAndLightModeBorderColor}>
@@ -40,7 +41,7 @@ const NavBar2 = () => {
             />
           </Link>
           <Flex gap="20px">
-            <IconButton aria-label='info'>
+            <IconButton onClick = {() => navigate('/info')} aria-label='info'>
               <InfoIcon/>
             </IconButton>
             <LogoutButton color = "purple"/>

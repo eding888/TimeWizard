@@ -53,6 +53,26 @@
   }
 }
 
+@keyframes newFriendRequests {
+  0%{
+    transform: rotate(0deg);
+  }
+  25%{
+    transform: translateY(-10px) rotate(3deg);
+    background-color: var(--chakra-colors-teal-500);
+  }
+  50% {
+    transform: rotate(0deg);
+  }
+  75%{
+    transform: translateY(-10px) rotate(-3deg);
+    background-color: var(--chakra-colors-teal-500);
+  }
+  100%{
+    transform: rotate(0deg);
+  }
+}
+
 @keyframes bounce {
   0%{
     transform: translateY(0px)

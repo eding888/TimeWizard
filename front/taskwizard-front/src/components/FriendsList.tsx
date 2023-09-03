@@ -1,11 +1,13 @@
 import '../index.css';
 import { useToast, Flex, Box, Drawer, DrawerContent, DrawerOverlay, DrawerCloseButton, DrawerHeader, DrawerBody, Input, Button, DrawerFooter } from '@chakra-ui/react';
 import { useState, SyntheticEvent } from 'react';
-import { sendFriendRequest, acceptFriendRequest, removeFriend } from '../utils/routing';
+import { sendFriendRequest, acceptFriendRequest, removeFriend, rejectFriendRequest } from '../utils/routing';
 import { FriendsData } from '../../../../back/src/models/user';
 import { CheckIcon, SmallCloseIcon } from '@chakra-ui/icons';
+import { useNavigate } from 'react-router-dom';
 const FriendsList = ({ isOpen, onClose, friendsData }: { isOpen: boolean, onClose: () => void, friendsData: FriendsData }) => {
   const [user, setUser] = useState('');
+  const [requestSuccess, setRequestSuccess] = useState(false);
 
   const handleUserInput = (event: SyntheticEvent): void => {
     const target = event.target as HTMLInputElement;
@@ -22,11 +24,10 @@ const FriendsList = ({ isOpen, onClose, friendsData }: { isOpen: boolean, onClos
         isClosable: true
       });
     } else {
-      toast({
-        title: 'Friend request sent.',
-        status: 'success',
-        isClosable: true
-      });
+      setRequestSuccess(true);
+      setTimeout(() => {
+        setRequestSuccess(false);
+      }, 1000);
     }
   };
 
@@ -38,10 +39,15 @@ const FriendsList = ({ isOpen, onClose, friendsData }: { isOpen: boolean, onClos
         status: 'error',
         isClosable: true
       });
-    } else {
+    }
+  };
+
+  const handleRejectFriendRequest = async (user: string) => {
+    const res = await rejectFriendRequest(user);
+    if (res !== 'OK') {
       toast({
-        title: 'Friend request accepted.',
-        status: 'success',
+        title: res,
+        status: 'error',
         isClosable: true
       });
     }
@@ -55,15 +61,10 @@ const FriendsList = ({ isOpen, onClose, friendsData }: { isOpen: boolean, onClos
         status: 'error',
         isClosable: true
       });
-    } else {
-      toast({
-        title: 'Friend removed.',
-        status: 'success',
-        isClosable: true
-      });
     }
   };
 
+  const navigate = useNavigate();
   return (
     <Drawer
         isOpen={isOpen}
@@ -79,7 +80,7 @@ const FriendsList = ({ isOpen, onClose, friendsData }: { isOpen: boolean, onClos
             <Flex mb = '5' gap='10px' direction='column'>
               <Box>Add a Friend</Box>
               <Input onChange={handleUserInput} placeholder='Username' />
-              <Button onClick={handleSendFriendRequest}>Add</Button>
+              <Button color={requestSuccess ? 'green' : ''}onClick={handleSendFriendRequest}>Add</Button>
             </Flex>
             <Box mb='1'>Friend Requests</Box>
             <Flex h='30%' overflow='auto' direction='column' ml='3'>
@@ -90,7 +91,7 @@ const FriendsList = ({ isOpen, onClose, friendsData }: { isOpen: boolean, onClos
                       <Box>{request}</Box>
                       <Flex gap='20px'>
                         <CheckIcon cursor='pointer' onClick={() => { handleAcceptFriendRequest(request); }}color='lime' />
-                        <SmallCloseIcon color='red' />
+                        <SmallCloseIcon cursor='pointer' onClick={() => { handleRejectFriendRequest(request); }}color='red' />
                       </Flex>
                     </Flex>
                   );
@@ -105,7 +106,7 @@ const FriendsList = ({ isOpen, onClose, friendsData }: { isOpen: boolean, onClos
                     <Flex alignItems='center' justifyContent='space-between'>
                       <Box>{friend}</Box>
                       <Flex gap='20px'>
-                        <Button color='lime' size='xs'>View</Button>
+                        <Button color='lime' onClick = {() => { navigate(`/dashboard/${friend}`); }}size='xs'>View</Button>
                         <Button color='red' onClick={() => { handleRemoveFriend(friend); }} size='xs'>Un-add</Button>
                       </Flex>
                     </Flex>

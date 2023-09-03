@@ -133,9 +133,30 @@ export const getCurrentUser = async () => {
   }
 };
 
+export const getFriendUser = async (username: string) => {
+  try {
+    const cleanUsername = DOMPurify.sanitize(username);
+    const res = await axios.get(`${backendUrl}/api/users/friend/${cleanUsername}`, { headers: { 'x-csrf-token': store.getState().session.csrf }, withCredentials: true });
+    return res.data;
+  } catch (error: any) {
+    console.log(error);
+  }
+};
+
 export const getTasks = async () => {
   try {
     const res = await axios.get(`${backendUrl}/api/task/current`, { headers: { 'x-csrf-token': store.getState().session.csrf }, withCredentials: true });
+    return res.data.tasks;
+  } catch (error: any) {
+    const errorMsg: string = error.response.data.error;
+    return errorMsg;
+  }
+};
+
+export const getFriendTasks = async (username: string) => {
+  try {
+    const cleanUsername = DOMPurify.sanitize(username);
+    const res = await axios.get(`${backendUrl}/api/task/friend/${cleanUsername}`, { headers: { 'x-csrf-token': store.getState().session.csrf }, withCredentials: true });
     return res.data.tasks;
   } catch (error: any) {
     const errorMsg: string = error.response.data.error;
@@ -191,6 +212,17 @@ export const acceptFriendRequest = async (username: string) => {
   try {
     const cleanUsername = DOMPurify.sanitize(username);
     const res = await axios.post(`${backendUrl}/api/users/acceptFriendRequest/${cleanUsername}`, {}, { headers: { 'x-csrf-token': store.getState().session.csrf }, withCredentials: true });
+    return 'OK';
+  } catch (error: any) {
+    const errorMsg: string = error.response.data.error;
+    return errorMsg;
+  }
+};
+
+export const rejectFriendRequest = async (username: string) => {
+  try {
+    const cleanUsername = DOMPurify.sanitize(username);
+    const res = await axios.post(`${backendUrl}/api/users/rejectFriendRequest/${cleanUsername}`, {}, { headers: { 'x-csrf-token': store.getState().session.csrf }, withCredentials: true });
     return 'OK';
   } catch (error: any) {
     const errorMsg: string = error.response.data.error;

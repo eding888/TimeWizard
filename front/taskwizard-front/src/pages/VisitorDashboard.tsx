@@ -5,21 +5,20 @@ import NavBar2 from '../components/NavBar2';
 import { AddIcon, HamburgerIcon } from '@chakra-ui/icons';
 import SignupButton from '../components/SignupButton';
 import { checkToken } from '../utils/checkToken';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import Loader from '../components/Loader';
 import NewTask from '../components/NewTask';
-import ViewTask from '../components/ViewTask';
-import StartableTask from '../components/StartableTask';
-import { newSession, getTasks, getCurrentUser } from '../utils/routing';
+import VisitorViewTask from '../components/VisitorViewTask';
+import CurrentViewTask from '../components/CurrentViewTask';
+import { newSession, getFriendTasks, getFriendUser } from '../utils/routing';
 import { TaskInterface } from '../../../../back/src/models/task';
-import { FriendsData } from '../../../../back/src/models/user';
-import FriendsList from '../components/FriendsList';
 import io from 'socket.io-client';
-function Dashboard () {
+function VisitorDashboard () {
+  const { username } = useParams();
+  const [isNotLoaded, setIsNotLoaded] = useState(true);
   const [weekDates, setWeekDates] = useState<Date[]>([]);
   const [screenCutoff] = useMediaQuery('(min-width: 600px)');
   const [allTasks, setAllTasks] = useState<TaskInterface[][]>([[], [], [], [], [], [], []]);
-  const [friendsData, setFriendsData] = useState<FriendsData>({ friends: [], friendRequests: [] });
   const [progress, setProgress] = useState(0);
   const [loaded, setLoaded] = useState(false);
   const date = new Date();
@@ -27,7 +26,10 @@ function Dashboard () {
   const navigate = useNavigate();
 
   const sortTasks = async () => {
-    const tasks: TaskInterface[] = await getTasks();
+    if (!username) {
+      return false;
+    }
+    const tasks: TaskInterface[] = await getFriendTasks(username);
     console.log(tasks);
     if (typeof tasks === 'string') {
       return false;
@@ -59,12 +61,6 @@ function Dashboard () {
     }
   };
 
-  const setFriendData = async () => {
-    const res = await getCurrentUser();
-    setFriendsData(res.friendsData);
-    console.log('update1');
-  };
-
   useEffect(() => {
     const checkSession = async () => {
       const res = await newSession();
@@ -77,7 +73,6 @@ function Dashboard () {
     const fetch = async () => {
       await checkSession();
       await sortTasks();
-      await setFriendData();
     };
     fetch();
 
@@ -96,9 +91,12 @@ function Dashboard () {
   }, []);
   useEffect(() => {
     const socket = io('http://localhost:8081');
-    socket.on('connect', () => {
+    socket.on('connect', async () => {
       console.log('Connected to server');
-      socket.emit('subscribeToUser', window.localStorage.getItem('loggedUser'));
+      if (username) {
+        const user = await getFriendUser(username);
+        socket.emit('subscribeToUser', user.id);
+      }
     });
 
     socket.on('taskChange', () => {
@@ -108,13 +106,15 @@ function Dashboard () {
 
     socket.on('userChange', async () => {
       sortTasks();
-      await setFriendData();
     });
 
     return () => {
       socket.disconnect();
     };
   }, []);
+  const handleLoad = () => {
+    setIsNotLoaded(false);
+  };
   const formatDate = (date: Date) => {
     if (!date) {
       return 'a';
@@ -124,35 +124,26 @@ function Dashboard () {
   const renderViewTasks = (day: number) => {
     return allTasks[day].map(task => {
       return (
-        <ViewTask key={task.id} task={task}/>
+        <VisitorViewTask key={task.id} task={task}/>
       );
     });
   };
-  const renderStartableTasks = (day: number) => {
+  const renderTodayViewTasks = (day: number) => {
     return allTasks[day].map(task => {
       console.log(task);
       return (
-        <StartableTask key={task.id} task={task}/>
+        <CurrentViewTask key={task.id} task={task}/>
       );
     });
   };
-  const { isOpen: isOpenNewTask, onOpen: onOpenNewTask, onClose: onCloseNewTask } = useDisclosure();
-  const { isOpen: isOpenFriendsList, onOpen: onOpenFriendsList, onClose: onCloseFriendsList } = useDisclosure();
   return (
     <>
       <NavBar2/>
-      <Flex justifyContent='center' alignItems='center' gap = {screenCutoff ? '50px' : '0px'} direction = {screenCutoff ? 'row' : 'column'} mb='3'>
-        <Flex justifyContent='center' gap='30px' mb = '5'>
-          <Button colorScheme = 'purple' onClick={onOpenNewTask}><AddIcon mr ='3'></AddIcon>New Task</Button>
-          <Button animation= {friendsData.friendRequests.length === 0 ? '' : 'newFriendRequests 2.5s ease-in-out infinite'} onClick={onOpenFriendsList}><HamburgerIcon mr ='3'></HamburgerIcon>View Friends</Button>
-        </Flex>
-        <Flex justifyContent='center' alignItems='center' direction='column' gap='30px' mb = '5'>
-          <Heading fontSize = 'xl' mb ='-3'>Today's Progress:</Heading>
-          <Progress w='300px' colorScheme='teal' borderRadius='lg' value={100 * progress}></Progress>
+      <Flex mb = '5' justifyContent='center'>
+        <Heading size='md'>
+          Viewing {username}'s Dashboard
+        </Heading>
       </Flex>
-      </Flex>
-      <NewTask isOpen={isOpenNewTask} onClose= {onCloseNewTask}></NewTask>
-      <FriendsList isOpen={isOpenFriendsList} onClose = {onCloseFriendsList} friendsData={friendsData}/>
       <Tabs isFitted variant='enclosed' defaultIndex={today}>
         <TabList mb='1em'>
           <Tab fontSize={screenCutoff ? 'm' : 'xs'} fontWeight={today === 0 ? 'bold' : 'normal'}>{screenCutoff ? 'Sunday' : 'Sun'} {formatDate(weekDates[0])}</Tab>
@@ -167,49 +158,49 @@ function Dashboard () {
           <TabPanel>
             <Skeleton isLoaded={loaded}>
               <Flex gap='30px' flexWrap='wrap' justifyContent='center' w='100%'>
-                { today === 0 ? renderStartableTasks(0) : renderViewTasks(0) }
+                { today === 0 ? renderTodayViewTasks(0) : renderViewTasks(0) }
               </Flex>
             </Skeleton>
           </TabPanel>
           <TabPanel>
           <Skeleton isLoaded={loaded}>
               <Flex gap='30px' flexWrap='wrap' justifyContent='center' w='100%'>
-                { today === 1 ? renderStartableTasks(1) : renderViewTasks(1) }
+                { today === 1 ? renderTodayViewTasks(1) : renderViewTasks(1) }
               </Flex>
             </Skeleton>
           </TabPanel>
           <TabPanel>
             <Skeleton isLoaded={loaded}>
               <Flex gap='30px' flexWrap='wrap' justifyContent='center' w='100%'>
-                { today === 2 ? renderStartableTasks(2) : renderViewTasks(2) }
+                { today === 2 ? renderTodayViewTasks(2) : renderViewTasks(2) }
               </Flex>
             </Skeleton>
           </TabPanel>
           <TabPanel>
             <Skeleton isLoaded={loaded}>
               <Flex gap='30px' flexWrap='wrap' justifyContent='center' w='100%'>
-                { today === 3 ? renderStartableTasks(3) : renderViewTasks(3) }
+                { today === 3 ? renderTodayViewTasks(3) : renderViewTasks(3) }
               </Flex>
             </Skeleton>
           </TabPanel>
           <TabPanel>
             <Skeleton isLoaded={loaded}>
               <Flex gap='30px' flexWrap='wrap' justifyContent='center' w='100%'>
-                { today === 4 ? renderStartableTasks(4) : renderViewTasks(4) }
+                { today === 4 ? renderTodayViewTasks(4) : renderViewTasks(4) }
               </Flex>
             </Skeleton>
           </TabPanel>
           <TabPanel>
             <Skeleton isLoaded={loaded}>
               <Flex gap='30px' flexWrap='wrap' justifyContent='center' w='100%'>
-                { today === 5 ? renderStartableTasks(5) : renderViewTasks(5) }
+                { today === 5 ? renderTodayViewTasks(5) : renderViewTasks(5) }
               </Flex>
             </Skeleton>
           </TabPanel>
           <TabPanel>
             <Skeleton isLoaded={loaded}>
               <Flex gap='30px' flexWrap='wrap' justifyContent='center' w='100%'>
-                { today === 6 ? renderStartableTasks(6) : renderViewTasks(6) }
+                { today === 6 ? renderTodayViewTasks(6) : renderViewTasks(6) }
               </Flex>
             </Skeleton>
           </TabPanel>
@@ -219,4 +210,4 @@ function Dashboard () {
   );
 }
 
-export default Dashboard;
+export default VisitorDashboard;

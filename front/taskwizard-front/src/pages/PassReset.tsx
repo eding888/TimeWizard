@@ -41,7 +41,7 @@ function PassReset () {
     <>
       {isNotLoaded && <Loader/>}
       <NavBar1/>
-      <Flex onLoad={handleLoad} alignItems='center' justifyContent='center' direction='column' height = 'calc(82vh - 95px)' gap = '30px'>
+      <Flex overflow='auto' onLoad={handleLoad} alignItems='center' justifyContent='center' direction='column' height = 'calc(82vh - 95px)' gap = '30px'>
         <Image
           src= 'https://cdn-icons-png.flaticon.com/512/477/477103.png'
           height={!screenCutoff ? 'clamp(50px, 25%, 300px)' : 'clamp(100px, 40%, 300px)'}
