@@ -12,6 +12,7 @@ import ViewTask from '../components/ViewTask';
 import StartableTask from '../components/StartableTask';
 import { newSession, getTasks, getCurrentUser } from '../utils/routing';
 import { TaskInterface } from '../../../../back/src/models/task';
+import FriendsList from '../components/FriendsList';
 import io from 'socket.io-client';
 function Dashboard () {
   const [isNotLoaded, setIsNotLoaded] = useState(true);
@@ -134,21 +135,23 @@ function Dashboard () {
     });
   };
   console.log(allTasks);
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isOpen: isOpenNewTask, onOpen: onOpenNewTask, onClose: onCloseNewTask } = useDisclosure();
+  const { isOpen: isOpenFriendsList, onOpen: onOpenFriendsList, onClose: onCloseFriendsList } = useDisclosure();
   return (
     <>
       <NavBar2/>
       <Flex justifyContent='center' alignItems='center' gap = {screenCutoff ? '50px' : '0px'} direction = {screenCutoff ? 'row' : 'column'} mb='3'>
         <Flex justifyContent='center' gap='30px' mb = '5'>
-          <Button colorScheme = 'purple' onClick={onOpen}><AddIcon mr ='3'></AddIcon>New Task</Button>
-          <Button onClick={onOpen}><HamburgerIcon mr ='3'></HamburgerIcon>View Friends</Button>
+          <Button colorScheme = 'purple' onClick={onOpenNewTask}><AddIcon mr ='3'></AddIcon>New Task</Button>
+          <Button onClick={onOpenFriendsList}><HamburgerIcon mr ='3'></HamburgerIcon>View Friends</Button>
         </Flex>
         <Flex justifyContent='center' alignItems='center' direction='column' gap='30px' mb = '5'>
           <Heading fontSize = 'xl' mb ='-3'>Today's Progress:</Heading>
           <Progress w='300px' colorScheme='teal' borderRadius='lg' value={100 * progress}></Progress>
       </Flex>
       </Flex>
-      <NewTask isOpen={isOpen} onClose= {onClose}></NewTask>
+      <NewTask isOpen={isOpenNewTask} onClose= {onCloseNewTask}></NewTask>
+      <FriendsList isOpen={isOpenFriendsList} onClose = {onCloseFriendsList}/>
       <Tabs isFitted variant='enclosed' defaultIndex={today}>
         <TabList mb='1em'>
           <Tab fontSize={screenCutoff ? 'm' : 'xs'} fontWeight={today === 0 ? 'bold' : 'normal'}>{screenCutoff ? 'Sunday' : 'Sun'} {formatDate(weekDates[0])}</Tab>

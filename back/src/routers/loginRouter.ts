@@ -62,8 +62,8 @@ loginRouter.post('/', async (request: AuthenticatedRequest, response: Response) 
       error: 'user is not verified'
     });
   }
-
-  user.refreshToken = genRefreshToken();
+  const refresh = genRefreshToken();
+  user.refreshToken = refresh;
   await user.save();
 
   const authToken: string = await genAuthToken(user.username, user.passwordHash);
@@ -72,8 +72,10 @@ loginRouter.post('/', async (request: AuthenticatedRequest, response: Response) 
     httpOnly: true,
     secure: true
   });
-  console.log(user);
-  console.log(authToken);
+  response.cookie('refresh', refresh, {
+    httpOnly: true,
+    secure: true
+  });
   const token = tokens.create(config.SECRET);
 
   response.status(200).json({ csrf: token });

@@ -28,7 +28,8 @@ const errorHandler = (error: Error, request: Request, response: Response, next: 
 
 const parseToken = async (request: AuthenticatedRequest, response: Response, next: NextFunction) => {
   let token = request.cookies.token;
-  if (token !== 'undefined' && token) {
+  const refresh = request.cookies.refresh;
+  if (token !== 'undefined' && token && refresh !== 'undefined' && refresh) {
     if (!verifyToken(token)) {
       let expiredToken;
       try {
@@ -46,6 +47,9 @@ const parseToken = async (request: AuthenticatedRequest, response: Response, nex
       }
       if (user.refreshToken !== null && (!verifyToken(user.refreshToken) || !user.username)) {
         return response.status(400).json({ error: 'Your session has expired. Please refresh and log back in.' });
+      }
+      if (refresh !== user.refreshToken) {
+        return response.status(401).json({ error: 'Incorrect refresh token.' });
       }
       token = await genAuthToken(user.username, user.passwordHash);
       response.cookie('token', token, {
