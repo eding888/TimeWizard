@@ -51,7 +51,7 @@ const NavBar2 = () => {
       </Box>
       {
       (!cutoff)
-        ? <Flex onClick = {() => { window.location.href = 'https://github.com/eding888'; }}cursor='pointer' gap='6px' alignItems='center' fontWeight='light' fontSize='xs' position='fixed' top = 'calc(100% - 35px)' left="50%" transform="translateX(-50%)">
+        ? <Flex zIndex = '999' onClick = {() => { window.location.href = 'https://github.com/eding888'; }}cursor='pointer' gap='6px' alignItems='center' fontWeight='light' fontSize='xs' position='fixed' top = 'calc(100% - 35px)' left="50%" transform="translateX(-50%)">
             <Image filter={colorMode === 'dark' ? 'invert(100%)' : ''}src='https://cdn-icons-png.flaticon.com/512/25/25231.png' height='20px'></Image>
             eding888
           </Flex>
