@@ -12,6 +12,7 @@ import ViewTask from '../components/ViewTask';
 import StartableTask from '../components/StartableTask';
 import { newSession, getTasks, getCurrentUser } from '../utils/routing';
 import { TaskInterface } from '../../../../back/src/models/task';
+import { FriendsData } from '../../../../back/src/models/user';
 import FriendsList from '../components/FriendsList';
 import io from 'socket.io-client';
 function Dashboard () {
@@ -19,6 +20,7 @@ function Dashboard () {
   const [weekDates, setWeekDates] = useState<Date[]>([]);
   const [screenCutoff] = useMediaQuery('(min-width: 600px)');
   const [allTasks, setAllTasks] = useState<TaskInterface[][]>([[], [], [], [], [], [], []]);
+  const [friendsData, setFriendsData] = useState<FriendsData>();
   const [progress, setProgress] = useState(0);
   const [loaded, setLoaded] = useState(false);
   const date = new Date();
@@ -58,6 +60,11 @@ function Dashboard () {
     }
   };
 
+  const setFriendData = async () => {
+    const res = await getCurrentUser();
+    setFriendsData(res.friendsData);
+  };
+
   useEffect(() => {
     const checkSession = async () => {
       const res = await newSession();
@@ -70,6 +77,7 @@ function Dashboard () {
     const fetch = async () => {
       await checkSession();
       await sortTasks();
+      await setFriendData();
     };
     fetch();
 
@@ -87,10 +95,6 @@ function Dashboard () {
     setWeekDates(dates);
   }, []);
   useEffect(() => {
-    const getCurrentUserId = async () => {
-      const res = await getCurrentUser();
-      return res.id;
-    };
     const socket = io('http://localhost:8081');
     socket.on('connect', () => {
       console.log('Connected to server');
@@ -151,7 +155,11 @@ function Dashboard () {
       </Flex>
       </Flex>
       <NewTask isOpen={isOpenNewTask} onClose= {onCloseNewTask}></NewTask>
-      <FriendsList isOpen={isOpenFriendsList} onClose = {onCloseFriendsList}/>
+      {
+        friendsData
+          ? <FriendsList isOpen={isOpenFriendsList} onClose = {onCloseFriendsList} friendsData={friendsData}/>
+          : <></>
+      }
       <Tabs isFitted variant='enclosed' defaultIndex={today}>
         <TabList mb='1em'>
           <Tab fontSize={screenCutoff ? 'm' : 'xs'} fontWeight={today === 0 ? 'bold' : 'normal'}>{screenCutoff ? 'Sunday' : 'Sun'} {formatDate(weekDates[0])}</Tab>

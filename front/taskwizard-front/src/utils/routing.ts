@@ -145,7 +145,8 @@ export const getTasks = async () => {
 
 export const deleteTask = async (id: string) => {
   try {
-    await axios.delete(`${backendUrl}/api/task/${id}`, { headers: { 'x-csrf-token': store.getState().session.csrf }, withCredentials: true });
+    const cleanId = DOMPurify.sanitize(id);
+    await axios.delete(`${backendUrl}/api/task/${cleanId}`, { headers: { 'x-csrf-token': store.getState().session.csrf }, withCredentials: true });
     return 'OK';
   } catch (error: any) {
     const errorMsg: string = error.response.data.error;
@@ -155,7 +156,8 @@ export const deleteTask = async (id: string) => {
 
 export const stopTask = async (id: string, countAmount?: number) => {
   try {
-    const res = await axios.post(`${backendUrl}/api/task/stopTask/${id}`, { amount: countAmount }, { headers: { 'x-csrf-token': store.getState().session.csrf }, withCredentials: true });
+    const cleanId = DOMPurify.sanitize(id);
+    const res = await axios.post(`${backendUrl}/api/task/stopTask/${cleanId}`, { amount: countAmount }, { headers: { 'x-csrf-token': store.getState().session.csrf }, withCredentials: true });
     return 'OK';
   } catch (error: any) {
     const errorMsg: string = error.response.data.error;
@@ -165,7 +167,41 @@ export const stopTask = async (id: string, countAmount?: number) => {
 
 export const startTask = async (id: string) => {
   try {
-    const res = await axios.post(`${backendUrl}/api/task/startTask/${id}`, {}, { headers: { 'x-csrf-token': store.getState().session.csrf }, withCredentials: true });
+    const cleanId = DOMPurify.sanitize(id);
+    const res = await axios.post(`${backendUrl}/api/task/startTask/${cleanId}`, {}, { headers: { 'x-csrf-token': store.getState().session.csrf }, withCredentials: true });
+    return 'OK';
+  } catch (error: any) {
+    const errorMsg: string = error.response.data.error;
+    return errorMsg;
+  }
+};
+
+export const sendFriendRequest = async (username: string) => {
+  try {
+    const cleanUsername = DOMPurify.sanitize(username);
+    const res = await axios.post(`${backendUrl}/api/users/sendFriendRequest/${cleanUsername}`, {}, { headers: { 'x-csrf-token': store.getState().session.csrf }, withCredentials: true });
+    return 'OK';
+  } catch (error: any) {
+    const errorMsg: string = error.response.data.error;
+    return errorMsg;
+  }
+};
+
+export const acceptFriendRequest = async (username: string) => {
+  try {
+    const cleanUsername = DOMPurify.sanitize(username);
+    const res = await axios.post(`${backendUrl}/api/users/acceptFriendRequest/${cleanUsername}`, {}, { headers: { 'x-csrf-token': store.getState().session.csrf }, withCredentials: true });
+    return 'OK';
+  } catch (error: any) {
+    const errorMsg: string = error.response.data.error;
+    return errorMsg;
+  }
+};
+
+export const removeFriend = async (username: string) => {
+  try {
+    const cleanUsername = DOMPurify.sanitize(username);
+    const res = await axios.post(`${backendUrl}/api/users/removeFriend/${cleanUsername}`, {}, { headers: { 'x-csrf-token': store.getState().session.csrf }, withCredentials: true });
     return 'OK';
   } catch (error: any) {
     const errorMsg: string = error.response.data.error;
