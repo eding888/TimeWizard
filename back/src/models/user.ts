@@ -7,7 +7,12 @@ interface PassResetDetails {
   passResetCooldown: number | null,
 }
 
-interface UserTask {
+export interface FriendsData {
+  friendRequests: string[],
+  friends: string[]
+}
+
+export interface UserTask {
   id: string,
   active: boolean,
   startTime: number,
@@ -22,6 +27,7 @@ export interface UserInterface extends mongoose.Document {
   emailCode: string | null,
   passReset: PassResetDetails,
   refreshToken: string | null,
+  friendsData: FriendsData,
   tasks: UserTask[];
 }
 const userSchema = new mongoose.Schema({
@@ -64,6 +70,16 @@ const userSchema = new mongoose.Schema({
   refreshToken: {
     type: String,
     default: null
+  },
+  friendsData: {
+    type: {
+      friendRequests: [String],
+      friends: [String]
+    },
+    default: {
+      friendRequests: [],
+      friends: []
+    }
   },
   tasks: [{
     id: {

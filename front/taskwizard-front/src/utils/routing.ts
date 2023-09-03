@@ -15,6 +15,14 @@ export interface DeadlineOptions {
   timeRemaining: number // seconds
 }
 
+const handleError = (error: any) => {
+  if (error.response) {
+    const errorMsg: string = error.response.data.error;
+    return errorMsg;
+  }
+  return 'No connection to server.';
+};
+
 export const newUser = async (username: string, email: string, password: string) => {
   try {
     const purifyUsername = DOMPurify.sanitize(username);
@@ -24,14 +32,17 @@ export const newUser = async (username: string, email: string, password: string)
     await axios.post(`${backendUrl}/api/newUser`, { username: purifyUsername, email: purifyEmail, password: purifyPassword });
     return 'OK';
   } catch (error: any) {
-    const errorMsg: string = error.response.data.error;
-    if (errorMsg.includes('email')) {
-      return 'Email is already in use.';
+    if (error.response) {
+      const errorMsg: string = error.response.data.error;
+      if (errorMsg.includes('email')) {
+        return 'Email is already in use.';
+      }
+      if (errorMsg.includes('username')) {
+        return 'Username is already in use.';
+      }
+      return errorMsg;
     }
-    if (errorMsg.includes('username')) {
-      return 'Username is already in use.';
-    }
-    return errorMsg;
+    return 'No connection to server.';
   }
 };
 
@@ -54,13 +65,16 @@ export const login = async (email: string, password: string) => {
     output = { status: 'OK', token: res.data.csrf };
     return output;
   } catch (error: any) {
-    const errorMsg: string = error.response.data.error;
-    let status: string = errorMsg;
-    if (errorMsg.includes('not verified')) {
-      status = 'CONFIRMATION';
+    if (error.response) {
+      const errorMsg: string = error.response.data.error;
+      let status: string = errorMsg;
+      if (errorMsg.includes('not verified')) {
+        status = 'CONFIRMATION';
+      }
+      const output = { status, token: null };
+      return output;
     }
-    const output = { status, token: null };
-    return output;
+    return { status: 'No connection to server.', token: null };
   }
 };
 
@@ -71,8 +85,7 @@ export const confirm = async (code: string, username: string) => {
     await axios.post(`${backendUrl}/api/login/confirm`, { code: purifyCode, username: purifyUsername });
     return 'OK';
   } catch (error: any) {
-    const errorMsg: string = error.response.data.error;
-    return errorMsg;
+    return handleError(error);
   }
 };
 
@@ -82,8 +95,7 @@ export const resetPassword = async (email: string) => {
     await axios.post(`${backendUrl}/api/login/resetPassword`, { email: purifyEmail });
     return 'OK';
   } catch (error: any) {
-    const errorMsg: string = error.response.data.error;
-    return errorMsg;
+    return handleError(error);
   }
 };
 
@@ -95,8 +107,7 @@ export const confirmResetPassword = async (email: string, code: string, newPassw
     await axios.post(`${backendUrl}/api/login/resetPassword/confirm`, { email: purifyEmail, code: purifyCode, newPassword: purifyNewPassword });
     return 'OK';
   } catch (error: any) {
-    const errorMsg: string = error.response.data.error;
-    return errorMsg;
+    return handleError(error);
   }
 };
 
@@ -108,8 +119,7 @@ export const newTask = async (type: Type, name: string, completionType: Completi
     await axios.post(`${backendUrl}/api/task/newTask`, { type: typeToVal, name: purifyName, discrete: (completionType === CompletionType.COUNT), daysOfWeek, deadlineDate, time }, { headers: { 'x-csrf-token': store.getState().session.csrf }, withCredentials: true });
     return 'OK';
   } catch (error: any) {
-    const errorMsg: string = error.response.data.error;
-    return errorMsg;
+    return handleError(error);
   }
 };
 
@@ -119,8 +129,7 @@ export const newSession = async () => {
     store.dispatch(setCsrf(res.data.csrf));
     return 'OK';
   } catch (error: any) {
-    const errorMsg: string = error.response.data.error;
-    return errorMsg;
+    return handleError(error);
   }
 };
 
@@ -129,7 +138,7 @@ export const getCurrentUser = async () => {
     const res = await axios.get(`${backendUrl}/api/users/current`, { headers: { 'x-csrf-token': store.getState().session.csrf }, withCredentials: true });
     return res.data;
   } catch (error: any) {
-    console.log(error);
+    return handleError(error);
   }
 };
 
@@ -139,7 +148,7 @@ export const getFriendUser = async (username: string) => {
     const res = await axios.get(`${backendUrl}/api/users/friend/${cleanUsername}`, { headers: { 'x-csrf-token': store.getState().session.csrf }, withCredentials: true });
     return res.data;
   } catch (error: any) {
-    console.log(error);
+    return handleError(error);
   }
 };
 
@@ -148,8 +157,7 @@ export const getTasks = async () => {
     const res = await axios.get(`${backendUrl}/api/task/current`, { headers: { 'x-csrf-token': store.getState().session.csrf }, withCredentials: true });
     return res.data.tasks;
   } catch (error: any) {
-    const errorMsg: string = error.response.data.error;
-    return errorMsg;
+    return handleError(error);
   }
 };
 
@@ -159,8 +167,7 @@ export const getFriendTasks = async (username: string) => {
     const res = await axios.get(`${backendUrl}/api/task/friend/${cleanUsername}`, { headers: { 'x-csrf-token': store.getState().session.csrf }, withCredentials: true });
     return res.data.tasks;
   } catch (error: any) {
-    const errorMsg: string = error.response.data.error;
-    return errorMsg;
+    return handleError(error);
   }
 };
 
@@ -170,8 +177,7 @@ export const deleteTask = async (id: string) => {
     await axios.delete(`${backendUrl}/api/task/${cleanId}`, { headers: { 'x-csrf-token': store.getState().session.csrf }, withCredentials: true });
     return 'OK';
   } catch (error: any) {
-    const errorMsg: string = error.response.data.error;
-    return errorMsg;
+    return handleError(error);
   }
 };
 
@@ -181,8 +187,7 @@ export const stopTask = async (id: string, countAmount?: number) => {
     const res = await axios.post(`${backendUrl}/api/task/stopTask/${cleanId}`, { amount: countAmount }, { headers: { 'x-csrf-token': store.getState().session.csrf }, withCredentials: true });
     return 'OK';
   } catch (error: any) {
-    const errorMsg: string = error.response.data.error;
-    return errorMsg;
+    return handleError(error);
   }
 };
 
@@ -192,8 +197,7 @@ export const startTask = async (id: string) => {
     const res = await axios.post(`${backendUrl}/api/task/startTask/${cleanId}`, {}, { headers: { 'x-csrf-token': store.getState().session.csrf }, withCredentials: true });
     return 'OK';
   } catch (error: any) {
-    const errorMsg: string = error.response.data.error;
-    return errorMsg;
+    return handleError(error);
   }
 };
 
@@ -203,8 +207,7 @@ export const sendFriendRequest = async (username: string) => {
     const res = await axios.post(`${backendUrl}/api/users/sendFriendRequest/${cleanUsername}`, {}, { headers: { 'x-csrf-token': store.getState().session.csrf }, withCredentials: true });
     return 'OK';
   } catch (error: any) {
-    const errorMsg: string = error.response.data.error;
-    return errorMsg;
+    return handleError(error);
   }
 };
 
@@ -214,8 +217,7 @@ export const acceptFriendRequest = async (username: string) => {
     const res = await axios.post(`${backendUrl}/api/users/acceptFriendRequest/${cleanUsername}`, {}, { headers: { 'x-csrf-token': store.getState().session.csrf }, withCredentials: true });
     return 'OK';
   } catch (error: any) {
-    const errorMsg: string = error.response.data.error;
-    return errorMsg;
+    return handleError(error);
   }
 };
 
@@ -225,8 +227,7 @@ export const rejectFriendRequest = async (username: string) => {
     const res = await axios.post(`${backendUrl}/api/users/rejectFriendRequest/${cleanUsername}`, {}, { headers: { 'x-csrf-token': store.getState().session.csrf }, withCredentials: true });
     return 'OK';
   } catch (error: any) {
-    const errorMsg: string = error.response.data.error;
-    return errorMsg;
+    return handleError(error);
   }
 };
 
@@ -236,7 +237,6 @@ export const removeFriend = async (username: string) => {
     const res = await axios.post(`${backendUrl}/api/users/removeFriend/${cleanUsername}`, {}, { headers: { 'x-csrf-token': store.getState().session.csrf }, withCredentials: true });
     return 'OK';
   } catch (error: any) {
-    const errorMsg: string = error.response.data.error;
-    return errorMsg;
+    return handleError(error);
   }
 };

@@ -14,7 +14,7 @@ export interface code{
   code: string;
 }
 
-let expireLong = '7d';
+let expireLong = '1d';
 let expireShort = '1h';
 const expireVeryShort = '10m';
 

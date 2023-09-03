@@ -28,11 +28,17 @@ const limiter = rateLimit({
 const maxAccounts = config.TEST ? 1000 : 3;
 const accountLimiter = rateLimit({
   windowMs: 120 * 60 * 1000,
-  // max: maxAccounts,
-  max: 1000,
+  max: maxAccounts,
   standardHeaders: true,
   legacyHeaders: false,
   message: 'Too many accounts created, please try again later.'
+});
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: 'Too many account requests, please try again later.'
 });
 
 const updateTasks = async () => {
@@ -116,7 +122,7 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.static('build'));
 
-app.use('/api/login', limiter, loginRouter);
+app.use('/api/login', loginLimiter, loginRouter);
 app.use('/api/newUser', accountLimiter, newUserRouter);
 
 app.use(middleware.parseToken);

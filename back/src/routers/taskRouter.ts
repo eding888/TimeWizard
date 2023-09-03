@@ -3,7 +3,7 @@ import { countDays, getCurrentEpochInSeconds } from '../utils/dayOfWeekHelper.js
 import 'express-async-errors';
 import { AuthenticatedRequest } from 'utils/middleware.js';
 import Task, { DeadlineOptions, RecurringOptions, TaskInterface } from '../models/task.js';
-import { UserInterface } from '../models/user.js';
+import User, { UserInterface } from '../models/user.js';
 
 const taskRouter: Router = express.Router();
 
@@ -43,6 +43,31 @@ taskRouter.get('/current', async (request: AuthenticatedRequest, response: Respo
   }
   response.status(200).json({ tasks });
 });
+
+taskRouter.get('/friend/:username', async (request: AuthenticatedRequest, response: Response) => {
+  if (!request.user) {
+    return response.status(401).json({ error: 'User/token not found' });
+  }
+  const username = request.params.username;
+  const user = await User.findOne({ username: { $regex: new RegExp(username, 'i') } });
+  if (!user) {
+    return response.status(400).json({ error: 'User does not exist.' });
+  }
+  if (!request.user.friendsData.friends.map(friend => friend.toUpperCase() === username.toUpperCase())) {
+    return response.status(401).json({ error: 'You do not have this user added.' });
+  }
+  const tasks: TaskInterface[] = [];
+  for (const userTask of user.tasks) {
+    const task = await Task.findById(userTask.id);
+    if (!task) {
+      return response.status(404).json({ error: 'Invalid task id' });
+    }
+    await checkIfTimeSurpassed(userTask.startTime, task);
+    tasks.push(task);
+  }
+  response.status(200).json({ tasks });
+});
+
 taskRouter.post('/newTask', async (request: AuthenticatedRequest, response: Response) => {
   const { type, name, discrete, daysOfWeek, deadlineDate, time }: NewUserInfo = request.body;
   if (type === null || type === undefined) {
