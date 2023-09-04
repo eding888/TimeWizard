@@ -26,7 +26,7 @@ userRouter.get('/friend/:username', async (request: AuthenticatedRequest, respon
   if (!user) {
     return response.status(400).json({ error: 'User does not exist.' });
   }
-  if (request.user.friendsData.friends.map(friend => friend.toUpperCase() === username.toUpperCase())) {
+  if (request.user.friendsData.friends.map(friend => friend.toUpperCase() === username.toUpperCase()).length === 0) {
     return response.status(401).json({ error: 'You do not have this user added.' });
   }
   await user.populate({
@@ -66,7 +66,7 @@ userRouter.post('/acceptFriendRequest/:username', async (request: AuthenticatedR
   if (!requestUser) {
     return response.status(400).json({ error: 'User does not exist.' });
   }
-  if (!user.friendsData.friendRequests.map(request => request.toUpperCase() === username.toUpperCase())) {
+  if (user.friendsData.friendRequests.map(request => request.toUpperCase() === username.toUpperCase()).length === 0) {
     return response.status(400).json({ error: 'User never recieved friend request form this user.' });
   }
   user.friendsData.friendRequests = user.friendsData.friendRequests.filter(request => request.toUpperCase() !== username.toUpperCase());
@@ -85,7 +85,7 @@ userRouter.post('/rejectFriendRequest/:username', async (request: AuthenticatedR
   if (!user) {
     return response.status(401).json({ error: 'User/token not found' });
   }
-  if (!user.friendsData.friendRequests.map(friend => friend.toUpperCase() === username)) {
+  if (user.friendsData.friendRequests.map(friend => friend.toUpperCase() === username).length === 0) {
     return response.status(400).json({ error: 'User never recieved friend request from this user.' });
   }
   user.friendsData.friendRequests = user.friendsData.friendRequests.filter(request => request.toUpperCase() !== username);
@@ -104,7 +104,7 @@ userRouter.post('/removeFriend/:username', async (request: AuthenticatedRequest,
   if (!requestUser) {
     return response.status(400).json({ error: 'User does not exist.' });
   }
-  if (!user.friendsData.friends.map(friend => friend.toUpperCase() === username.toUpperCase())) {
+  if (user.friendsData.friends.map(friend => friend.toUpperCase() === username.toUpperCase()).length === 0) {
     return response.status(400).json({ error: 'This user was never added.' });
   }
   user.friendsData.friends = user.friendsData.friends.filter(request => request.toUpperCase() !== username.toUpperCase());

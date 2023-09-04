@@ -94,6 +94,7 @@ function VisitorDashboard () {
       console.log('Connected to server');
       if (username) {
         const user = await getFriendUser(username);
+        console.log(user);
         if (!user.id) {
           navigate('/dashboard');
         }
