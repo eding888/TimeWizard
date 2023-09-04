@@ -20,12 +20,10 @@ const CurrentViewTask = ({ task }: { task: TaskInterface }) => {
     firstStopTask();
   }, []);
   useEffect(() => {
-    console.log('x9');
     setTimeLeft(task.timeLeftToday);
     setTotalTime(task.totalTimeToday);
   }, [task]);
 
-  console.log(store.getState().dashboard.startedTask);
   return (
     <>
       <Card w={screenCutoff ? '400px' : '100%'} h='400px' justifyContent='center'>

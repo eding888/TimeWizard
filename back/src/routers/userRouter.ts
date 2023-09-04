@@ -38,7 +38,6 @@ userRouter.get('/friend/:username', async (request: AuthenticatedRequest, respon
 
 userRouter.post('/sendFriendRequest/:username', async (request: AuthenticatedRequest, response: Response) => {
   const username = request.params.username;
-  console.log(username);
   if (!request.user) {
     return response.status(401).json({ error: 'User/token not found' });
   }

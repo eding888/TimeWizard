@@ -28,7 +28,6 @@ function Dashboard () {
 
   const sortTasks = async () => {
     const tasks: TaskInterface[] = await getTasks();
-    console.log(tasks);
     if (typeof tasks === 'string') {
       return false;
     }
@@ -62,7 +61,6 @@ function Dashboard () {
   const setFriendData = async () => {
     const res = await getCurrentUser();
     setFriendsData(res.friendsData);
-    console.log('update1');
   };
 
   useEffect(() => {
@@ -102,7 +100,6 @@ function Dashboard () {
     });
 
     socket.on('taskChange', () => {
-      console.log('shit');
       sortTasks();
     });
 
@@ -130,7 +127,6 @@ function Dashboard () {
   };
   const renderStartableTasks = (day: number) => {
     return allTasks[day].map(task => {
-      console.log(task);
       return (
         <StartableTask key={task.id} task={task}/>
       );

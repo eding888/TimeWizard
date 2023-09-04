@@ -87,7 +87,6 @@ const parseToken = async (request: AuthenticatedRequest, response: Response, nex
 
 // Checks and verifies csrf token from cookies
 const checkCsrf = (request: AuthenticatedRequest, response: Response, next: NextFunction) => {
-  console.log(request.headers);
   const csrf = request.headers['x-csrf-token'];
   if (!csrf || Array.isArray(csrf)) {
     return response.status(403).json({ error: 'no csrf provided' });

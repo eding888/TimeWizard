@@ -31,7 +31,6 @@ const StartableTask = ({ task }: { task: TaskInterface }) => {
     firstStopTask();
   }, []);
   useEffect(() => {
-    console.log('x9');
     setTimeLeft(task.timeLeftToday);
     setTotalTime(task.totalTimeToday);
   }, [task]);
@@ -68,8 +67,10 @@ const StartableTask = ({ task }: { task: TaskInterface }) => {
     const handleVisibilityChange = async () => {
       if (!document.hidden) {
         await stopTask(task.id);
-        if (startedRef) {
-          (await startTask(task.id));
+        if (task.timeLeftToday <= 1) {
+          handleStartedStateChange(setStarted, false);
+        } else if (startedRef) {
+          await startTask(task.id);
         }
       }
     };

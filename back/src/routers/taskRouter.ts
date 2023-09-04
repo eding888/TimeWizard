@@ -18,9 +18,11 @@ interface NewUserInfo {
 
 const checkIfTimeSurpassed = async (startTime: number, task: TaskInterface) => {
   const time = getCurrentEpochInSeconds();
+  console.log(((time - startTime) / 1000), task.timeLeftToday);
   if (startTime !== -1 && task.timeLeftToday !== 0 && (((time - startTime) / 1000) >= task.timeLeftToday)) {
     task.totalTimeToday += task.timeLeftToday;
     task.timeLeftToday = 0;
+    console.log('obama');
     await task.save();
     return true;
   }
@@ -240,7 +242,6 @@ taskRouter.delete('/:id', async (request: AuthenticatedRequest, response: Respon
   user.tasks = user.tasks.filter(task => {
     return task.id.toString() !== id;
   });
-  console.log(user.tasks);
   await user.save();
 
   response.status(200);

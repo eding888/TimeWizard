@@ -126,7 +126,6 @@ const DataPrompt = ({ stateMethod, completionType }: {stateMethod: React.Dispatc
     const target = event.target as HTMLInputElement;
     const name = target.value;
     const newData = { ...currentData };
-    console.log(newData);
     newData.name = name.length === 0 ? null : name;
     setCurrentData(newData);
     stateMethod(newData);
@@ -361,8 +360,6 @@ const NewTask = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void}) =
   }, [timerTaskData]);
   const toast = useToast();
   const createNewTask = async (data: TaskData, completionType: CompletionType) => {
-    console.log('hi');
-    console.log(data);
     if (data.type === null || data.name === null || !data.selectedDays || data.hours === null || data.minutes === null) {
       return false;
     }

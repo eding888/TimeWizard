@@ -30,7 +30,6 @@ function VisitorDashboard () {
       return false;
     }
     const tasks: TaskInterface[] = await getFriendTasks(username);
-    console.log(tasks);
     if (typeof tasks === 'string') {
       return false;
     }
@@ -103,7 +102,6 @@ function VisitorDashboard () {
     });
 
     socket.on('taskChange', () => {
-      console.log('shit');
       sortTasks();
     });
 
@@ -133,7 +131,6 @@ function VisitorDashboard () {
   };
   const renderTodayViewTasks = (day: number) => {
     return allTasks[day].map(task => {
-      console.log(task);
       return (
         <CurrentViewTask key={task.id} task={task}/>
       );

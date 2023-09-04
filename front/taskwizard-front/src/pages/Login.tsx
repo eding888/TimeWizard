@@ -61,7 +61,6 @@ function Login () {
         window.localStorage.setItem('loggedUser', user.id);
         navigate('/dashboard');
       } catch (error: any) {
-        console.log(error);
         if (error.message && error.message.includes('undefined is not an object')) {
           toast({
             title: 'Error in storing login cookie.',
@@ -86,7 +85,6 @@ function Login () {
     try {
       await document.requestStorageAccess();
       console.log(await document.hasStorageAccess());
-      console.log('hi');
     } catch (error) {
       // Handle errors, e.g., if the browser doesn't support this API.
       console.error('Error requesting storage access:', error);

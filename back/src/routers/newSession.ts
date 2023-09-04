@@ -7,7 +7,6 @@ const tokens = new Tokens();
 
 const newSessionRouter: Router = express.Router();
 newSessionRouter.get('/', async (request: AuthenticatedRequest, response: Response) => {
-  console.log('hi');
   if (!request.user) {
     return response.status(401).json({ error: 'User/token not found' });
   }
