@@ -13,7 +13,6 @@ const getTaskIdsFromUser = (user: UserInterface): string[] => {
 
 export const handleSocket = (io: Server): void => {
   io.on('connection', (socket) => {
-    console.log('WebSocket connected');
     // Socket connection initiated by listening to changes in specific user
     socket.on('subscribeToUser', async (userId) => {
       try {
@@ -22,9 +21,7 @@ export const handleSocket = (io: Server): void => {
           console.log('User not found');
           return;
         }
-        console.log('Subscribing to user:', user.username);
         let ids = getTaskIdsFromUser(user);
-        console.log(ids);
         const taskChangeStream = Task.collection.watch();
         const userChangeStream = User.collection.watch();
         // Emit changes in Task document
@@ -42,7 +39,6 @@ export const handleSocket = (io: Server): void => {
           }
         });
         socket.on('disconnect', () => {
-          console.log('WebSocket disconnected');
           taskChangeStream.close();
           userChangeStream.close();
         });

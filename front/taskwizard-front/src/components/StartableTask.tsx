@@ -12,7 +12,7 @@ import { setStart } from '../redux/dashboardSlice';
 const StartableTask = ({ task }: { task: TaskInterface }) => {
   const [screenCutoff] = useMediaQuery('(min-width: 600px)');
   const [countAmount, setCountAmount] = useState(1);
-  const [started, setStarted] = useState(false);
+  const [started, _setStarted] = useState(false);
   const [overtime, setOvertime] = useState(false);
   const [timeLeft, setTimeLeft] = useState(task.timeLeftToday);
   const [totalTime, setTotalTime] = useState(task.totalTimeToday);
@@ -20,6 +20,10 @@ const StartableTask = ({ task }: { task: TaskInterface }) => {
   const cancelRef = useRef(null);
   const toast = useToast();
   const startedRef = useRef(started);
+  const setStarted = (data: boolean) => {
+    startedRef.current = data;
+    _setStarted(data);
+  };
   const handleCountChange = (amount: string) => {
     const amountNum = parseInt(amount);
     setCountAmount(amountNum);
@@ -66,10 +70,11 @@ const StartableTask = ({ task }: { task: TaskInterface }) => {
   useEffect(() => {
     const handleVisibilityChange = async () => {
       if (!document.hidden) {
+        console.log(startedRef.current);
         await stopTask(task.id);
         if (task.timeLeftToday <= 1) {
-          handleStartedStateChange(setStarted, false);
-        } else if (startedRef) {
+          handleStartedStateChange(_setStarted, false);
+        } else if (startedRef.current) {
           await startTask(task.id);
         }
       }

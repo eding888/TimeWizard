@@ -84,7 +84,6 @@ function Login () {
   async function requestStorage () {
     try {
       await document.requestStorageAccess();
-      console.log(await document.hasStorageAccess());
     } catch (error) {
       // Handle errors, e.g., if the browser doesn't support this API.
       console.error('Error requesting storage access:', error);

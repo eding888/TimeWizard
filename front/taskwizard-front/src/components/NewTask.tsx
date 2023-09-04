@@ -371,7 +371,7 @@ const NewTask = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void}) =
         isClosable: true
       });
     } else {
-      console.log('poop');
+      console.log('New task created');
     }
   };
   return (
