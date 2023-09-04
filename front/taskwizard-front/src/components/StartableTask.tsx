@@ -20,10 +20,6 @@ const StartableTask = ({ task }: { task: TaskInterface }) => {
   const cancelRef = useRef(null);
   const toast = useToast();
   const startedRef = useRef(started);
-  const setStartedRef = (data: boolean) => {
-    startedRef.current = data;
-    setStarted(data);
-  };
   const handleCountChange = (amount: string) => {
     const amountNum = parseInt(amount);
     setCountAmount(amountNum);
@@ -72,7 +68,9 @@ const StartableTask = ({ task }: { task: TaskInterface }) => {
     const handleVisibilityChange = async () => {
       if (!document.hidden) {
         await stopTask(task.id);
-        handleStartedStateChange(setStarted, false);
+        if (startedRef) {
+          (await startTask(task.id));
+        }
       }
     };
     document.addEventListener('visibilitychange', handleVisibilityChange);
