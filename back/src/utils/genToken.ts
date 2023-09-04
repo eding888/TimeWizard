@@ -3,14 +3,15 @@ import crypto from 'crypto';
 import config from './config.js';
 import User from '../models/user.js';
 
-export interface tokenPayload{
+// Format for token data when it is being encrypted
+export interface tokenPayload {
   _id: string;
   username: string,
   passwordHash: string,
   jti: string
 }
 
-export interface code{
+export interface code {
   code: string;
 }
 
@@ -23,7 +24,8 @@ if (config.TEST) {
   expireShort = '6s';
 }
 
-export const genAuthToken = async (username : string, passwordHash: string) => {
+// Generates encrypted auth token
+export const genAuthToken = async (username : string, passwordHash: string) : Promise<string> => {
   const user = await User.findOne({ username });
   if (user !== null) {
     const id: string = user._id.toString();
@@ -38,7 +40,8 @@ export const genAuthToken = async (username : string, passwordHash: string) => {
   return '';
 };
 
-export const genRefreshToken = () => {
+// Generates encrypted refresh token
+export const genRefreshToken = () : string => {
   const random = crypto.randomBytes(32).toString('hex');
 
   const payload = {
@@ -47,6 +50,7 @@ export const genRefreshToken = () => {
   return jwt.sign(payload, config.SECRET, { expiresIn: expireLong });
 };
 
+// Generates a 6 digit code for email verification as well as its encrypted equivalent
 export const genEmailCode = () => {
   const min = 100000;
   const max = 999999;
@@ -67,7 +71,8 @@ export const genEmailCode = () => {
   );
 };
 
-export const verifyToken = (refreshToken: string) => {
+// Returns true if token is not expired, but false if it is
+export const verifyToken = (refreshToken: string) : boolean => {
   try {
     const decoded = jwt.verify(refreshToken, config.SECRET); // eslint-disable-line
     return true;

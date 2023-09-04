@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, SyntheticEvent } from 'react';
+import React, { useRef, useState, useEffect, SyntheticEvent, Dispatch, SetStateAction } from 'react';
 import { NumberDecrementStepper, NumberIncrementStepper, NumberInput, NumberInputField, NumberInputStepper, Progress, useToast, useMediaQuery, Flex, Box, Heading, useDisclosure, Button, AlertDialog, AlertDialogOverlay, AlertDialogContent, AlertDialogHeader, AlertDialogBody, AlertDialogFooter, Card, Icon } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import { TaskInterface } from '../../../../back/src/models/task';
@@ -19,6 +19,11 @@ const StartableTask = ({ task }: { task: TaskInterface }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const cancelRef = useRef(null);
   const toast = useToast();
+  const startedRef = useRef(started);
+  const setStartedRef = (data: boolean) => {
+    startedRef.current = data;
+    setStarted(data);
+  };
   const handleCountChange = (amount: string) => {
     const amountNum = parseInt(amount);
     setCountAmount(amountNum);
@@ -55,6 +60,23 @@ const StartableTask = ({ task }: { task: TaskInterface }) => {
 
     return () => { clearInterval(timer1); clearInterval(timer2); };
   }, [started, timeLeft]);
+
+  // This is a piece of shit hack because state cannot be changed in an event handler.
+  function handleStartedStateChange (func: Dispatch<SetStateAction<boolean>>, value: boolean) {
+    if (func) {
+      func(value);
+    }
+  }
+
+  useEffect(() => {
+    const handleVisibilityChange = async () => {
+      if (!document.hidden) {
+        await stopTask(task.id);
+        handleStartedStateChange(setStarted, false);
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+  }, []);
 
   const handleDeleteTask = async () => {
     dispatch(setStart(''));
@@ -106,7 +128,6 @@ const StartableTask = ({ task }: { task: TaskInterface }) => {
       });
     }
   };
-  console.log(store.getState().dashboard.startedTask);
   return (
     <>
       <Card w={screenCutoff ? '400px' : '100%'} h='400px' justifyContent='center'>

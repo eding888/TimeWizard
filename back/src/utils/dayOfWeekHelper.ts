@@ -1,5 +1,7 @@
 import { Date } from '../models/task';
-export const countDays = (daysOfWeek: number[], endDate: Date) => {
+
+// Returns the number of days based on a target date and which days of the week count.
+export const countDays = (daysOfWeek: number[], endDate: Date): number => {
   const start = new Date();
   start.setHours(0, 0, 0, 0);
   const end = new Date(`${endDate.year}-${endDate.month}-${endDate.day}`);
@@ -18,7 +20,8 @@ export const countDays = (daysOfWeek: number[], endDate: Date) => {
   return count;
 };
 
-export const validateDays = (daysOfWeek: number[]) => {
+// Ensures that days in daysOfWeek array are valid (between 0-6)
+export const validateDays = (daysOfWeek: number[]): boolean => {
   const days = new Set();
   for (let i = 0; i < daysOfWeek.length; i++) {
     const day: number = daysOfWeek[i];

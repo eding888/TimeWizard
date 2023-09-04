@@ -26,6 +26,10 @@ const errorHandler = (error: Error, request: Request, response: Response, next: 
   next(error);
 };
 
+// Middleware which gets the auth token and refresh token from cookies.
+// If auth token is expired, it can be refreshed with refresh token.
+// If refresh token is expired, any request will fail.
+// If auth token is fine, then the user is extracted from it and put into request
 const parseToken = async (request: AuthenticatedRequest, response: Response, next: NextFunction) => {
   let token = request.cookies.token;
   const refresh = request.cookies.refresh;
@@ -81,6 +85,7 @@ const parseToken = async (request: AuthenticatedRequest, response: Response, nex
   next();
 };
 
+// Checks and verifies csrf token from cookies
 const checkCsrf = (request: AuthenticatedRequest, response: Response, next: NextFunction) => {
   console.log(request.headers);
   const csrf = request.headers['x-csrf-token'];
