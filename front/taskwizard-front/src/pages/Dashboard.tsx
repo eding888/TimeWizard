@@ -145,15 +145,15 @@ function Dashboard () {
         <Flex justifyContent='center' alignItems='center' direction='column' gap='30px' mb = '5'>
           <Heading fontSize = 'xl' mb ='-3'>Today's Progress:</Heading>
           <Progress w='300px' colorScheme='teal' borderRadius='lg' value={100 * progress}></Progress>
-      </Flex>
+        </Flex>
       </Flex>
       <NewTask isOpen={isOpenNewTask} onClose= {onCloseNewTask}></NewTask>
       <FriendsList isOpen={isOpenFriendsList} onClose = {onCloseFriendsList} friendsData={friendsData}/>
       <Tabs isFitted variant='enclosed' defaultIndex={today}>
         <TabList mb='1em'>
           <Tab fontSize={screenCutoff ? 'm' : 'xs'} fontWeight={today === 0 ? 'bold' : 'normal'}>{screenCutoff ? 'Sunday' : 'Sun'} {formatDate(weekDates[0])}</Tab>
-          <Tab fontSize={screenCutoff ? 'm' : 'xs'} fontWeight={today === 2 ? 'bold' : 'normal'}>{screenCutoff ? 'Tuesday' : 'Tue'} {formatDate(weekDates[2])}</Tab>
           <Tab fontSize={screenCutoff ? 'm' : 'xs'} fontWeight={today === 1 ? 'bold' : 'normal'}>{screenCutoff ? 'Monday' : 'Mon'} {formatDate(weekDates[1])}</Tab>
+          <Tab fontSize={screenCutoff ? 'm' : 'xs'} fontWeight={today === 2 ? 'bold' : 'normal'}>{screenCutoff ? 'Tuesday' : 'Tue'} {formatDate(weekDates[2])}</Tab>
           <Tab fontSize={screenCutoff ? 'm' : 'xs'} fontWeight={today === 3 ? 'bold' : 'normal'}>{screenCutoff ? 'Wednesday' : 'Wed'} {formatDate(weekDates[3])}</Tab>
           <Tab fontSize={screenCutoff ? 'm' : 'xs'} fontWeight={today === 4 ? 'bold' : 'normal'}>{screenCutoff ? 'Thursday' : 'Thu'} {formatDate(weekDates[4])}</Tab>
           <Tab fontSize={screenCutoff ? 'm' : 'xs'} fontWeight={today === 5 ? 'bold' : 'normal'}>{screenCutoff ? 'Friday' : 'Fri'} {formatDate(weekDates[5])}</Tab>
@@ -168,7 +168,7 @@ function Dashboard () {
             </Skeleton>
           </TabPanel>
           <TabPanel>
-          <Skeleton isLoaded={loaded}>
+          <Skeleton isLoaded={loaded} h={screenCutoff ? '70vh' : '60vh'} overflow='auto' w = '100%'>
               <Flex gap='30px' flexWrap='wrap' justifyContent='center' w='100%'>
                 { today === 1 ? renderStartableTasks(1) : renderViewTasks(1) }
               </Flex>
