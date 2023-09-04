@@ -70,12 +70,11 @@ const StartableTask = ({ task }: { task: TaskInterface }) => {
   useEffect(() => {
     const handleVisibilityChange = async () => {
       if (!document.hidden) {
-        console.log(startedRef.current);
-        await stopTask(task.id);
-        if (task.timeLeftToday <= 1) {
-          handleStartedStateChange(_setStarted, false);
-        } else if (startedRef.current) {
+        if (startedRef.current) {
+          await stopTask(task.id);
           await startTask(task.id);
+        } else if (task.timeLeftToday <= 1) {
+          handleStartedStateChange(_setStarted, false);
         }
       }
     };
