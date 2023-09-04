@@ -53,7 +53,7 @@ taskRouter.get('/friend/:username', async (request: AuthenticatedRequest, respon
   if (!user) {
     return response.status(400).json({ error: 'User does not exist.' });
   }
-  if (!request.user.friendsData.friends.map(friend => friend.toUpperCase() === username.toUpperCase())) {
+  if (request.user.friendsData.friends.map(friend => friend.toUpperCase() === username.toUpperCase())) {
     return response.status(401).json({ error: 'You do not have this user added.' });
   }
   const tasks: TaskInterface[] = [];

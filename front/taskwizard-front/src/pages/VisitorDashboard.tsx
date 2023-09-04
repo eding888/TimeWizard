@@ -95,6 +95,9 @@ function VisitorDashboard () {
       console.log('Connected to server');
       if (username) {
         const user = await getFriendUser(username);
+        if (!user.id) {
+          navigate('/dashboard');
+        }
         socket.emit('subscribeToUser', user.id);
       }
     });
