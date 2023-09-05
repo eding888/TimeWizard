@@ -41,6 +41,16 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: null
     },
+    friendsData: {
+        type: {
+            friendRequests: [String],
+            friends: [String]
+        },
+        default: {
+            friendRequests: [],
+            friends: []
+        }
+    },
     tasks: [{
             id: {
                 type: mongoose.Schema.Types.ObjectId,

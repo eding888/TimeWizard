@@ -3,7 +3,7 @@ import DOMPurify from 'dompurify';
 import { CompletionType, Type } from '../components/NewTask';
 import store from '../redux/store';
 import { setCsrf } from '../redux/sessionSlice';
-const backendUrl = 'http://localhost:8080';
+const backendUrl = '';
 
 export interface RecurringOptions {
   debt: number,

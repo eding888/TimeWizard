@@ -93,7 +93,8 @@ function Dashboard () {
     setWeekDates(dates);
   }, []);
   useEffect(() => {
-    const socket = io('http://localhost:8081');
+    const socket = io();
+
     socket.on('connect', () => {
       console.log('Connected to server');
       socket.emit('subscribeToUser', window.localStorage.getItem('loggedUser'));
@@ -168,7 +169,7 @@ function Dashboard () {
             </Skeleton>
           </TabPanel>
           <TabPanel>
-          <Skeleton isLoaded={loaded} h={screenCutoff ? '70vh' : '60vh'} overflow='auto' w = '100%'>
+          <Skeleton isLoaded={loaded} h={screenCutoff ? '65vh' : '60vh'} overflow='auto' w = '100%'>
               <Flex gap='30px' flexWrap='wrap' justifyContent='center' w='100%'>
                 { today === 1 ? renderStartableTasks(1) : renderViewTasks(1) }
               </Flex>

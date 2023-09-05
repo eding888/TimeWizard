@@ -14,9 +14,8 @@ import cookieParser from 'cookie-parser';
 import cron from 'node-cron';
 import Task, { TaskInterface } from './models/task.js';
 import { countDays } from './utils/dayOfWeekHelper.js';
-import http from 'http';
-import { Server } from 'socket.io';
-import { handleSocket } from './utils/socketConnection.js';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 
 // Limit for requests for normal requests
 const limiter = rateLimit({
@@ -97,7 +96,7 @@ const app: Express = express();
 
 // Set cors to only allow same-site requests
 const corsOptions = {
-  origin: 'http://localhost:5173',
+  origin: 'https://taskwizard.fly.dev',
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true // Allow cookies to be sent cross-origin
 };
@@ -105,15 +104,6 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 // Create separate server for socket io requests
-const server = http.createServer(app);
-const io = new Server(server, {
-  cors: {
-    origin: 'http://localhost:5173',
-    credentials: true
-  }
-});
-handleSocket(io);
-server.listen(8081, () => console.log(`Socket listening on port ${8081}`));
 
 mongoose.set('strictQuery', false);
 
@@ -135,11 +125,19 @@ app.use('/api/newUser', accountLimiter, newUserRouter);
 
 app.use(middleware.parseToken);
 app.use('/api/newSession', limiter, newSessionRouter);
-app.use(middleware.checkCsrf);
 
-app.use('/api/users', limiter, userRouter);
-app.use('/api/task', limiter, taskRouter);
-app.use('/api/sample', limiter, sample);
+app.use('/api/users', middleware.checkCsrf, limiter, userRouter);
+app.use('/api/task', middleware.checkCsrf, limiter, taskRouter);
+app.use('/api/sample', middleware.checkCsrf, limiter, sample);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+app.get('/*', function (req, res) {
+  res.sendFile(join(__dirname, '../build/index.html'), function (err) {
+    if (err) {
+      res.status(500).send(err);
+    }
+  });
+});
 
 app.use(middleware.errorHandler);
 export default app;

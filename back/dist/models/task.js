@@ -29,21 +29,29 @@ const taskSchema = new mongoose.Schema({
         },
         default: null
     },
+    discrete: {
+        type: Boolean,
+        default: false
+    },
     daysOfWeek: {
         type: [Number],
         required: [true, 'Days of week are required']
     },
+    totalTimeToday: {
+        type: Number,
+        default: 0
+    },
     timeLeftToday: {
         type: Number,
-        deafult: 0
+        default: 0
     },
-    overtimeToday: {
+    originalTimeToday: {
         type: Number,
-        deafult: 0
+        default: 0
     },
     daysOld: {
         type: Number,
-        deafult: 0
+        default: 0
     },
     user: {
         type: String,
@@ -58,14 +66,6 @@ taskSchema.set('toJSON', {
 });
 taskSchema.plugin(uniqueValidator);
 taskSchema.pre('save', function (next) {
-    if (this.recurringOptions === null && this.deadlineOptions === null) {
-        const error = new Error('Options must be provided for Task');
-        return next(error);
-    }
-    if ((this.type === 'deadline' && this.deadlineOptions === null) || (this.type === 'recurring' && this.recurringOptions === null)) {
-        const error = new Error('Incorrect options provided');
-        return next(error);
-    }
     if (!validateDays(this.daysOfWeek)) {
         const error = new Error('Days of week not formatted correctly');
         return next(error);

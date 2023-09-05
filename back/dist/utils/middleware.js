@@ -17,9 +17,14 @@ const errorHandler = (error, request, response, next) => {
     }
     next(error);
 };
+// Middleware which gets the auth token and refresh token from cookies.
+// If auth token is expired, it can be refreshed with refresh token.
+// If refresh token is expired, any request will fail.
+// If auth token is fine, then the user is extracted from it and put into request
 const parseToken = async (request, response, next) => {
     let token = request.cookies.token;
-    if (token !== 'undefined' && token) {
+    const refresh = request.cookies.refresh;
+    if (token !== 'undefined' && token && refresh !== 'undefined' && refresh) {
         if (!verifyToken(token)) {
             let expiredToken;
             try {
@@ -37,7 +42,10 @@ const parseToken = async (request, response, next) => {
                 return response.status(401).json({ error: 'token password does not match' }); // due to password reset by user, esssentially logs all current users out
             }
             if (user.refreshToken !== null && (!verifyToken(user.refreshToken) || !user.username)) {
-                return response.status(400).json({ error: 'refresh token expired' });
+                return response.status(400).json({ error: 'Your session has expired. Please refresh and log back in.' });
+            }
+            if (refresh !== user.refreshToken) {
+                return response.status(401).json({ error: 'Incorrect refresh token.' });
             }
             token = await genAuthToken(user.username, user.passwordHash);
             response.cookie('token', token, {
@@ -71,6 +79,7 @@ const parseToken = async (request, response, next) => {
     }
     next();
 };
+// Checks and verifies csrf token from cookies
 const checkCsrf = (request, response, next) => {
     const csrf = request.headers['x-csrf-token'];
     if (!csrf || Array.isArray(csrf)) {

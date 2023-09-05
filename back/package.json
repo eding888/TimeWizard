@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "buildJS": "rm -rf dist && tsc",
-    "start": "NODE_ENV=production node index.js",
+    "start": "NODE_ENV=production node dist/index.js",
     "dev": "NODE_ENV=development nodemon index.js",
     "test": "NODE_ENV=test NODE_OPTIONS=--experimental-vm-modules jest --verbose --runInBand",
     "buildAndTest": "npm run buildJS && npm run test",
@@ -28,6 +28,7 @@
     "esm": "^3.2.25",
     "express": "^4.18.2",
     "express-async-errors": "^3.1.1",
+    "express-rate-limit": "^6.10.0",
     "http": "^0.0.1-security",
     "jsonwebtoken": "^9.0.1",
     "mongodb": "^5.7.0",
@@ -40,6 +41,7 @@
     "validator": "^13.9.0"
   },
   "devDependencies": {
+    "@flydotio/dockerfile": "^0.4.8",
     "@types/cookie-parser": "^1.4.3",
     "@types/cors": "^2.8.13",
     "@types/csrf": "^3.1.0",

@@ -19,18 +19,18 @@ const sendEmailWithCode = async (email, mailType, subject) => {
     }
 };
 loginRouter.post('/', async (request, response) => {
-    const { username, password } = request.body;
-    if (!username || !password) {
+    const { email, password } = request.body;
+    if (!email || !password) {
         return response.status(400).json({
-            error: 'no username/password provided'
+            error: 'no email/password provided'
         });
     }
-    if (!checkSanitizedInput(username, 'none')) {
+    if (!checkSanitizedInput(email, 'email')) {
         return response.status(400).json({
-            error: 'improper formatting of username'
+            error: 'Improper formatting of email'
         });
     }
-    const user = await User.findOne({ username });
+    const user = await User.findOne({ email });
     if (!user) {
         return response.status(404).json({
             error: 'user not found'
@@ -41,7 +41,7 @@ loginRouter.post('/', async (request, response) => {
         : await bcrypt.compare(password, user.passwordHash);
     if (!passwordCorrect) {
         return response.status(401).json({
-            error: 'invalid password'
+            error: 'Invalid password'
         });
     }
     if (!user.isVerified) {
@@ -57,10 +57,15 @@ loginRouter.post('/', async (request, response) => {
             error: 'user is not verified'
         });
     }
-    user.refreshToken = genRefreshToken();
+    const refresh = genRefreshToken();
+    user.refreshToken = refresh;
     await user.save();
     const authToken = await genAuthToken(user.username, user.passwordHash);
     response.cookie('token', authToken, {
+        httpOnly: true,
+        secure: true
+    });
+    response.cookie('refresh', refresh, {
         httpOnly: true,
         secure: true
     });
@@ -93,7 +98,7 @@ loginRouter.post('/confirm', async (request, response) => {
     const userCode = jwt.verify(user.emailCode, config.SECRET).code;
     if (userCode !== code) {
         return response.status(401).json({
-            error: 'code does not match'
+            error: 'Incorrect code'
         });
     }
     user.isVerified = true;
@@ -142,7 +147,7 @@ loginRouter.post('/resetPassword/confirm', async (request, response) => {
     const { email, code, newPassword } = request.body;
     if (!email || !code || !newPassword) {
         return response.status(400).json({
-            error: 'email not provided'
+            error: 'One or more fields not provided.'
         });
     }
     if (!checkSanitizedInput(email, 'email')) {
@@ -169,7 +174,15 @@ loginRouter.post('/resetPassword/confirm', async (request, response) => {
             error: 'user still on password reset cooldown'
         });
     }
-    const userCode = jwt.verify(passResetCode, config.SECRET).code;
+    let userCode;
+    try {
+        userCode = jwt.verify(passResetCode, config.SECRET).code;
+    }
+    catch (error) {
+        return response.status(400).json({
+            error: 'Password reset attempt expired, please try again.'
+        });
+    }
     if (!user.passReset.passResetAttempts) {
         return response.status(400).json({
             error: 'user does not have password reset attempts'

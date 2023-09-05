@@ -2,13 +2,14 @@ import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import config from './config.js';
 import User from '../models/user.js';
-let expireLong = '7d';
+let expireLong = '1d';
 let expireShort = '1h';
 const expireVeryShort = '10m';
 if (config.TEST) {
     expireLong = '11s';
     expireShort = '6s';
 }
+// Generates encrypted auth token
 export const genAuthToken = async (username, passwordHash) => {
     const user = await User.findOne({ username });
     if (user !== null) {
@@ -23,6 +24,7 @@ export const genAuthToken = async (username, passwordHash) => {
     }
     return '';
 };
+// Generates encrypted refresh token
 export const genRefreshToken = () => {
     const random = crypto.randomBytes(32).toString('hex');
     const payload = {
@@ -30,6 +32,7 @@ export const genRefreshToken = () => {
     };
     return jwt.sign(payload, config.SECRET, { expiresIn: expireLong });
 };
+// Generates a 6 digit code for email verification as well as its encrypted equivalent
 export const genEmailCode = () => {
     const min = 100000;
     const max = 999999;
@@ -44,6 +47,7 @@ export const genEmailCode = () => {
         token
     });
 };
+// Returns true if token is not expired, but false if it is
 export const verifyToken = (refreshToken) => {
     try {
         const decoded = jwt.verify(refreshToken, config.SECRET); // eslint-disable-line

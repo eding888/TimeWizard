@@ -1,0 +1,46 @@
+import User from '../models/user.js';
+import Task from '../models/task.js';
+// Helper method which just returns ids from tasks in user document as an array
+const getTaskIdsFromUser = (user) => {
+    const ids = [];
+    user.tasks.forEach(task => ids.push(task.id.toString()));
+    return ids;
+};
+export const handleSocket = (io) => {
+    io.on('connection', (socket) => {
+        // Socket connection initiated by listening to changes in specific user
+        socket.on('subscribeToUser', async (userId) => {
+            try {
+                const user = await User.findById(userId);
+                if (!user) {
+                    console.log('User not found');
+                    return;
+                }
+                let ids = getTaskIdsFromUser(user);
+                const taskChangeStream = Task.collection.watch();
+                const userChangeStream = User.collection.watch();
+                // Emit changes in Task document
+                taskChangeStream.on('change', (change) => {
+                    if (ids.includes(change.documentKey._id.toString())) {
+                        socket.emit('taskChange', change);
+                    }
+                });
+                // Emit changes in User document
+                userChangeStream.on('change', async (change) => {
+                    if (change.documentKey._id.toString() === user._id.toString()) {
+                        const user = await User.findById(userId);
+                        ids = getTaskIdsFromUser(user);
+                        socket.emit('userChange', change);
+                    }
+                });
+                socket.on('disconnect', () => {
+                    taskChangeStream.close();
+                    userChangeStream.close();
+                });
+            }
+            catch (error) {
+                console.error('Error:', error);
+            }
+        });
+    });
+};

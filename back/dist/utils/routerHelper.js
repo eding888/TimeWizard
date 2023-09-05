@@ -9,16 +9,19 @@ import { dirname, join } from 'path';
 const readFile = util.promisify(fs.readFile);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+// Indicates which html template to use for email
 export var MailType;
 (function (MailType) {
     MailType["verifyUser"] = "verify-user";
     MailType["resetPassword"] = "reset-password";
 })(MailType || (MailType = {}));
+// Method which returns the text content in html template
 const readTemplate = async (templateName) => {
     const templatePath = join(__dirname, '..', '..', 'templ', `${templateName}.html`);
     const template = await readFile(templatePath, 'utf-8');
     return template;
 };
+// Sends email using nodemailer
 export const sendEmail = async (recipientEmail, emailType, subject, digits) => {
     const template = await readTemplate(emailType);
     const transporter = nodemailer.createTransport({
@@ -53,8 +56,7 @@ export const sendEmail = async (recipientEmail, emailType, subject, digits) => {
     });
     return response;
 };
-// This must be used for basically any user input especially when it used
-// as a search parameter to shut down any xss or injection attacks.
+// This method is used as another failsafe for XSS attacks; it cleanses a string for any unwanted characters
 const emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; // eslint-disable-line
 export const checkSanitizedInput = (input, specialCharactersAllowed = 'none') => {
     switch (specialCharactersAllowed) {
@@ -75,6 +77,7 @@ export const checkSanitizedInput = (input, specialCharactersAllowed = 'none') =>
     }
     return null;
 };
+// Method checks for any errors or unwanted patterns in password and returns it as a hash
 export const passwordToHash = async (password) => {
     const passwordSchema = new PasswordValidator();
     passwordSchema

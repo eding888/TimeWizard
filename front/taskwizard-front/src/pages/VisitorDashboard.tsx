@@ -89,12 +89,11 @@ function VisitorDashboard () {
     setWeekDates(dates);
   }, []);
   useEffect(() => {
-    const socket = io('http://localhost:8081');
+    const socket = io();
     socket.on('connect', async () => {
       console.log('Connected to server');
       if (username) {
         const user = await getFriendUser(username);
-        console.log(user);
         if (!user.id) {
           navigate('/dashboard');
         }
