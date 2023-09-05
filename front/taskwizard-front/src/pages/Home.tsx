@@ -34,7 +34,7 @@ function Home () {
           <Heading textAlign='center' animation="fadeInDelay1 2.5s ease-in-out forwards">TaskWizard makes it easy.</Heading>
         </Flex>
         <Flex gap="20px">
-          <Button colorScheme='purple' size='lg' animation="fadeInDelay2 3s ease-in-out forwards">
+          <Button onClick = {() => { window.open('https://www.youtube.com/watch?v=bfOXnC1_BDA', '_blank', 'noreferrer'); } }colorScheme='purple' size='lg' animation="fadeInDelay2 3s ease-in-out forwards">
             Learn More
           </Button>
           <Box animation="fadeInDelay2 3s ease-in-out forwards">
