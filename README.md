@@ -13,6 +13,8 @@ Allows users to create tasks for certain days of the week. These tasks can be fu
 
 Also allows users to add each other a friends, allowing them to view each others weekly tasks, as well as a live view of what tasks they are accomplishing/working on currently thanks to the use of Socket.io.
 
+Check out a quick guide on TaskWizard here: https://www.youtube.com/watch?v=bfOXnC1_BDA
+
 Utilizes React for the frontend and Node, Express and Mongodb for the backend.
 Incorporates various security measures to prevent common web attacks:
  - DOMPurify is used for every user input to prevent XSS. There are also sanitzation measures on the backend to ensure nothing gets through.
