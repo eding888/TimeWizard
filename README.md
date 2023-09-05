@@ -5,7 +5,7 @@
 ![GitHub all releases](https://img.shields.io/github/downloads/eding888/taskwizard/total)
 ![taskwizard](https://i.ibb.co/5F9p1T9/logo-no-background.png)
 
-Now live at taskwizard.fly.dev! [Check it out](taskwizard.fly.dev)
+Now live at taskwizard.fly.dev! [Check it out](https://taskwizard.fly.dev/)
 
 An adaptive, innovative and easy to use task management website encouraging consistency and discouraging procrastination.
 
