@@ -22,3 +22,5 @@ Incorporates various security measures to prevent common web attacks:
  - Cookies are stored with secure and httponly headers.
  - Cors headers are properly set.
  - Auth tokens and refresh tokens are used.
+
+If you would like to contribute, feel free to submit a pr!
